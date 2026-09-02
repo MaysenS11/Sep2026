@@ -10,7 +10,7 @@ public enum RoomType { Start, Normal, Chest, Boss }
 public enum RoomShape { Rectangle, LShape }
 
 [ExecuteAlways]
-public class PerimeterDungeonGenerator : MonoBehaviour
+public class DungeonGenerator : MonoBehaviour
 {
     [Header("Tilemap References")]
     [SerializeField] private Tilemap floorTilemap;
@@ -104,7 +104,7 @@ public class PerimeterDungeonGenerator : MonoBehaviour
                 MacroPos = macroPos,
                 Type = type,
                 Shape = (type == RoomType.Normal && Random.value < 0.35f) ? RoomShape.LShape : RoomShape.Rectangle,
-                LocalSize = (type == RoomType.Boss) ? new Vector2Int(14, 14) : new Vector2Int(Random.Range(9, 14), Random.Range(9, 14)),
+                LocalSize = (type == RoomType.Boss) ? new Vector2Int(14, 14) : new Vector2Int(Random.Range(12, 16), Random.Range(9, 14)),
                 WorldOriginTile = new Vector2Int(macroPos.x * macroCellSize.x, macroPos.y * macroCellSize.y)
             };
 
@@ -327,14 +327,14 @@ public class PerimeterDungeonGenerator : MonoBehaviour
 }
 
 #if UNITY_EDITOR
-[CustomEditor(typeof(PerimeterDungeonGenerator))]
-public class PerimeterDungeonGeneratorEditor : Editor
+[CustomEditor(typeof(DungeonGenerator))]
+public class DungeonGeneratorEditor : Editor
 {
     public override void OnInspectorGUI()
     {
         DrawDefaultInspector();
 
-        PerimeterDungeonGenerator generator = (PerimeterDungeonGenerator)target;
+        DungeonGenerator generator = (DungeonGenerator)target;
 
         EditorGUILayout.Space(10);
         if (GUILayout.Button("Generate Dungeon (In Editor)", GUILayout.Height(30)))
