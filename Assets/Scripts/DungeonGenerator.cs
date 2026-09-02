@@ -104,7 +104,7 @@ public class DungeonGenerator : MonoBehaviour
                 MacroPos = macroPos,
                 Type = type,
                 Shape = (type == RoomType.Normal && Random.value < 0.35f) ? RoomShape.LShape : RoomShape.Rectangle,
-                LocalSize = (type == RoomType.Boss) ? new Vector2Int(14, 14) : new Vector2Int(Random.Range(12, 16), Random.Range(9, 14)),
+                LocalSize = (type == RoomType.Boss) ? new Vector2Int(14, 14) : new Vector2Int(Random.Range(22, 16), Random.Range(18, 12)),
                 WorldOriginTile = new Vector2Int(macroPos.x * macroCellSize.x, macroPos.y * macroCellSize.y)
             };
 
