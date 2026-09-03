@@ -398,10 +398,16 @@ public class DungeonGenerator : MonoBehaviour
             return;
 
         Room firstRoom = GeneratedRooms[0];
-        Vector3 center = new Vector3(
-            firstRoom.WorldOriginTile.x + firstRoom.LocalSize.x / 2f,
-            firstRoom.WorldOriginTile.y + firstRoom.LocalSize.y / 2f,
-            playerTransform.position.z);
+        Vector3 roomCenter = new Vector3(
+            firstRoom.WorldOriginTile.x + (firstRoom.LocalSize.x - 1) / 2f,
+            firstRoom.WorldOriginTile.y + (firstRoom.LocalSize.y - 1) / 2f,
+            0f);
+        Vector3Int spawnCell = new Vector3Int(
+            Mathf.RoundToInt(roomCenter.x),
+            Mathf.RoundToInt(roomCenter.y),
+            0);
+        Vector3 center = fillFloorTilemap.GetCellCenterWorld(spawnCell);
+        center.z = playerTransform.position.z;
         playerTransform.position = center;
     }
 
