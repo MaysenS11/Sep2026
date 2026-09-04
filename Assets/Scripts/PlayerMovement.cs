@@ -28,7 +28,9 @@ public class PlayerMovement : MonoBehaviour
     private InputAction interactAction;
 
     private bool isMoving = false;
+    private bool hasEnteredInitialRoom;
     private float lastMoveTime = -999f; 
+    private float doorTriggerBlockedUntil;
     private Vector2 lastDirection = Vector2.down;
 
     private void Awake()
@@ -48,7 +50,8 @@ public class PlayerMovement : MonoBehaviour
     private void OnEnable()
     {
         inputActions.Enable();
-        
+        GameManager.DoorTriggered += OnDoorTriggered;
+        GameManager.NewRoomEntered += OnNewRoomEntered;
         attackAction.performed += OnAttackPerformed;
         interactAction.performed += OnInteractPerformed;
     }
@@ -57,6 +60,8 @@ public class PlayerMovement : MonoBehaviour
     {
         attackAction.performed -= OnAttackPerformed;
         interactAction.performed -= OnInteractPerformed;
+        GameManager.DoorTriggered -= OnDoorTriggered;
+        GameManager.NewRoomEntered -= OnNewRoomEntered;
 
         inputActions.Disable();
     }
@@ -64,6 +69,15 @@ public class PlayerMovement : MonoBehaviour
     private void Update()
     {
         HandleMovement();
+    }
+
+    private void Start()
+    {
+        if (GameManager.Instance == null) return;
+        if (GameManager.Instance.DungeonDictionary.TryGetValue(GameManager.Instance.CurrentRoomIndex, out GameManager.RoomData room))
+        {
+            MoveToPosition(room.WorldCenterPosition);
+        }
     }
 
     private void HandleMovement()
@@ -129,6 +143,83 @@ public class PlayerMovement : MonoBehaviour
     private void OnInteractPerformed(InputAction.CallbackContext context)
     {
         if (isMoving) return;
+        animator.SetTrigger(interactTrigger);
+    }
+
+    private void OnDoorTriggered(DoorType doorType, Vector2Int doorTilePosition)
+    {
+        if (isMoving || Time.time < doorTriggerBlockedUntil || GameManager.Instance == null) return;
+
+        TransitionThroughDoor(doorType);
+        doorTriggerBlockedUntil = Time.time + 0.2f;
+    }
+
+    private void OnNewRoomEntered(GameManager.RoomData room)
+    {
+        if (hasEnteredInitialRoom || room.RoomIndex != 0) return;
+        hasEnteredInitialRoom = true;
+        MoveToPosition(room.WorldCenterPosition);
+    }
+
+    private void TransitionThroughDoor(DoorType doorType)
+    {
+        GameManager manager = GameManager.Instance;
+        if (manager == null || !manager.DungeonDictionary.TryGetValue(manager.CurrentRoomIndex, out GameManager.RoomData currentRoom)) return;
+
+        int nextRoomIndex;
+        Vector3? targetDoor;
+        if (doorType == DoorType.ExitDoor)
+        {
+            nextRoomIndex = currentRoom.RoomIndex + 1;
+            targetDoor = GetEntryDoor(nextRoomIndex);
+        }
+        else if (doorType == DoorType.EntryDoor)
+        {
+            nextRoomIndex = currentRoom.RoomIndex - 1;
+            targetDoor = GetExitDoor(nextRoomIndex);
+        }
+        else if (doorType == DoorType.SpecialExitDoor)
+        {
+            nextRoomIndex = currentRoom.SpecialChestRoomIndex;
+            targetDoor = GetSpecialEntryDoor(nextRoomIndex);
+        }
+        else
+        {
+            nextRoomIndex = currentRoom.ParentRoomIndex;
+            targetDoor = GetSpecialExitDoor(nextRoomIndex);
+        }
+
+        if (!targetDoor.HasValue || !manager.DungeonDictionary.TryGetValue(nextRoomIndex, out GameManager.RoomData nextRoom)) return;
+
+        MoveToPosition(targetDoor.Value);
+        GameManager.NotifyNewRoomEntered(nextRoom);
+    }
+
+    private Vector3? GetEntryDoor(int roomIndex)
+    {
+        return GameManager.Instance.DungeonDictionary.TryGetValue(roomIndex, out GameManager.RoomData room) ? room.EntryDoorPosition : null;
+    }
+
+    private Vector3? GetExitDoor(int roomIndex)
+    {
+        return GameManager.Instance.DungeonDictionary.TryGetValue(roomIndex, out GameManager.RoomData room) ? room.ExitDoorPosition : null;
+    }
+
+    private Vector3? GetSpecialEntryDoor(int roomIndex)
+    {
+        return GameManager.Instance.DungeonDictionary.TryGetValue(roomIndex, out GameManager.RoomData room) ? room.SpecialEntryDoorPosition : null;
+    }
+
+    private Vector3? GetSpecialExitDoor(int roomIndex)
+    {
+        return GameManager.Instance.DungeonDictionary.TryGetValue(roomIndex, out GameManager.RoomData room) ? room.SpecialExitDoorPosition : null;
+    }
+
+    private void MoveToPosition(Vector3 position)
+    {
+        Vector3 target = position;
+        target.z = transform.position.z;
+        transform.position = target;
     }
 
     private void OnDrawGizmos()

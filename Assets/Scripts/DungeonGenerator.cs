@@ -6,8 +6,6 @@ using UnityEngine.Tilemaps;
 using UnityEditor;
 #endif
 
-public enum RoomType { Start, Normal, Chest, Boss }
-public enum RoomShape { Rectangle, LShape, TShape, UShape }
 public enum LRotation { TopRight, TopLeft, BottomRight, BottomLeft }
 
 public class DungeonGenerator : MonoBehaviour
@@ -76,12 +74,16 @@ public class DungeonGenerator : MonoBehaviour
     [SerializeField] private TileBase specialEntranceDoorTile;
     [SerializeField] private TileBase specialExitDoorTile;
 
+    public Tilemap DoorTilemap => objectTilemap;
+    public TileBase EntranceDoorTile => entranceDoorTile;
+    public TileBase ExitDoorTile => exitDoorTile;
+    public TileBase SpecialEntranceDoorTile => specialEntranceDoorTile;
+    public TileBase SpecialExitDoorTile => specialExitDoorTile;
+
     [Header("Debug Settings")]
     [SerializeField] private TileBase debugPathTile;
 
     [Header("Dungeon Settings")]
-    [SerializeField] private Transform playerTransform;
-    [SerializeField] private KeyCode interactKey = KeyCode.E;
     [SerializeField] private int minRooms = 6;
     [SerializeField] private int maxRooms = 9;
     [SerializeField] private Vector2Int macroCellSize = new Vector2Int(25, 20);
@@ -114,24 +116,20 @@ public class DungeonGenerator : MonoBehaviour
     private readonly List<Vector2Int> _validFloorTilesBuffer = new List<Vector2Int>(256);
     private readonly List<Vector2Int> _exitCandidatesBuffer = new List<Vector2Int>(256);
     private readonly List<Room> _candidateParentRoomsBuffer = new List<Room>(16);
-    private readonly Dictionary<Vector2Int, DoorTriggerData> _doorMap = new Dictionary<Vector2Int, DoorTriggerData>();
-
-    private DoorTriggerData _activeDoor;
     #endregion
-
-    public struct DoorTriggerData
-    {
-        public Vector2Int Position;
-        public Vector2Int TargetPosition;
-        public bool IsExitDoor;
-        public Room CurrentRoom;
-        public Room TargetRoom;
-    }
 
     #region Unity Lifecycle
     private void Awake()
     {
-        CachePlayerTransform();
+        if (GameManager.Instance != null)
+        {
+            GameManager.Instance.ConfigureDoorTiles(
+                objectTilemap,
+                entranceDoorTile,
+                exitDoorTile,
+                specialEntranceDoorTile,
+                specialExitDoorTile);
+        }
     }
 
     private void Start()
@@ -139,53 +137,6 @@ public class DungeonGenerator : MonoBehaviour
         GenerateAndBuildDungeon();
     }
 
-    private void Update()
-    {
-        if (Application.isPlaying && _activeDoor.CurrentRoom != null && Input.GetKeyDown(interactKey))
-        {
-            PerformDoorTransition(_activeDoor);
-        }
-    }
-
-    private void OnTriggerEnter2D(Collider2D other)
-    {
-        if (!other.CompareTag("Player")) return;
-
-        Vector3Int cellPos = fillFloorTilemap.WorldToCell(other.transform.position);
-        Vector2Int tilePos = new Vector2Int(cellPos.x, cellPos.y);
-
-        if (_doorMap.TryGetValue(tilePos, out DoorTriggerData doorData))
-        {
-            _activeDoor = doorData;
-        }
-    }
-
-    private void OnTriggerExit2D(Collider2D other)
-    {
-        if (!other.CompareTag("Player")) return;
-
-        Vector3Int cellPos = fillFloorTilemap.WorldToCell(other.transform.position);
-        Vector2Int tilePos = new Vector2Int(cellPos.x, cellPos.y);
-
-        if (_doorMap.ContainsKey(tilePos))
-        {
-            _activeDoor = default;
-        }
-    }
-
-    private void OnGUI()
-    {
-        if (Application.isPlaying && _activeDoor.CurrentRoom != null)
-        {
-            GUIStyle style = new GUIStyle(GUI.skin.box)
-            {
-                fontSize = 18,
-                alignment = TextAnchor.MiddleCenter
-            };
-            string actionText = _activeDoor.IsExitDoor ? "Enter Next Room" : "Return to Previous Room";
-            GUI.Box(new Rect(Screen.width / 2 - 150, Screen.height - 80, 300, 40), $"Press [{interactKey}] to {actionText}", style);
-        }
-    }
     #endregion
 
     #region Public Interface
@@ -198,9 +149,18 @@ public class DungeonGenerator : MonoBehaviour
             return;
         }
 
+        if (GameManager.Instance != null)
+        {
+            GameManager.Instance.ConfigureDoorTiles(
+                objectTilemap,
+                entranceDoorTile,
+                exitDoorTile,
+                specialEntranceDoorTile,
+                specialExitDoorTile);
+        }
+
         ClearDungeonTiles();
         GeneratedRooms.Clear();
-        _doorMap.Clear();
 
         int totalRooms = Mathf.Clamp(Random.Range(minRooms, maxRooms + 1), 4, outerPerimeter.Length);
         int startPerimeterIdx = Random.Range(0, outerPerimeter.Length);
@@ -250,10 +210,9 @@ public class DungeonGenerator : MonoBehaviour
 
         // 3. Doors, Layout, and Teleport Mappings
         CalculateInteriorDoors();
-        LinkDoorTriggers();
         RenderDungeonTiles();
         ApplyDoorsToTilemap();
-        PlacePlayerAtFirstRoom();
+        PublishDungeonData();
 
         if (debugTilemap != null && debugPathTile != null)
         {
@@ -272,7 +231,6 @@ public class DungeonGenerator : MonoBehaviour
         if (fillFloorTilemap != null) fillFloorTilemap.ClearAllTiles();
         if (debugTilemap != null) debugTilemap.ClearAllTiles();
         if (objectTilemap != null) objectTilemap.ClearAllTiles();
-        _doorMap.Clear();
     }
     #endregion
 
@@ -417,96 +375,69 @@ public class DungeonGenerator : MonoBehaviour
         }
     }
 
-    private void LinkDoorTriggers()
+    private void PublishDungeonData()
     {
-        _doorMap.Clear();
+        if (GameManager.Instance == null) return;
 
+        GameManager.Instance.DungeonDictionary.Clear();
         for (int i = 0; i < GeneratedRooms.Count; i++)
         {
-            Room currentRoom = GeneratedRooms[i];
-            if (currentRoom.Type == RoomType.Chest) continue;
-
-            if (currentRoom.ExitDoorPos.HasValue && i + 1 < GeneratedRooms.Count)
+            Room room = GeneratedRooms[i];
+            GameManager.RoomData data = new GameManager.RoomData
             {
-                Room nextRoom = GeneratedRooms[i + 1];
-                if (nextRoom.EntranceDoorPos.HasValue)
-                {
-                    _doorMap[currentRoom.ExitDoorPos.Value] = new DoorTriggerData
-                    {
-                        Position = currentRoom.ExitDoorPos.Value,
-                        TargetPosition = nextRoom.EntranceDoorPos.Value,
-                        IsExitDoor = true,
-                        CurrentRoom = currentRoom,
-                        TargetRoom = nextRoom
-                    };
+                RoomIndex = room.Index,
+                ParentRoomIndex = room.ParentRoom != null ? room.ParentRoom.Index : -1,
+                Type = room.Type,
+                Shape = room.Shape,
+                Size = room.LocalSize,
+                WorldCenterTile = room.WorldCenterTile,
+                WorldOriginTile = room.WorldOriginTile,
+                WorldCenterPosition = GetWorldPosition(room.WorldCenterTile),
+                EntryDoorPosition = GetWorldPosition(room.EntranceDoorPos),
+                ExitDoorPosition = GetWorldPosition(room.ExitDoorPos)
+            };
 
-                    _doorMap[nextRoom.EntranceDoorPos.Value] = new DoorTriggerData
-                    {
-                        Position = nextRoom.EntranceDoorPos.Value,
-                        TargetPosition = currentRoom.ExitDoorPos.Value,
-                        IsExitDoor = false,
-                        CurrentRoom = nextRoom,
-                        TargetRoom = currentRoom
-                    };
-                }
+            if (room.ParentRoom != null)
+            {
+                data.HasSpecialChestRoom = true;
+                data.SpecialChestRoomIndex = room.ParentRoom.Index;
+                data.SpecialEntryDoorPosition = GetWorldPosition(room.EntranceDoorPos);
+                data.SpecialExitDoorPosition = GetWorldPosition(room.ParentRoom.ExitDoorPos);
             }
+
+            GameManager.Instance.DungeonDictionary[data.RoomIndex] = data;
         }
 
         for (int i = 0; i < GeneratedRooms.Count; i++)
         {
-            Room chest = GeneratedRooms[i];
-            if (chest.Type != RoomType.Chest || chest.ParentRoom == null) continue;
+            Room room = GeneratedRooms[i];
+            if (room.ParentRoom == null) continue;
 
-            Room host = chest.ParentRoom;
-            if (chest.EntranceDoorPos.HasValue && host.ExitDoorPos.HasValue)
-            {
-                _doorMap[host.ExitDoorPos.Value] = new DoorTriggerData
-                {
-                    Position = host.ExitDoorPos.Value,
-                    TargetPosition = chest.EntranceDoorPos.Value,
-                    IsExitDoor = true,
-                    CurrentRoom = host,
-                    TargetRoom = chest
-                };
+            GameManager.RoomData parentData = GameManager.Instance.DungeonDictionary[room.ParentRoom.Index];
+            parentData.HasSpecialChestRoom = true;
+            parentData.SpecialChestRoomIndex = room.Index;
+            parentData.SpecialExitDoorPosition = GetWorldPosition(room.ParentRoom.ExitDoorPos);
+            GameManager.Instance.DungeonDictionary[parentData.RoomIndex] = parentData;
+        }
 
-                _doorMap[chest.EntranceDoorPos.Value] = new DoorTriggerData
-                {
-                    Position = chest.EntranceDoorPos.Value,
-                    TargetPosition = host.ExitDoorPos.Value,
-                    IsExitDoor = false,
-                    CurrentRoom = chest,
-                    TargetRoom = host
-                };
-            }
+        GameManager.Instance.CurrentRoomIndex = GeneratedRooms.Count > 0 ? GeneratedRooms[0].Index : 0;
+        if (GeneratedRooms.Count > 0)
+        {
+            GameManager.NotifyNewRoomEntered(GameManager.Instance.DungeonDictionary[GameManager.Instance.CurrentRoomIndex]);
         }
     }
 
-    private void PerformDoorTransition(DoorTriggerData door)
+    private Vector3 GetWorldPosition(Vector2Int tilePosition)
     {
-        CachePlayerTransform();
-        if (playerTransform == null) return;
-
-        Vector3Int targetCell = new Vector3Int(door.TargetPosition.x, door.TargetPosition.y, 0);
-        Vector3 targetWorld = fillFloorTilemap.GetCellCenterWorld(targetCell);
-        targetWorld.z = playerTransform.position.z;
-
-        playerTransform.position = targetWorld;
-        _activeDoor = default;
+        return fillFloorTilemap.GetCellCenterWorld(new Vector3Int(tilePosition.x, tilePosition.y, 0));
     }
 
-    private void PlacePlayerAtFirstRoom()
+    private Vector3? GetWorldPosition(Vector2Int? tilePosition)
     {
-        if (GeneratedRooms.Count == 0) return;
+        if (!tilePosition.HasValue || fillFloorTilemap == null) return null;
 
-        CachePlayerTransform();
-        if (playerTransform == null) return;
-
-        Room firstRoom = GeneratedRooms[0];
-        Vector3Int spawnCell = new Vector3Int(firstRoom.WorldCenterTile.x, firstRoom.WorldCenterTile.y, 0);
-
-        Vector3 center = fillFloorTilemap.GetCellCenterWorld(spawnCell);
-        center.z = playerTransform.position.z;
-        playerTransform.position = center;
+        Vector2Int position = tilePosition.Value;
+        return fillFloorTilemap.GetCellCenterWorld(new Vector3Int(position.x, position.y, 0));
     }
     #endregion
 
@@ -621,8 +552,8 @@ public class DungeonGenerator : MonoBehaviour
         for (int i = 0; i < GeneratedRooms.Count; i++)
         {
             Room room = GeneratedRooms[i];
-            TileBase inTile = (room.Type == RoomType.Chest && specialEntranceDoorTile != null) ? specialEntranceDoorTile : entranceDoorTile;
-            TileBase outTile = (room.Type == RoomType.Chest && specialExitDoorTile != null) ? specialExitDoorTile : exitDoorTile;
+            TileBase inTile = room.Type == RoomType.Chest && specialEntranceDoorTile != null ? specialEntranceDoorTile : entranceDoorTile;
+            TileBase outTile = room.ParentRoom != null && specialExitDoorTile != null ? specialExitDoorTile : exitDoorTile;
 
             if (room.EntranceDoorPos.HasValue && inTile != null)
             {
@@ -693,15 +624,6 @@ public class DungeonGenerator : MonoBehaviour
     #endregion
 
     #region Helper Methods
-    private void CachePlayerTransform()
-    {
-        if (playerTransform == null)
-        {
-            GameObject player = GameObject.FindGameObjectWithTag("Player");
-            if (player != null) playerTransform = player.transform;
-        }
-    }
-
     private void GetValidInteriorFloorTiles(Room room, List<Vector2Int> results)
     {
         results.Clear();

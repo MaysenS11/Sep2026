@@ -12,6 +12,16 @@ public class CameraBounds : MonoBehaviour
     private float camHorizSize;
 
     
+    private void OnEnable()
+    {
+        GameManager.NewRoomEntered += OnNewRoomEntered;
+    }
+
+    private void OnDisable()
+    {
+        GameManager.NewRoomEntered -= OnNewRoomEntered;
+    }
+
     public void Start()
     {
         boundsCollider = GetComponent<BoxCollider2D>();
@@ -25,6 +35,19 @@ public class CameraBounds : MonoBehaviour
 
         camVertSize = mainCamera.orthographicSize * 2f;
         camHorizSize = camVertSize * mainCamera.aspect;
+
+        if (GameManager.Instance != null && GameManager.Instance.DungeonDictionary.TryGetValue(GameManager.Instance.CurrentRoomIndex, out GameManager.RoomData room))
+        {
+            OnNewRoomEntered(room);
+        }
+    }
+
+    private void OnNewRoomEntered(GameManager.RoomData room)
+    {
+        if (boundsCollider == null || mainCamera == null) return;
+
+        Vector3 center = new Vector3(room.WorldCenterTile.x, room.WorldCenterTile.y, transform.position.z);
+        SetRoomBounds(center, room.Size.x, room.Size.y);
     }
 
     /// <summary>
@@ -43,6 +66,9 @@ public class CameraBounds : MonoBehaviour
         boundsCollider.transform.position = roomCenter;
         boundsCollider.size = new Vector2(finalWidth, finalHeight);
 
-        confiner.InvalidateBoundingShapeCache();
+        if (confiner != null)
+        {
+            confiner.InvalidateBoundingShapeCache();
+        }
     }
 }
