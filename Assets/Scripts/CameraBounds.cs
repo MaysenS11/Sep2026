@@ -7,6 +7,7 @@ public class CameraBounds : MonoBehaviour
     [SerializeField] private Camera mainCamera;
     [SerializeField] private CinemachineConfiner2D confiner;
 
+
     private BoxCollider2D boundsCollider;
     private float camVertSize;
     private float camHorizSize;
@@ -45,6 +46,7 @@ public class CameraBounds : MonoBehaviour
     private void OnNewRoomEntered(GameManager.RoomData room)
     {
         if (boundsCollider == null || mainCamera == null) return;
+
 
         Vector3 center = new Vector3(room.WorldCenterTile.x, room.WorldCenterTile.y, transform.position.z);
         SetRoomBounds(center, room.Size.x, room.Size.y);
