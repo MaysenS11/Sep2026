@@ -116,7 +116,7 @@ public class PlayerMovement : MonoBehaviour
 
     private bool IsTileBlocked(Vector3 targetPos)
     {
-        return Physics2D.OverlapCircle(targetPos, 0.2f, obstacleLayer) != null;
+        return Physics2D.OverlapBox(targetPos, new Vector2(tileSize * 0.8f, tileSize * 0.8f), 0f, obstacleLayer) != null;
     }
 
     private void OnAttackPerformed(InputAction.CallbackContext context)
@@ -130,4 +130,15 @@ public class PlayerMovement : MonoBehaviour
     {
         if (isMoving) return;
     }
+
+    private void OnDrawGizmos()
+{
+    Gizmos.color = Color.red;
+    // Calculates where the next tile check will happen based on last direction
+    Vector3 testPos = transform.position + new Vector3(lastDirection.x, lastDirection.y, 0) * tileSize;
+    
+    // Draw both the circle check and a square box check
+    Gizmos.DrawWireSphere(testPos, 0.2f);
+    Gizmos.DrawWireCube(testPos, new Vector3(tileSize * 0.8f, tileSize * 0.8f, 0f));
+}
 }

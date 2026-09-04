@@ -15,34 +15,25 @@ public class DungeonGenerator : MonoBehaviour
 {
     [Header("Layer Tilemaps")]
     [SerializeField] private Tilemap roofTilemap;
-    [FormerlySerializedAs("layer1WallTilemap")]
     [SerializeField] private Tilemap wallTilemap;
-    [FormerlySerializedAs("floorBorderTilemap")]
     [SerializeField] private Tilemap borderFloorTilemap;
-    [FormerlySerializedAs("floorTilemap")]
     [SerializeField] private Tilemap fillFloorTilemap;
     [SerializeField] private Tilemap objectTilemap;
     [SerializeField] private Tilemap debugTilemap;
 
     [Header("Rule Tile Assets")]
     [SerializeField] private TileBase roofRuleTile;
-    [FormerlySerializedAs("wallRuleTile")]
     [SerializeField] private TileBase wallRuleTile;
-    [FormerlySerializedAs("floorBorderRuleTile")]
     [SerializeField] private TileBase borderFloorRuleTile;
-    [FormerlySerializedAs("floorRuleTile")]
     [SerializeField] private TileBase fillFloorRuleTile;
 
-    [Header("Standard Door Assets")]
+    [Header("Door Assets")]
     [SerializeField] private TileBase entranceDoorTile; 
     [SerializeField] private TileBase exitDoorTile;     
-
-    [Header("Special Door Assets")]
     [SerializeField] private TileBase specialEntranceDoorTile; 
     [SerializeField] private TileBase specialExitDoorTile;     
 
     [Header("Debug Settings")]
-    [SerializeField] private bool showDebugPaths = true;
     [SerializeField] private TileBase debugPathTile; 
 
     [Header("Dungeon Settings")]
@@ -150,19 +141,16 @@ public class DungeonGenerator : MonoBehaviour
             GeneratedRooms.Add(room);
         }
 
-        // 2. Insert Chest Room & Link Parent
         TryInsertChestRoom();
 
-        // 3. Position Doors
         CalculateInteriorDoors();
 
-        // 4. Render the centered roof, wall, border, and fill footprints
         RenderDungeonTiles();
         ApplyDoorsToTilemap();
         PlacePlayerAtFirstRoom();
 
         // 5. Draw Debug Paths
-        if (showDebugPaths && debugTilemap != null && debugPathTile != null)
+        if (debugTilemap != null && debugPathTile != null)
         {
             DrawDebugRoomConnections();
         }
