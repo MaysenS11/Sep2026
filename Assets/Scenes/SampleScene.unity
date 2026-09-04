@@ -20753,10 +20753,10 @@ MonoBehaviour:
   wallRuleTile: {fileID: 11400000, guid: 6de462d65812d8d4882e3525435be644, type: 2}
   borderFloorRuleTile: {fileID: 11400000, guid: 10f2942cec4556143ba1c2752af4b8fe, type: 2}
   fillFloorRuleTile: {fileID: 11400000, guid: be29a36375ed95140a30caecea5ae7c3, type: 2}
-  entranceDoorTile: {fileID: 11400000, guid: cce944db0c10f304ca53f966e96f45ad, type: 2}
+  entranceDoorTile: {fileID: 11400000, guid: 25fdbe3cedf7afc49b7991d6cc46e026, type: 2}
   exitDoorTile: {fileID: 11400000, guid: cce944db0c10f304ca53f966e96f45ad, type: 2}
-  specialEntranceDoorTile: {fileID: 11400000, guid: cce944db0c10f304ca53f966e96f45ad, type: 2}
-  specialExitDoorTile: {fileID: 11400000, guid: cce944db0c10f304ca53f966e96f45ad, type: 2}
+  specialEntranceDoorTile: {fileID: 11400000, guid: 00957600435bf2e4b93d83e90203c724, type: 2}
+  specialExitDoorTile: {fileID: 11400000, guid: 2a1e6d46208348b45ae4c041d3887312, type: 2}
   debugPathTile: {fileID: 11400000, guid: a39d144e8e1bc4141932c0eb103d5ac4, type: 2}
   minRooms: 7
   maxRooms: 10

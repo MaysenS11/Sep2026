@@ -126,6 +126,8 @@ public class PlayerMovement : MonoBehaviour
         transform.position = targetPos;
         isMoving = false;
         animator.SetBool(Moving, false);
+
+        TryTriggerDoorAtCurrentPosition();
     }
 
     private bool IsTileBlocked(Vector3 targetPos)
@@ -152,6 +154,18 @@ public class PlayerMovement : MonoBehaviour
 
         TransitionThroughDoor(doorType);
         doorTriggerBlockedUntil = Time.time + 0.2f;
+    }
+
+    private void TryTriggerDoorAtCurrentPosition()
+    {
+        GameManager manager = GameManager.Instance;
+        if (manager == null || manager.DoorTilemap == null) return;
+
+        Vector3Int cell = manager.DoorTilemap.WorldToCell(transform.position);
+        if (manager.TryResolveDoor(cell, out DoorType doorType))
+        {
+            GameManager.TriggerDoor(doorType, new Vector2Int(cell.x, cell.y));
+        }
     }
 
     private void OnNewRoomEntered(GameManager.RoomData room)
