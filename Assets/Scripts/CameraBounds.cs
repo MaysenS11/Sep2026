@@ -15,12 +15,12 @@ public class CameraBounds : MonoBehaviour
     
     private void OnEnable()
     {
-        GameManager.NewRoomEntered += OnNewRoomEntered;
+        EventBus<RoomEnteredEvent>.Subscribe(OnRoomEntered);
     }
 
     private void OnDisable()
     {
-        GameManager.NewRoomEntered -= OnNewRoomEntered;
+        EventBus<RoomEnteredEvent>.Unsubscribe(OnRoomEntered);
     }
 
     public void Start()
@@ -39,25 +39,22 @@ public class CameraBounds : MonoBehaviour
 
         if (GameManager.Instance != null && GameManager.Instance.DungeonDictionary.TryGetValue(GameManager.Instance.CurrentRoomIndex, out GameManager.RoomData room))
         {
-            OnNewRoomEntered(room);
+            ApplyRoomBounds(room);
         }
     }
 
-    private void OnNewRoomEntered(GameManager.RoomData room)
+    private void OnRoomEntered(RoomEnteredEvent evt)
     {
-        if (boundsCollider == null || mainCamera == null) return;
+        ApplyRoomBounds(evt.Room);
+    }
 
+    private void ApplyRoomBounds(GameManager.RoomData room)
+    {
+        if (boundsCollider == null || mainCamera == null || room == null) return;
 
         Vector3 center = new Vector3(room.WorldCenterTile.x, room.WorldCenterTile.y, transform.position.z);
         SetRoomBounds(center, room.Size.x, room.Size.y);
     }
-
-    /// <summary>
-    /// Call this function whenever a new room finishes generating.
-    /// </summary>
-    /// <param name="roomCenter">World position center of the generated room</param>
-    /// <param name="roomWidth">Room width in world units (e.g. 25 tiles * tileSize)</param>
-    /// <param name="roomHeight">Room height in world units (e.g. 20 tiles * tileSize)</param>
 
     public void SetRoomBounds(Vector3 roomCenter, float roomWidth, float roomHeight)
     {

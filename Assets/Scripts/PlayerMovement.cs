@@ -50,8 +50,8 @@ public class PlayerMovement : MonoBehaviour
     private void OnEnable()
     {
         inputActions.Enable();
-        GameManager.DoorTriggered += OnDoorTriggered;
-        GameManager.NewRoomEntered += OnNewRoomEntered;
+        EventBus<DoorTriggeredEvent>.Subscribe(OnDoorTriggered);
+        EventBus<RoomEnteredEvent>.Subscribe(OnRoomEntered);
         attackAction.performed += OnAttackPerformed;
         interactAction.performed += OnInteractPerformed;
     }
@@ -60,8 +60,8 @@ public class PlayerMovement : MonoBehaviour
     {
         attackAction.performed -= OnAttackPerformed;
         interactAction.performed -= OnInteractPerformed;
-        GameManager.DoorTriggered -= OnDoorTriggered;
-        GameManager.NewRoomEntered -= OnNewRoomEntered;
+        EventBus<DoorTriggeredEvent>.Unsubscribe(OnDoorTriggered);
+        EventBus<RoomEnteredEvent>.Unsubscribe(OnRoomEntered);
 
         inputActions.Disable();
     }
@@ -148,11 +148,11 @@ public class PlayerMovement : MonoBehaviour
         animator.SetTrigger(interactTrigger);
     }
 
-    private void OnDoorTriggered(DoorType doorType, Vector2Int doorTilePosition)
+    private void OnDoorTriggered(DoorTriggeredEvent evt)
     {
         if (isMoving || Time.time < doorTriggerBlockedUntil || GameManager.Instance == null) return;
 
-        TransitionThroughDoor(doorType);
+        TransitionThroughDoor(evt.DoorType);
         doorTriggerBlockedUntil = Time.time + 0.2f;
     }
 
@@ -168,11 +168,11 @@ public class PlayerMovement : MonoBehaviour
         }
     }
 
-    private void OnNewRoomEntered(GameManager.RoomData room)
+    private void OnRoomEntered(RoomEnteredEvent evt)
     {
-        if (hasEnteredInitialRoom || room.RoomIndex != 0) return;
+        if (hasEnteredInitialRoom || evt.Room.RoomIndex != 0) return;
         hasEnteredInitialRoom = true;
-        MoveToPosition(room.WorldCenterPosition);
+        MoveToPosition(evt.Room.WorldCenterPosition);
     }
 
     private void TransitionThroughDoor(DoorType doorType)

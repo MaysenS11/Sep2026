@@ -43,8 +43,11 @@ public class GameManager : MonoBehaviour
     private TileBase specialEntranceDoorTile;
     private TileBase specialExitDoorTile;
 
-    // Events
+    // Legacy Events (Marked Obsolete in favor of EventBus<T>)
+    [System.Obsolete("Use EventBus<DoorTriggeredEvent>.Subscribe instead.")]
     public static event Action<DoorType, Vector2Int> DoorTriggered;
+
+    [System.Obsolete("Use EventBus<RoomEnteredEvent>.Subscribe instead.")]
     public static event Action<RoomData> NewRoomEntered;
 
     public Tilemap DoorTilemap => doorTilemap;
@@ -81,7 +84,10 @@ public class GameManager : MonoBehaviour
 
     public static void TriggerDoor(DoorType type, Vector2Int doorTilePos)
     {
+#pragma warning disable CS0618
         DoorTriggered?.Invoke(type, doorTilePos);
+#pragma warning restore CS0618
+        EventBus<DoorTriggeredEvent>.Raise(new DoorTriggeredEvent(type, doorTilePos));
     }
 
     public static void NotifyNewRoomEntered(RoomData newRoom)
@@ -90,6 +96,9 @@ public class GameManager : MonoBehaviour
         {
             Instance.CurrentRoomIndex = newRoom.RoomIndex;
         }
+#pragma warning disable CS0618
         NewRoomEntered?.Invoke(newRoom);
+#pragma warning restore CS0618
+        EventBus<RoomEnteredEvent>.Raise(new RoomEnteredEvent(newRoom));
     }
 }
