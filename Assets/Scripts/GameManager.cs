@@ -1,4 +1,3 @@
-using System;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Tilemaps;
@@ -6,32 +5,37 @@ using UnityEngine.Tilemaps;
 public enum DoorType { EntryDoor, ExitDoor, SpecialExitDoor, SpecialEntryDoor }
 public enum RoomType { Start, Normal, Chest, Boss }
 public enum RoomShape { Rectangle, LShape, TShape, UShape }
+public enum LRotation { TopRight, TopLeft, BottomRight, BottomLeft }
 
 public class GameManager : MonoBehaviour
 {
     public static GameManager Instance { get; private set; }
 
-    [System.Serializable]
     public class RoomData
     {
         public int RoomIndex;
         public int ParentRoomIndex = -1;
+        public Vector2Int MacroPos;
         public RoomType Type;
         public RoomShape Shape;
+        public LRotation LRot;
         public Vector2Int Size;
-        public Vector2Int WorldCenterTile;
         public Vector2Int WorldOriginTile;
-        public Vector3 WorldCenterPosition;
+        
+        public Vector2Int? EntranceDoorTile;
+        public Vector2Int? ExitDoorTile;
 
-        // Door positions in world space
         public Vector3? EntryDoorPosition;
         public Vector3? ExitDoorPosition;
 
-        // Chest Room linking
         public bool HasSpecialChestRoom;
         public int SpecialChestRoomIndex = -1;
         public Vector3? SpecialExitDoorPosition;
         public Vector3? SpecialEntryDoorPosition;
+
+        public Vector2Int CenterTile;
+        public Vector3 CenterPosition;
+        public Vector3 CenterTilePosition;
     }
 
     public Dictionary<int, RoomData> DungeonDictionary = new Dictionary<int, RoomData>();
@@ -43,14 +47,13 @@ public class GameManager : MonoBehaviour
     private TileBase specialEntranceDoorTile;
     private TileBase specialExitDoorTile;
 
-    // Legacy Events (Marked Obsolete in favor of EventBus<T>)
-    [System.Obsolete("Use EventBus<DoorTriggeredEvent>.Subscribe instead.")]
-    public static event Action<DoorType, Vector2Int> DoorTriggered;
-
-    [System.Obsolete("Use EventBus<RoomEnteredEvent>.Subscribe instead.")]
-    public static event Action<RoomData> NewRoomEntered;
-
     public Tilemap DoorTilemap => doorTilemap;
+
+    private void Awake()
+    {
+        if (Instance != null && Instance != this) { Destroy(gameObject); return; }
+        Instance = this;
+    }
 
     public void ConfigureDoorTiles(Tilemap tilemap, TileBase entryTile, TileBase exitTile, TileBase specialEntryTile, TileBase specialExitTile)
     {
@@ -76,17 +79,8 @@ public class GameManager : MonoBehaviour
         return true;
     }
 
-    private void Awake()
-    {
-        if (Instance != null && Instance != this) { Destroy(gameObject); return; }
-        Instance = this;
-    }
-
     public static void TriggerDoor(DoorType type, Vector2Int doorTilePos)
     {
-#pragma warning disable CS0618
-        DoorTriggered?.Invoke(type, doorTilePos);
-#pragma warning restore CS0618
         EventBus<DoorTriggeredEvent>.Raise(new DoorTriggeredEvent(type, doorTilePos));
     }
 
@@ -96,9 +90,6 @@ public class GameManager : MonoBehaviour
         {
             Instance.CurrentRoomIndex = newRoom.RoomIndex;
         }
-#pragma warning disable CS0618
-        NewRoomEntered?.Invoke(newRoom);
-#pragma warning restore CS0618
         EventBus<RoomEnteredEvent>.Raise(new RoomEnteredEvent(newRoom));
     }
 }

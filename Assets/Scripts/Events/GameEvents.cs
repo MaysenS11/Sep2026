@@ -1,5 +1,26 @@
 ﻿using UnityEngine;
 
+public enum GameState
+{
+    MainMenu,
+    GeneratingDungeon,
+    Gameplay,
+    Paused,
+    GameOver
+}
+
+public readonly struct GameStateChangedEvent : IEvent
+{
+    public readonly GameState PreviousState;
+    public readonly GameState NewState;
+
+    public GameStateChangedEvent(GameState previousState, GameState newState)
+    {
+        PreviousState = previousState;
+        NewState = newState;
+    }
+}
+
 public readonly struct DoorTriggeredEvent : IEvent
 {
     public readonly DoorType DoorType;
@@ -19,26 +40,5 @@ public readonly struct RoomEnteredEvent : IEvent
     public RoomEnteredEvent(GameManager.RoomData room)
     {
         Room = room;
-    }
-}
-
-public enum GameState
-{
-    MainMenu,
-    GeneratingDungeon,
-    Gameplay,
-    Paused,
-    GameOver
-}
-
-public readonly struct GameStateChangedEvent : IEvent
-{
-    public readonly GameState PreviousState;
-    public readonly GameState NewState;
-
-    public GameStateChangedEvent(GameState previousState, GameState newState)
-    {
-        PreviousState = previousState;
-        NewState = newState;
     }
 }

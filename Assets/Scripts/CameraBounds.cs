@@ -51,16 +51,17 @@ public class CameraBounds : MonoBehaviour
     private void ApplyRoomBounds(GameManager.RoomData room)
     {
         if (boundsCollider == null || mainCamera == null || room == null) return;
-
-        Vector3 center = new Vector3(room.WorldCenterTile.x, room.WorldCenterTile.y, transform.position.z);
-        SetRoomBounds(center, room.Size.x, room.Size.y);
+        SetRoomBounds(room.CenterPosition, room.Size.x, room.Size.y);
     }
 
     public void SetRoomBounds(Vector3 roomCenter, float roomWidth, float roomHeight)
     {
-        
+        roomWidth += 4f;
+        roomHeight += 2f;
         float finalWidth = Mathf.Max(roomWidth, camHorizSize);
         float finalHeight = Mathf.Max(roomHeight, camVertSize);
+
+        Debug.Log($"Camera bounds set for room {0} at position {roomCenter} with with {roomWidth} and height {roomHeight}");
 
         boundsCollider.transform.position = roomCenter;
         boundsCollider.size = new Vector2(finalWidth, finalHeight);
@@ -68,6 +69,29 @@ public class CameraBounds : MonoBehaviour
         if (confiner != null)
         {
             confiner.InvalidateBoundingShapeCache();
+
+            CinemachineCamera vcam = confiner.GetComponent<CinemachineCamera>();
+            if (vcam != null)
+            {
+                CinemachineFollow follow = vcam.GetComponent<CinemachineFollow>();
+                if (follow != null)
+                {
+                    follow.enabled = false;
+                }
+
+                Vector3 targetCamPos = new Vector3(roomCenter.x, roomCenter.y, vcam.transform.position.z);
+                vcam.ForceCameraPosition(targetCamPos, Quaternion.identity);
+
+                if (vcam.Target.TrackingTarget != null)
+                {
+                    vcam.OnTargetObjectWarped(vcam.Target.TrackingTarget, Vector3.zero);
+                }
+
+                if (follow != null)
+                {
+                    follow.enabled = true;
+                }
+            }
         }
     }
 }

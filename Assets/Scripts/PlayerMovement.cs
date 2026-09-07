@@ -76,13 +76,13 @@ public class PlayerMovement : MonoBehaviour
         if (GameManager.Instance == null) return;
         if (GameManager.Instance.DungeonDictionary.TryGetValue(GameManager.Instance.CurrentRoomIndex, out GameManager.RoomData room))
         {
-            MoveToPosition(room.WorldCenterPosition);
+            MoveToPosition(room.CenterTilePosition);
         }
     }
 
     private void HandleMovement()
     {
-        if (isMoving || Time.time < lastMoveTime + moveCooldown)  return;
+        if (isMoving || (ScreenFadeTransition.Instance != null && ScreenFadeTransition.Instance.IsTransitioning) || Time.time < lastMoveTime + moveCooldown) return;
 
         Vector2 inputDir = moveAction.ReadValue<Vector2>();
 
@@ -137,20 +137,20 @@ public class PlayerMovement : MonoBehaviour
 
     private void OnAttackPerformed(InputAction.CallbackContext context)
     {
-        if (isMoving) return;
+        if (isMoving || (ScreenFadeTransition.Instance != null && ScreenFadeTransition.Instance.IsTransitioning)) return;
 
         animator.SetTrigger(attackTrigger);
     }
 
     private void OnInteractPerformed(InputAction.CallbackContext context)
     {
-        if (isMoving) return;
+        if (isMoving || (ScreenFadeTransition.Instance != null && ScreenFadeTransition.Instance.IsTransitioning)) return;
         animator.SetTrigger(interactTrigger);
     }
 
     private void OnDoorTriggered(DoorTriggeredEvent evt)
     {
-        if (isMoving || Time.time < doorTriggerBlockedUntil || GameManager.Instance == null) return;
+        if (isMoving || (ScreenFadeTransition.Instance != null && ScreenFadeTransition.Instance.IsTransitioning) || Time.time < doorTriggerBlockedUntil || GameManager.Instance == null) return;
 
         TransitionThroughDoor(evt.DoorType);
         doorTriggerBlockedUntil = Time.time + 0.2f;
@@ -172,7 +172,7 @@ public class PlayerMovement : MonoBehaviour
     {
         if (hasEnteredInitialRoom || evt.Room.RoomIndex != 0) return;
         hasEnteredInitialRoom = true;
-        MoveToPosition(evt.Room.WorldCenterPosition);
+        //MoveToPosition(evt.Room.CenterTilePosition);
     }
 
     private void TransitionThroughDoor(DoorType doorType)
@@ -205,8 +205,19 @@ public class PlayerMovement : MonoBehaviour
 
         if (!targetDoor.HasValue || !manager.DungeonDictionary.TryGetValue(nextRoomIndex, out GameManager.RoomData nextRoom)) return;
 
-        MoveToPosition(targetDoor.Value);
-        GameManager.NotifyNewRoomEntered(nextRoom);
+        if (ScreenFadeTransition.Instance != null)
+        {
+            StartCoroutine(ScreenFadeTransition.Instance.PlayTransition(() =>
+            {
+                MoveToPosition(targetDoor.Value);
+                GameManager.NotifyNewRoomEntered(nextRoom);
+            }));
+        }
+        else
+        {
+            MoveToPosition(targetDoor.Value);
+            GameManager.NotifyNewRoomEntered(nextRoom);
+        }
     }
 
     private Vector3? GetEntryDoor(int roomIndex)

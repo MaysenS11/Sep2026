@@ -6,31 +6,8 @@ using UnityEngine.Tilemaps;
 using UnityEditor;
 #endif
 
-public enum LRotation { TopRight, TopLeft, BottomRight, BottomLeft }
-
 public class DungeonGenerator : MonoBehaviour
 {
-    #region Nested Types
-    public class Room
-    {
-        public int Index;
-        public Vector2Int MacroPos;
-        public RoomType Type;
-        public RoomShape Shape;
-        public LRotation LRot;
-        public Vector2Int LocalSize;
-        public Vector2Int WorldOriginTile;
-        public Room ParentRoom;
-
-        public Vector2Int? EntranceDoorPos;
-        public Vector2Int? ExitDoorPos;
-
-        public Vector2Int WorldCenterTile => new Vector2Int(
-            WorldOriginTile.x + (LocalSize.x / 2),
-            WorldOriginTile.y + (LocalSize.y / 2)
-        );
-    }
-
     private struct RectBounds
     {
         public Vector2Int Origin;
@@ -51,9 +28,7 @@ public class DungeonGenerator : MonoBehaviour
             );
         }
     }
-    #endregion
 
-    #region Inspector Fields
     [Header("Layer Tilemaps")]
     [SerializeField] private Tilemap roofTilemap;
     [SerializeField] private Tilemap wallTilemap;
@@ -94,10 +69,8 @@ public class DungeonGenerator : MonoBehaviour
     [SerializeField] private Vector2Int maxNormalRoomSize = new Vector2Int(20, 16);
     [SerializeField] private Vector2Int fixedBossRoomSize = new Vector2Int(18, 16);
     [SerializeField] private Vector2Int fixedChestRoomSize = new Vector2Int(12, 12);
-    #endregion
 
-    #region Properties & Fields
-    public List<Room> GeneratedRooms { get; private set; } = new List<Room>();
+    public List<GameManager.RoomData> GeneratedRooms { get; private set; } = new List<GameManager.RoomData>();
 
     private static readonly Vector2Int[] outerPerimeter = new Vector2Int[]
     {
@@ -115,31 +88,15 @@ public class DungeonGenerator : MonoBehaviour
 
     private readonly List<Vector2Int> _validFloorTilesBuffer = new List<Vector2Int>(256);
     private readonly List<Vector2Int> _exitCandidatesBuffer = new List<Vector2Int>(256);
-    private readonly List<Room> _candidateParentRoomsBuffer = new List<Room>(16);
-    #endregion
-
-    #region Unity Lifecycle
-    private void Awake()
-    {
-        if (GameManager.Instance != null)
-        {
-            GameManager.Instance.ConfigureDoorTiles(
-                objectTilemap,
-                entranceDoorTile,
-                exitDoorTile,
-                specialEntranceDoorTile,
-                specialExitDoorTile);
-        }
-    }
+    private readonly List<GameManager.RoomData> _candidateParentRoomsBuffer = new List<GameManager.RoomData>(16);
+    private readonly List<RectBounds> _subRectsBuffer = new List<RectBounds>(8);
+    private TileBase[] _tileBuffer = new TileBase[1024];
 
     private void Start()
     {
         GenerateAndBuildDungeon();
     }
 
-    #endregion
-
-    #region Public Interface
     [ContextMenu("Generate Dungeon in Editor")]
     public void GenerateAndBuildDungeon()
     {
@@ -149,15 +106,16 @@ public class DungeonGenerator : MonoBehaviour
             return;
         }
 
-        if (GameManager.Instance != null)
-        {
-            GameManager.Instance.ConfigureDoorTiles(
-                objectTilemap,
-                entranceDoorTile,
-                exitDoorTile,
-                specialEntranceDoorTile,
-                specialExitDoorTile);
-        }
+        if (GameManager.Instance == null) return;
+        
+        GameManager.Instance.ConfigureDoorTiles
+        (
+            objectTilemap,
+            entranceDoorTile,
+            exitDoorTile,
+            specialEntranceDoorTile,
+            specialExitDoorTile
+        );
 
         ClearDungeonTiles();
         GeneratedRooms.Clear();
@@ -165,7 +123,6 @@ public class DungeonGenerator : MonoBehaviour
         int totalRooms = Mathf.Clamp(Random.Range(minRooms, maxRooms + 1), 4, outerPerimeter.Length);
         int startPerimeterIdx = Random.Range(0, outerPerimeter.Length);
 
-        // 1. Generate Main Path Rooms
         for (int i = 0; i < totalRooms; i++)
         {
             int pIdx = (startPerimeterIdx + i) % outerPerimeter.Length;
@@ -188,14 +145,14 @@ public class DungeonGenerator : MonoBehaviour
                 else if (shapeRoll < 0.70f) shape = RoomShape.UShape;
             }
 
-            Room room = new Room
+            GameManager.RoomData room = new GameManager.RoomData
             {
-                Index = i,
+                RoomIndex = i,
                 MacroPos = macroPos,
                 Type = type,
                 Shape = shape,
                 LRot = (LRotation)Random.Range(0, 4),
-                LocalSize = size,
+                Size = size,
                 WorldOriginTile = new Vector2Int(
                     (macroPos.x * macroCellSize.x) + centeredOffset.x,
                     (macroPos.y * macroCellSize.y) + centeredOffset.y
@@ -205,10 +162,7 @@ public class DungeonGenerator : MonoBehaviour
             GeneratedRooms.Add(room);
         }
 
-        // 2. Generate Special Chest Rooms
         TryInsertChestRooms();
-
-        // 3. Doors, Layout, and Teleport Mappings
         CalculateInteriorDoors();
         RenderDungeonTiles();
         ApplyDoorsToTilemap();
@@ -232,9 +186,7 @@ public class DungeonGenerator : MonoBehaviour
         if (debugTilemap != null) debugTilemap.ClearAllTiles();
         if (objectTilemap != null) objectTilemap.ClearAllTiles();
     }
-    #endregion
 
-    #region Generation Pipeline Steps
     private Vector2Int GetRoomSize(RoomType type)
     {
         if (type == RoomType.Boss) return fixedBossRoomSize;
@@ -290,24 +242,24 @@ public class DungeonGenerator : MonoBehaviour
             if (!selectedChestMacro.HasValue) break;
 
             int parentIdx = Random.Range(0, _candidateParentRoomsBuffer.Count);
-            Room parentRoom = _candidateParentRoomsBuffer[parentIdx];
+            GameManager.RoomData parentRoom = _candidateParentRoomsBuffer[parentIdx];
             _candidateParentRoomsBuffer.RemoveAt(parentIdx);
 
             Vector2Int padding = macroCellSize - fixedChestRoomSize;
             Vector2Int centeredOffset = new Vector2Int(padding.x / 2, padding.y / 2);
 
-            Room chestRoom = new Room
+            GameManager.RoomData chestRoom = new GameManager.RoomData
             {
-                Index = GeneratedRooms.Count,
+                RoomIndex = GeneratedRooms.Count,
+                ParentRoomIndex = parentRoom.RoomIndex,
                 MacroPos = selectedChestMacro.Value,
                 Type = RoomType.Chest,
                 Shape = RoomShape.Rectangle,
-                LocalSize = fixedChestRoomSize,
+                Size = fixedChestRoomSize,
                 WorldOriginTile = new Vector2Int(
                     (selectedChestMacro.Value.x * macroCellSize.x) + centeredOffset.x,
                     (selectedChestMacro.Value.y * macroCellSize.y) + centeredOffset.y
-                ),
-                ParentRoom = parentRoom
+                )
             };
 
             GeneratedRooms.Add(chestRoom);
@@ -320,25 +272,25 @@ public class DungeonGenerator : MonoBehaviour
 
         for (int i = 0; i < GeneratedRooms.Count; i++)
         {
-            Room room = GeneratedRooms[i];
+            GameManager.RoomData room = GeneratedRooms[i];
             GetValidInteriorFloorTiles(room, _validFloorTilesBuffer);
 
             if (_validFloorTilesBuffer.Count < 2) continue;
 
             if (room.Type == RoomType.Start)
             {
-                room.EntranceDoorPos = null;
-                room.ExitDoorPos = _validFloorTilesBuffer[Random.Range(0, _validFloorTilesBuffer.Count)];
+                room.EntranceDoorTile = null;
+                room.ExitDoorTile = _validFloorTilesBuffer[Random.Range(0, _validFloorTilesBuffer.Count)];
             }
             else if (room.Type == RoomType.Boss)
             {
-                room.EntranceDoorPos = _validFloorTilesBuffer[Random.Range(0, _validFloorTilesBuffer.Count)];
-                room.ExitDoorPos = null;
+                room.EntranceDoorTile = _validFloorTilesBuffer[Random.Range(0, _validFloorTilesBuffer.Count)];
+                room.ExitDoorTile = null;
             }
             else
             {
                 Vector2Int entrance = _validFloorTilesBuffer[Random.Range(0, _validFloorTilesBuffer.Count)];
-                room.EntranceDoorPos = entrance;
+                room.EntranceDoorTile = entrance;
 
                 _exitCandidatesBuffer.Clear();
                 for (int t = 0; t < _validFloorTilesBuffer.Count; t++)
@@ -352,7 +304,7 @@ public class DungeonGenerator : MonoBehaviour
 
                 if (_exitCandidatesBuffer.Count > 0)
                 {
-                    room.ExitDoorPos = _exitCandidatesBuffer[Random.Range(0, _exitCandidatesBuffer.Count)];
+                    room.ExitDoorTile = _exitCandidatesBuffer[Random.Range(0, _exitCandidatesBuffer.Count)];
                 }
                 else
                 {
@@ -369,7 +321,7 @@ public class DungeonGenerator : MonoBehaviour
                             farthestTile = tile;
                         }
                     }
-                    room.ExitDoorPos = farthestTile;
+                    room.ExitDoorTile = farthestTile;
                 }
             }
         }
@@ -382,45 +334,39 @@ public class DungeonGenerator : MonoBehaviour
         GameManager.Instance.DungeonDictionary.Clear();
         for (int i = 0; i < GeneratedRooms.Count; i++)
         {
-            Room room = GeneratedRooms[i];
-            GameManager.RoomData data = new GameManager.RoomData
-            {
-                RoomIndex = room.Index,
-                ParentRoomIndex = room.ParentRoom != null ? room.ParentRoom.Index : -1,
-                Type = room.Type,
-                Shape = room.Shape,
-                Size = room.LocalSize,
-                WorldCenterTile = room.WorldCenterTile,
-                WorldOriginTile = room.WorldOriginTile,
-                WorldCenterPosition = GetWorldPosition(room.WorldCenterTile),
-                EntryDoorPosition = GetWorldPosition(room.EntranceDoorPos),
-                ExitDoorPosition = GetWorldPosition(room.ExitDoorPos)
-            };
+            GameManager.RoomData room = GeneratedRooms[i];
 
-            if (room.ParentRoom != null)
+            room.EntryDoorPosition = GetWorldPosition(room.EntranceDoorTile);
+            room.ExitDoorPosition = GetWorldPosition(room.ExitDoorTile);
+
+            room.CenterPosition = new Vector3(
+                room.WorldOriginTile.x + (room.Size.x / 2f),
+                room.WorldOriginTile.y + (room.Size.y / 2f),
+                0f
+            );
+
+            room.CenterTile = new Vector2Int(
+                room.WorldOriginTile.x + (room.Size.x / 2),
+                room.WorldOriginTile.y + (room.Size.y / 2)
+            );
+            room.CenterTilePosition = GetWorldPosition(room.CenterTile);
+
+            if (room.ParentRoomIndex != -1 && GameManager.Instance.DungeonDictionary.TryGetValue(room.ParentRoomIndex, out var parentRoom))
             {
-                data.HasSpecialChestRoom = true;
-                data.SpecialChestRoomIndex = room.ParentRoom.Index;
-                data.SpecialEntryDoorPosition = GetWorldPosition(room.EntranceDoorPos);
-                data.SpecialExitDoorPosition = GetWorldPosition(room.ParentRoom.ExitDoorPos);
+                room.HasSpecialChestRoom = true;
+                room.SpecialChestRoomIndex = parentRoom.RoomIndex;
+                room.SpecialEntryDoorPosition = GetWorldPosition(room.EntranceDoorTile);
+                room.SpecialExitDoorPosition = GetWorldPosition(parentRoom.ExitDoorTile);
+
+                parentRoom.HasSpecialChestRoom = true;
+                parentRoom.SpecialChestRoomIndex = room.RoomIndex;
+                parentRoom.SpecialExitDoorPosition = GetWorldPosition(parentRoom.ExitDoorTile);
             }
 
-            GameManager.Instance.DungeonDictionary[data.RoomIndex] = data;
+            GameManager.Instance.DungeonDictionary[room.RoomIndex] = room;
         }
 
-        for (int i = 0; i < GeneratedRooms.Count; i++)
-        {
-            Room room = GeneratedRooms[i];
-            if (room.ParentRoom == null) continue;
-
-            GameManager.RoomData parentData = GameManager.Instance.DungeonDictionary[room.ParentRoom.Index];
-            parentData.HasSpecialChestRoom = true;
-            parentData.SpecialChestRoomIndex = room.Index;
-            parentData.SpecialExitDoorPosition = GetWorldPosition(room.ParentRoom.ExitDoorPos);
-            GameManager.Instance.DungeonDictionary[parentData.RoomIndex] = parentData;
-        }
-
-        GameManager.Instance.CurrentRoomIndex = GeneratedRooms.Count > 0 ? GeneratedRooms[0].Index : 0;
+        GameManager.Instance.CurrentRoomIndex = GeneratedRooms.Count > 0 ? GeneratedRooms[0].RoomIndex : 0;
         if (GeneratedRooms.Count > 0)
         {
             GameManager.NotifyNewRoomEntered(GameManager.Instance.DungeonDictionary[GameManager.Instance.CurrentRoomIndex]);
@@ -439,25 +385,16 @@ public class DungeonGenerator : MonoBehaviour
         Vector2Int position = tilePosition.Value;
         return fillFloorTilemap.GetCellCenterWorld(new Vector3Int(position.x, position.y, 0));
     }
-    #endregion
 
-    #region Rendering & Sub-Rectangle Layering Logic
     private void RenderDungeonTiles()
     {
         for (int i = 0; i < GeneratedRooms.Count; i++)
         {
-            Room room = GeneratedRooms[i];
+            GameManager.RoomData room = GeneratedRooms[i];
 
-            // 1. Draw Fill Layer FIRST (-2)
             DrawDecomposedLayer(room, fillFloorTilemap, fillFloorRuleTile, -2);
-
-            // 2. Draw Border Floor Layer (0)
             DrawDecomposedLayer(room, borderFloorTilemap, borderFloorRuleTile, 0);
-
-            // 3. Draw Wall Layer (+2)
             DrawDecomposedLayer(room, wallTilemap, wallRuleTile, 2);
-
-            // 4. Draw Roof Layer (+4)
             DrawDecomposedLayer(room, roofTilemap, roofRuleTile, 4);
         }
 
@@ -467,22 +404,22 @@ public class DungeonGenerator : MonoBehaviour
         fillFloorTilemap.RefreshAllTiles();
     }
 
-    private void DrawDecomposedLayer(Room room, Tilemap tilemap, TileBase tile, int diameterOffset)
+    private void DrawDecomposedLayer(GameManager.RoomData room, Tilemap tilemap, TileBase tile, int diameterOffset)
     {
-        List<RectBounds> subRects = GetRoomSubRectangles(room);
+        PopulateRoomSubRectangles(room, _subRectsBuffer);
 
-        for (int i = 0; i < subRects.Count; i++)
+        for (int i = 0; i < _subRectsBuffer.Count; i++)
         {
-            RectBounds expanded = subRects[i].Expand(diameterOffset);
+            RectBounds expanded = _subRectsBuffer[i].Expand(diameterOffset);
             DrawRectangle(tilemap, tile, expanded.Origin, expanded.Size);
         }
     }
 
-    private List<RectBounds> GetRoomSubRectangles(Room room)
+    private void PopulateRoomSubRectangles(GameManager.RoomData room, List<RectBounds> results)
     {
-        List<RectBounds> rects = new List<RectBounds>();
+        results.Clear();
         Vector2Int origin = room.WorldOriginTile;
-        Vector2Int size = room.LocalSize;
+        Vector2Int size = room.Size;
 
         int halfW = size.x / 2;
         int halfH = size.y / 2;
@@ -490,47 +427,45 @@ public class DungeonGenerator : MonoBehaviour
         switch (room.Shape)
         {
             case RoomShape.Rectangle:
-                rects.Add(new RectBounds(origin, size));
+                results.Add(new RectBounds(origin, size));
                 break;
 
             case RoomShape.LShape:
                 switch (room.LRot)
                 {
-                    case LRotation.TopRight: // Cut Top-Right
-                        rects.Add(new RectBounds(origin, new Vector2Int(size.x, halfH)));
-                        rects.Add(new RectBounds(origin, new Vector2Int(halfW, size.y)));
+                    case LRotation.TopRight:
+                        results.Add(new RectBounds(origin, new Vector2Int(size.x, halfH)));
+                        results.Add(new RectBounds(origin, new Vector2Int(halfW, size.y)));
                         break;
 
-                    case LRotation.TopLeft: // Cut Top-Left
-                        rects.Add(new RectBounds(origin, new Vector2Int(size.x, halfH)));
-                        rects.Add(new RectBounds(new Vector2Int(origin.x + halfW, origin.y), new Vector2Int(size.x - halfW, size.y)));
+                    case LRotation.TopLeft:
+                        results.Add(new RectBounds(origin, new Vector2Int(size.x, halfH)));
+                        results.Add(new RectBounds(new Vector2Int(origin.x + halfW, origin.y), new Vector2Int(size.x - halfW, size.y)));
                         break;
 
-                    case LRotation.BottomRight: // Cut Bottom-Right
-                        rects.Add(new RectBounds(new Vector2Int(origin.x, origin.y + halfH), new Vector2Int(size.x, size.y - halfH)));
-                        rects.Add(new RectBounds(origin, new Vector2Int(halfW, size.y)));
+                    case LRotation.BottomRight:
+                        results.Add(new RectBounds(new Vector2Int(origin.x, origin.y + halfH), new Vector2Int(size.x, size.y - halfH)));
+                        results.Add(new RectBounds(origin, new Vector2Int(halfW, size.y)));
                         break;
 
-                    case LRotation.BottomLeft: // Cut Bottom-Left
-                        rects.Add(new RectBounds(new Vector2Int(origin.x, origin.y + halfH), new Vector2Int(size.x, size.y - halfH)));
-                        rects.Add(new RectBounds(new Vector2Int(origin.x + halfW, origin.y), new Vector2Int(size.x - halfW, size.y)));
+                    case LRotation.BottomLeft:
+                        results.Add(new RectBounds(new Vector2Int(origin.x, origin.y + halfH), new Vector2Int(size.x, size.y - halfH)));
+                        results.Add(new RectBounds(new Vector2Int(origin.x + halfW, origin.y), new Vector2Int(size.x - halfW, size.y)));
                         break;
                 }
                 break;
 
-            case RoomShape.TShape: // Horizontal cross bar + Vertical stem
-                rects.Add(new RectBounds(origin, new Vector2Int(size.x, halfH)));
-                rects.Add(new RectBounds(new Vector2Int(origin.x + (size.x - 5) / 2, origin.y), new Vector2Int(5, size.y)));
+            case RoomShape.TShape:
+                results.Add(new RectBounds(origin, new Vector2Int(size.x, halfH)));
+                results.Add(new RectBounds(new Vector2Int(origin.x + (size.x - 5) / 2, origin.y), new Vector2Int(5, size.y)));
                 break;
 
-            case RoomShape.UShape: // Bottom bar + Left/Right vertical arms
-                rects.Add(new RectBounds(origin, new Vector2Int(size.x, 5)));
-                rects.Add(new RectBounds(origin, new Vector2Int(5, size.y)));
-                rects.Add(new RectBounds(new Vector2Int(origin.x + size.x - 5, origin.y), new Vector2Int(5, size.y)));
+            case RoomShape.UShape:
+                results.Add(new RectBounds(origin, new Vector2Int(size.x, 5)));
+                results.Add(new RectBounds(origin, new Vector2Int(5, size.y)));
+                results.Add(new RectBounds(new Vector2Int(origin.x + size.x - 5, origin.y), new Vector2Int(5, size.y)));
                 break;
         }
-
-        return rects;
     }
 
     private void DrawRectangle(Tilemap tilemap, TileBase tile, Vector2Int origin, Vector2Int size)
@@ -538,11 +473,14 @@ public class DungeonGenerator : MonoBehaviour
         if (size.x <= 0 || size.y <= 0) return;
 
         int totalTiles = size.x * size.y;
-        TileBase[] tileArray = new TileBase[totalTiles];
+        if (_tileBuffer.Length < totalTiles)
+        {
+            _tileBuffer = new TileBase[totalTiles];
+        }
 
-        for (int i = 0; i < totalTiles; i++) tileArray[i] = tile;
+        for (int i = 0; i < totalTiles; i++) _tileBuffer[i] = tile;
 
-        tilemap.SetTilesBlock(new BoundsInt(new Vector3Int(origin.x, origin.y, 0), new Vector3Int(size.x, size.y, 1)), tileArray);
+        tilemap.SetTilesBlock(new BoundsInt(new Vector3Int(origin.x, origin.y, 0), new Vector3Int(size.x, size.y, 1)), _tileBuffer);
     }
 
     private void ApplyDoorsToTilemap()
@@ -551,20 +489,20 @@ public class DungeonGenerator : MonoBehaviour
 
         for (int i = 0; i < GeneratedRooms.Count; i++)
         {
-            Room room = GeneratedRooms[i];
+            GameManager.RoomData room = GeneratedRooms[i];
             TileBase inTile = room.Type == RoomType.Chest && specialEntranceDoorTile != null ? specialEntranceDoorTile : entranceDoorTile;
-            TileBase outTile = room.ParentRoom != null && specialExitDoorTile != null ? specialExitDoorTile : exitDoorTile;
+            TileBase outTile = room.ParentRoomIndex != -1 && specialExitDoorTile != null ? specialExitDoorTile : exitDoorTile;
 
-            if (room.EntranceDoorPos.HasValue && inTile != null)
+            if (room.EntranceDoorTile.HasValue && inTile != null)
             {
-                Vector3Int pos = new Vector3Int(room.EntranceDoorPos.Value.x, room.EntranceDoorPos.Value.y, 0);
+                Vector3Int pos = new Vector3Int(room.EntranceDoorTile.Value.x, room.EntranceDoorTile.Value.y, 0);
                 fillFloorTilemap.SetTile(pos, fillFloorRuleTile);
                 objectTilemap.SetTile(pos, inTile);
             }
 
-            if (room.ExitDoorPos.HasValue && outTile != null)
+            if (room.ExitDoorTile.HasValue && outTile != null)
             {
-                Vector3Int pos = new Vector3Int(room.ExitDoorPos.Value.x, room.ExitDoorPos.Value.y, 0);
+                Vector3Int pos = new Vector3Int(room.ExitDoorTile.Value.x, room.ExitDoorTile.Value.y, 0);
                 fillFloorTilemap.SetTile(pos, fillFloorRuleTile);
                 objectTilemap.SetTile(pos, outTile);
             }
@@ -573,29 +511,33 @@ public class DungeonGenerator : MonoBehaviour
 
     private void DrawDebugRoomConnections()
     {
+        if (debugTilemap == null || debugPathTile == null)
+        {
+            return;
+        }
         debugTilemap.ClearAllTiles();
 
         _candidateParentRoomsBuffer.Clear();
-        List<Room> chestRooms = new List<Room>();
+        List<GameManager.RoomData> chestRooms = new List<GameManager.RoomData>();
 
         for (int i = 0; i < GeneratedRooms.Count; i++)
         {
-            Room room = GeneratedRooms[i];
+            GameManager.RoomData room = GeneratedRooms[i];
             if (room.Type != RoomType.Chest) _candidateParentRoomsBuffer.Add(room);
             else chestRooms.Add(room);
         }
 
         for (int i = 0; i < _candidateParentRoomsBuffer.Count - 1; i++)
         {
-            DrawOrthogonalPath(_candidateParentRoomsBuffer[i].WorldCenterTile, _candidateParentRoomsBuffer[i + 1].WorldCenterTile);
+            DrawOrthogonalPath(_candidateParentRoomsBuffer[i].CenterTile, _candidateParentRoomsBuffer[i + 1].CenterTile);
         }
 
         for (int i = 0; i < chestRooms.Count; i++)
         {
-            Room chest = chestRooms[i];
-            if (chest.ParentRoom != null)
+            GameManager.RoomData chest = chestRooms[i];
+            if (chest.ParentRoomIndex != -1 && GameManager.Instance.DungeonDictionary.TryGetValue(chest.ParentRoomIndex, out var parentRoom))
             {
-                DrawOrthogonalPath(chest.ParentRoom.WorldCenterTile, chest.WorldCenterTile);
+                DrawOrthogonalPath(parentRoom.CenterTile, chest.CenterTile);
             }
         }
     }
@@ -621,18 +563,16 @@ public class DungeonGenerator : MonoBehaviour
 
         debugTilemap.SetTile(new Vector3Int(end.x, end.y, 0), debugPathTile);
     }
-    #endregion
 
-    #region Helper Methods
-    private void GetValidInteriorFloorTiles(Room room, List<Vector2Int> results)
+    private void GetValidInteriorFloorTiles(GameManager.RoomData room, List<Vector2Int> results)
     {
         results.Clear();
-        int halfWidth = room.LocalSize.x / 2;
-        int halfHeight = room.LocalSize.y / 2;
+        int halfWidth = room.Size.x / 2;
+        int halfHeight = room.Size.y / 2;
 
-        for (int x = 1; x < room.LocalSize.x - 1; x++)
+        for (int x = 1; x < room.Size.x - 1; x++)
         {
-            for (int y = 1; y < room.LocalSize.y - 1; y++)
+            for (int y = 1; y < room.Size.y - 1; y++)
             {
                 if (room.Shape == RoomShape.LShape)
                 {
@@ -643,11 +583,11 @@ public class DungeonGenerator : MonoBehaviour
                 }
                 else if (room.Shape == RoomShape.TShape)
                 {
-                    if (y >= halfHeight && (x < (room.LocalSize.x - 5) / 2 || x >= (room.LocalSize.x + 5) / 2)) continue;
+                    if (y >= halfHeight && (x < (room.Size.x - 5) / 2 || x >= (room.Size.x + 5) / 2)) continue;
                 }
                 else if (room.Shape == RoomShape.UShape)
                 {
-                    if (y >= 5 && (x >= 5 && x < room.LocalSize.x - 5)) continue;
+                    if (y >= 5 && (x >= 5 && x < room.Size.x - 5)) continue;
                 }
 
                 results.Add(new Vector2Int(room.WorldOriginTile.x + x, room.WorldOriginTile.y + y));
@@ -669,10 +609,8 @@ public class DungeonGenerator : MonoBehaviour
         }
 #endif
     }
-    #endregion
 }
 
-#region Editor Extensions
 #if UNITY_EDITOR
 [CustomEditor(typeof(DungeonGenerator))]
 public class DungeonGeneratorEditor : Editor
@@ -696,4 +634,3 @@ public class DungeonGeneratorEditor : Editor
     }
 }
 #endif
-#endregion
