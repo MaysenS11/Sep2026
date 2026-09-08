@@ -1,6 +1,11 @@
 using UnityEngine;
 using Unity.Cinemachine;
 
+#if UNITY_EDITOR
+using UnityEditor;
+#endif
+
+[ExecuteAlways]
 public class CameraBounds : MonoBehaviour
 {
     [Header("Components")]
@@ -23,32 +28,102 @@ public class CameraBounds : MonoBehaviour
     {
         EventBus<RoomEnteredEvent>.Subscribe(OnRoomEntered);
         EventBus<DoorTriggeredEvent>.Subscribe(OnDoorTriggered);
+        EventBus<GenerateDungeonEvent>.Subscribe(OnGenerateDungeon);
     }
 
     private void OnDisable()
     {
         EventBus<RoomEnteredEvent>.Unsubscribe(OnRoomEntered);
         EventBus<DoorTriggeredEvent>.Unsubscribe(OnDoorTriggered);
+        EventBus<GenerateDungeonEvent>.Unsubscribe(OnGenerateDungeon);
+    }
+
+    private bool EnsureInitialized()
+    {
+        if (boundsCollider == null)
+        {
+            boundsCollider = GetComponent<BoxCollider2D>();
+        }
+
+        if (mainCamera == null)
+        {
+            mainCamera = Camera.main;
+            if (mainCamera == null)
+            {
+                mainCamera = Object.FindAnyObjectByType<Camera>();
+            }
+        }
+
+        if (boundsCollider == null || mainCamera == null)
+        {
+            return false;
+        }
+
+        camVertSize = mainCamera.orthographicSize * 2f;
+        camHorizSize = camVertSize * mainCamera.aspect;
+        return true;
     }
 
     public void Start()
     {
-        boundsCollider = GetComponent<BoxCollider2D>();
-        mainCamera = Camera.main;
-
-        if (boundsCollider == null || mainCamera == null)
+        if (!EnsureInitialized())
         {
             Debug.LogError("Missing required components on CameraBounds script.");
             return;
         }
 
-        camVertSize = mainCamera.orthographicSize * 2f;
-        camHorizSize = camVertSize * mainCamera.aspect;
-
         if (GameManager.Instance != null && GameManager.Instance.DungeonDictionary.TryGetValue(GameManager.Instance.CurrentRoomIndex, out GameManager.RoomData room))
         {
             ApplyRoomBounds(room);
         }
+    }
+
+    private void OnGenerateDungeon(GenerateDungeonEvent evt)
+    {
+        AdjustToStartRoom();
+    }
+
+    public void AdjustToStartRoom(GameManager.RoomData startRoom = null)
+    {
+        if (!EnsureInitialized()) return;
+
+        if (startRoom == null)
+        {
+            if (GameManager.Instance != null && GameManager.Instance.DungeonDictionary != null)
+            {
+                if (!GameManager.Instance.DungeonDictionary.TryGetValue(0, out startRoom))
+                {
+                    if (GameManager.Instance.DungeonDictionary.Count > 0)
+                    {
+                        var enumerator = GameManager.Instance.DungeonDictionary.Values.GetEnumerator();
+                        if (enumerator.MoveNext())
+                        {
+                            startRoom = enumerator.Current;
+                        }
+                    }
+                }
+            }
+        }
+
+        if (startRoom == null) return;
+
+        SetRoomBounds(startRoom.CenterPosition, startRoom.Size.x, startRoom.Size.y, startRoom.CenterPosition);
+
+#if UNITY_EDITOR
+        if (!Application.isPlaying)
+        {
+            EditorUtility.SetDirty(gameObject);
+            CinemachineCamera vcam = virtualCamera != null ? virtualCamera : (confiner != null ? confiner.GetComponent<CinemachineCamera>() : null);
+            if (vcam != null)
+            {
+                EditorUtility.SetDirty(vcam.gameObject);
+            }
+            if (confiner != null)
+            {
+                EditorUtility.SetDirty(confiner.gameObject);
+            }
+        }
+#endif
     }
 
     private void OnDoorTriggered(DoorTriggeredEvent evt)

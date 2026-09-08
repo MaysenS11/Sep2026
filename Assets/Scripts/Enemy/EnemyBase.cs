@@ -158,4 +158,27 @@ public abstract class EnemyBase : MonoBehaviour
             target.TakeDamage(stats.AttackDamage, gameObject);
         }
     }
+
+    /// <summary>
+    /// Executes the shared attack-and-push mechanic: the enemy moves onto the player's tile,
+    /// triggering PlayerPushedEvent which pushes the player in the movement direction and deals damage.
+    /// </summary>
+    protected IEnumerator AttackAndPushPlayer(Transform playerTransform, Vector3 playerTilePos, Vector2 pushDirection, float moveSpeed)
+    {
+        int damage = stats != null ? stats.AttackDamage : 2;
+        Vector3 playerPushedPos = playerTilePos + new Vector3(pushDirection.x, pushDirection.y, 0) * tileSize;
+
+        // Fire PlayerPushedEvent so player smoothly slides in the push direction and takes damage
+        EventBus<PlayerPushedEvent>.Raise(new PlayerPushedEvent(
+            playerTransform.gameObject,
+            playerPushedPos,
+            pushDirection,
+            moveSpeed * 1.5f,
+            damage,
+            gameObject
+        ));
+
+        // Enemy moves diagonally/orthogonally onto the player's tile
+        yield return StartCoroutine(StepToTile(playerTilePos, moveSpeed));
+    }
 }

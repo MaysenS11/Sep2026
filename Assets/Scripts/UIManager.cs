@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.UI;
 using TMPro;
@@ -11,10 +12,82 @@ public class UIManager : MonoBehaviour
     [Header("Player Equipment")]
     [SerializeField] private Image maskDisplayImage;
 
-    [Header("Health Display")]
-    [SerializeField] private Image[] heartImages; // Drag your 3 Heart Image components here
+    [Header("Health Display (Heart Fills)")]
+    [Tooltip("Assign the HeartFillContainer transforms in left-to-right order, or leave empty to auto-find from HUD/HealthContainer")]
+    [SerializeField] private Transform[] heartFillContainers;
+
+    [Header("Legacy Health Display (Optional)")]
+    [SerializeField] private Image[] heartImages; // Drag your Heart Image components here
     [SerializeField] private Sprite fullHeartSprite;
     [SerializeField] private Sprite emptyHeartSprite;
+
+    // Flattened list of all individual fill pieces ordered from rightmost to leftmost
+    private readonly List<GameObject> rightToLeftFills = new List<GameObject>();
+    private bool isInitialized = false;
+
+    private void Awake()
+    {
+        InitializeHeartFills();
+    }
+
+    private void InitializeHeartFills()
+    {
+        if (isInitialized) return;
+
+        // Auto-find containers under HealthContainer if not assigned in Inspector
+        if (heartFillContainers == null || heartFillContainers.Length == 0)
+        {
+            Transform healthContainer = transform.Find("IngamePanel/HealthContainer");
+            if (healthContainer == null)
+            {
+                healthContainer = transform.Find("HUD/HealthContainer");
+            }
+            if (healthContainer == null)
+            {
+                var foundHc = GameObject.Find("HealthContainer");
+                if (foundHc != null) healthContainer = foundHc.transform;
+            }
+
+            if (healthContainer != null)
+            {
+                var containerList = new List<Transform>();
+                for (int i = 0; i < healthContainer.childCount; i++)
+                {
+                    Transform child = healthContainer.GetChild(i);
+                    Transform fillContainer = child.Find("HeartFillContainer");
+                    if (fillContainer != null)
+                    {
+                        containerList.Add(fillContainer);
+                    }
+                }
+                heartFillContainers = containerList.ToArray();
+            }
+        }
+
+        rightToLeftFills.Clear();
+
+        if (heartFillContainers != null && heartFillContainers.Length > 0)
+        {
+            // Traverse containers from rightmost container to leftmost container
+            for (int c = heartFillContainers.Length - 1; c >= 0; c--)
+            {
+                Transform container = heartFillContainers[c];
+                if (container == null) continue;
+
+                // Within each container, disable fills in reverse order (fill 3, fill 2, fill 1, fill 0)
+                for (int f = container.childCount - 1; f >= 0; f--)
+                {
+                    Transform fillChild = container.GetChild(f);
+                    if (fillChild != null)
+                    {
+                        rightToLeftFills.Add(fillChild.gameObject);
+                    }
+                }
+            }
+        }
+
+        isInitialized = true;
+    }
 
     private void OnEnable()
     {
@@ -28,7 +101,7 @@ public class UIManager : MonoBehaviour
 
     private void OnPlayerHealthChanged(PlayerHealthChangedEvent evt)
     {
-        UpdateHealth(evt.CurrentHealth);
+        UpdateHealth(evt.CurrentHealth, evt.MaxHealth);
     }
 
     private void Update()
@@ -36,25 +109,54 @@ public class UIManager : MonoBehaviour
         // 1. Update Timer (Format 00:00:00:00 -> Hrs:Mins:Secs:MS)
         elapsedTime += Time.deltaTime;
         System.TimeSpan t = System.TimeSpan.FromSeconds(elapsedTime);
-        timerText.text = string.Format("{0:D2}:{1:D2}:{2:D2}:{3:D2}", 
-            t.Hours, t.Minutes, t.Seconds, t.Milliseconds / 10);
+        if (timerText != null)
+        {
+            timerText.text = string.Format("{0:D2}:{1:D2}:{2:D2}:{3:D2}", 
+                t.Hours, t.Minutes, t.Seconds, t.Milliseconds / 10);
+        }
+    }
+
+    public void UpdateHealth(int currentHealth, int maxHealth)
+    {
+        if (!isInitialized)
+        {
+            InitializeHeartFills();
+        }
+
+        // Heart fill display: disable a fill from the rightmost container for each damage point taken
+        if (rightToLeftFills.Count > 0)
+        {
+            int damageTaken = Mathf.Max(0, maxHealth - currentHealth);
+
+            for (int i = 0; i < rightToLeftFills.Count; i++)
+            {
+                if (rightToLeftFills[i] == null) continue;
+                // If index < damageTaken, this fill was consumed (disabled); otherwise enabled
+                bool isActive = i >= damageTaken;
+                rightToLeftFills[i].SetActive(isActive);
+            }
+        }
+
+        // Backward compatibility for full-heart image array if assigned
+        if (heartImages != null && heartImages.Length > 0)
+        {
+            for (int i = 0; i < heartImages.Length; i++)
+            {
+                if (heartImages[i] == null) continue;
+
+                Sprite targetSprite = (i < currentHealth) ? fullHeartSprite : emptyHeartSprite;
+                if (targetSprite != null)
+                {
+                    heartImages[i].sprite = targetSprite;
+                }
+                heartImages[i].enabled = (i < currentHealth);
+            }
+        }
     }
 
     public void UpdateHealth(int currentHealth)
     {
-        if (heartImages == null) return;
-
-        for (int i = 0; i < heartImages.Length; i++)
-        {
-            if (heartImages[i] == null) continue;
-
-            Sprite targetSprite = (i < currentHealth) ? fullHeartSprite : emptyHeartSprite;
-            if (targetSprite != null)
-            {
-                heartImages[i].sprite = targetSprite;
-            }
-            heartImages[i].enabled = (i < currentHealth);
-        }
+        UpdateHealth(currentHealth, 16);
     }
 
     public void SetMaskSprite(Sprite newMask)

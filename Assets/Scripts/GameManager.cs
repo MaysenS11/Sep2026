@@ -9,7 +9,19 @@ public enum LRotation { TopRight, TopLeft, BottomRight, BottomLeft }
 
 public class GameManager : MonoBehaviour
 {
-    public static GameManager Instance { get; private set; }
+    private static GameManager _instance;
+    public static GameManager Instance
+    {
+        get
+        {
+            if (_instance == null)
+            {
+                _instance = Object.FindAnyObjectByType<GameManager>();
+            }
+            return _instance;
+        }
+        private set => _instance = value;
+    }
 
     public class RoomData
     {

@@ -21,6 +21,10 @@ public readonly struct GameStateChangedEvent : IEvent
     }
 }
 
+public readonly struct GenerateDungeonEvent : IEvent
+{
+}
+
 public readonly struct DoorTriggeredEvent : IEvent
 {
     public readonly DoorType DoorType;
@@ -86,5 +90,25 @@ public readonly struct PlayerHealthChangedEvent : IEvent
     {
         CurrentHealth = currentHealth;
         MaxHealth = maxHealth;
+    }
+}
+
+public readonly struct PlayerPushedEvent : IEvent
+{
+    public readonly GameObject Target;
+    public readonly Vector3 TargetPosition;
+    public readonly Vector2 PushDirection;
+    public readonly float PushSpeed;
+    public readonly int Damage;
+    public readonly GameObject Attacker;
+
+    public PlayerPushedEvent(GameObject target, Vector3 targetPosition, Vector2 pushDirection, float pushSpeed, int damage, GameObject attacker)
+    {
+        Target = target;
+        TargetPosition = targetPosition;
+        PushDirection = pushDirection;
+        PushSpeed = pushSpeed;
+        Damage = damage;
+        Attacker = attacker;
     }
 }

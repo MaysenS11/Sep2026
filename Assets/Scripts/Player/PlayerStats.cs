@@ -80,4 +80,10 @@ public class PlayerStats : MonoBehaviour, IDamageable
         EventBus<EntityDiedEvent>.Raise(new EntityDiedEvent(gameObject));
         Debug.Log("Player has died.");
     }
+
+    public void ResetHealth()
+    {
+        currentHealth = maxHealth;
+        EventBus<PlayerHealthChangedEvent>.Raise(new PlayerHealthChangedEvent(currentHealth, maxHealth));
+    }
 }

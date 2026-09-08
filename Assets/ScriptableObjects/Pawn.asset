@@ -19,3 +19,7 @@ MonoBehaviour:
   stepsPerTurn: 1
   stepSpeed: 5
   detectionRange: 6
+  movementPattern: 0
+  attackPattern: 0
+  maxLineSteps: 1
+  movesInterval: 1

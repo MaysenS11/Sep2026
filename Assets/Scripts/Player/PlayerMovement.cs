@@ -23,6 +23,8 @@ public class PlayerMovement : MonoBehaviour
     private readonly int MoveY = Animator.StringToHash("MoveY");
     private readonly int attackTrigger = Animator.StringToHash("IsAttacking");
     private readonly int interactTrigger = Animator.StringToHash("Interact");
+    private readonly int takeDamageTrigger = Animator.StringToHash("TakeDamage");
+    private readonly int dieTrigger = Animator.StringToHash("Die");
 
     private InputAction moveAction;
     private InputAction attackAction;
@@ -62,6 +64,9 @@ public class PlayerMovement : MonoBehaviour
         EventBus<DoorTriggeredEvent>.Subscribe(OnDoorTriggered);
         EventBus<RoomEnteredEvent>.Subscribe(OnRoomEntered);
         EventBus<EnemyTurnCompletedEvent>.Subscribe(OnEnemyTurnCompleted);
+        EventBus<PlayerPushedEvent>.Subscribe(OnPlayerPushed);
+        EventBus<EntityDamagedEvent>.Subscribe(OnEntityDamaged);
+        EventBus<EntityDiedEvent>.Subscribe(OnEntityDied);
         attackAction.performed += OnAttackPerformed;
         interactAction.performed += OnInteractPerformed;
     }
@@ -73,8 +78,81 @@ public class PlayerMovement : MonoBehaviour
         EventBus<DoorTriggeredEvent>.Unsubscribe(OnDoorTriggered);
         EventBus<RoomEnteredEvent>.Unsubscribe(OnRoomEntered);
         EventBus<EnemyTurnCompletedEvent>.Unsubscribe(OnEnemyTurnCompleted);
+        EventBus<PlayerPushedEvent>.Unsubscribe(OnPlayerPushed);
+        EventBus<EntityDamagedEvent>.Unsubscribe(OnEntityDamaged);
+        EventBus<EntityDiedEvent>.Unsubscribe(OnEntityDied);
 
         inputActions.Disable();
+    }
+
+    private void OnEntityDamaged(EntityDamagedEvent evt)
+    {
+        if (evt.Target != gameObject) return;
+        if (animator != null)
+        {
+            animator.SetTrigger(takeDamageTrigger);
+        }
+    }
+
+    private void OnEntityDied(EntityDiedEvent evt)
+    {
+        if (evt.Entity != gameObject) return;
+
+        canTakeTurn = false;
+        if (animator != null)
+        {
+            animator.ResetTrigger(takeDamageTrigger);
+            animator.SetTrigger(dieTrigger);
+        }
+
+        StartCoroutine(HandlePlayerDeathSequence());
+    }
+
+    private IEnumerator HandlePlayerDeathSequence()
+    {
+        // Wait for the die animation (approx 0.92s) to finish playing before reloading
+        yield return new WaitForSeconds(0.95f);
+
+        // Player died: trigger dungeon regeneration
+        EventBus<GenerateDungeonEvent>.Raise(new GenerateDungeonEvent());
+    }
+
+    private void OnPlayerPushed(PlayerPushedEvent evt)
+    {
+        if (evt.Target != gameObject) return;
+        StartCoroutine(ExecutePushCoroutine(evt));
+    }
+
+    private IEnumerator ExecutePushCoroutine(PlayerPushedEvent evt)
+    {
+        // Check if pushed destination is blocked
+        Vector3 destination = evt.TargetPosition;
+        if (IsTileBlocked(destination))
+        {
+            // Destination is blocked by obstacle/wall, keep current position but still take damage
+            destination = transform.position;
+        }
+
+        if (destination != transform.position)
+        {
+            isMoving = true;
+            // Note: Keep player facing the way it was when attack began (do NOT change lastDirection or MoveX/MoveY)
+            float pushSpeed = evt.PushSpeed > 0f ? evt.PushSpeed : moveSpeed * 1.5f;
+            while (Vector3.Distance(transform.position, destination) > 0.001f)
+            {
+                transform.position = Vector3.MoveTowards(transform.position, destination, pushSpeed * Time.deltaTime);
+                yield return null;
+            }
+            transform.position = destination;
+            isMoving = false;
+            TryTriggerDoorAtCurrentPosition();
+        }
+
+        // Apply damage after push or upon impact
+        if (playerStats != null && evt.Damage > 0)
+        {
+            playerStats.TakeDamage(evt.Damage, evt.Attacker);
+        }
     }
 
     private void Update()
@@ -326,6 +404,32 @@ public class PlayerMovement : MonoBehaviour
         Vector3 target = position;
         target.z = transform.position.z;
         transform.position = target;
+    }
+
+    public void TeleportTo(Vector3 position)
+    {
+        StopAllCoroutines();
+        isMoving = false;
+        canTakeTurn = true;
+        nextMoveTime = 0f;
+        doorTriggerBlockedUntil = 0f;
+        if (animator != null)
+        {
+            animator.SetBool(Moving, false);
+        }
+        MoveToPosition(position);
+    }
+
+    public void ResetTurnState()
+    {
+        isMoving = false;
+        canTakeTurn = true;
+        nextMoveTime = 0f;
+        doorTriggerBlockedUntil = 0f;
+        if (animator != null)
+        {
+            animator.SetBool(Moving, false);
+        }
     }
 
     private void OnDrawGizmos()

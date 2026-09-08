@@ -10,6 +10,7 @@ public class ScreenFadeTransition : MonoBehaviour
     [SerializeField] private CanvasGroup fadeCanvasGroup;
     [SerializeField] private float defaultFadeDuration = 0.25f;
     [SerializeField] private float blackHoldDuration = 0.05f;
+    [SerializeField] private bool fadeInOnStart = true;
 
     public bool IsTransitioning { get; private set; }
 
@@ -23,6 +24,33 @@ public class ScreenFadeTransition : MonoBehaviour
         Instance = this;
 
         EnsureFadeOverlay();
+
+        if (fadeInOnStart && fadeCanvasGroup != null)
+        {
+            fadeCanvasGroup.alpha = 1f;
+            fadeCanvasGroup.blocksRaycasts = true;
+        }
+    }
+
+    private void Start()
+    {
+        if (fadeInOnStart)
+        {
+            StartCoroutine(FadeInOnStartRoutine());
+        }
+    }
+
+    private IEnumerator FadeInOnStartRoutine()
+    {
+        EnsureFadeOverlay();
+        if (fadeCanvasGroup != null)
+        {
+            fadeCanvasGroup.alpha = 1f;
+            fadeCanvasGroup.blocksRaycasts = true;
+        }
+        IsTransitioning = true;
+        yield return StartCoroutine(FadeRoutine(0f, defaultFadeDuration));
+        IsTransitioning = false;
     }
 
     private void EnsureFadeOverlay()
