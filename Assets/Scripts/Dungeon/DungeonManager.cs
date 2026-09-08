@@ -9,6 +9,7 @@ using UnityEditor;
 
 namespace Dungeon
 {
+    [ExecuteAlways]
     public class DungeonManager : MonoBehaviour
     {
         public static DungeonManager Instance { get; private set; }
@@ -59,9 +60,6 @@ namespace Dungeon
         [SerializeField] private EnemySpawner enemySpawner = new EnemySpawner();
         [SerializeField] private PropSpawner propSpawner = new PropSpawner();
 
-        [Header("Enemy Spawning (Legacy Reference)")]
-        [SerializeField] private GameObject pawnPrefab;
-
         public List<GameManager.RoomData> GeneratedRooms { get; private set; } = new List<GameManager.RoomData>();
 
         private readonly DungeonLayoutPlanner _layoutPlanner = new DungeonLayoutPlanner();
@@ -82,18 +80,43 @@ namespace Dungeon
             RegisterDefaultSpawners();
         }
 
+        private void OnEnable()
+        {
+            EventBus<GenerateDungeonEvent>.Subscribe(OnGenerateDungeonEvent);
+        }
+
+        private void OnDisable()
+        {
+            EventBus<GenerateDungeonEvent>.Unsubscribe(OnGenerateDungeonEvent);
+        }
+
         private void Start()
         {
-            GenerateAndBuildDungeon();
+            // Do not generate a new dungeon on Start.
+            // If the dungeon was generated in editor, ensure data is published to GameManager.
+            if (GeneratedRooms != null && GeneratedRooms.Count > 0)
+            {
+                PublishDungeonData();
+            }
+        }
+
+        private void OnGenerateDungeonEvent(GenerateDungeonEvent evt)
+        {
+            if (ScreenFadeTransition.Instance != null && Application.isPlaying)
+            {
+                StartCoroutine(ScreenFadeTransition.Instance.PlayTransition(() =>
+                {
+                    GenerateAndBuildDungeon();
+                }));
+            }
+            else
+            {
+                GenerateAndBuildDungeon();
+            }
         }
 
         private void SyncLegacyFields()
         {
-            if (pawnPrefab != null && enemySpawner.PawnPrefab == null)
-            {
-                enemySpawner.PawnPrefab = pawnPrefab;
-            }
-
             if (entranceDoorTile != null && doorSpawner.EntranceDoorTile == null) doorSpawner.EntranceDoorTile = entranceDoorTile;
             if (exitDoorTile != null && doorSpawner.ExitDoorTile == null) doorSpawner.ExitDoorTile = exitDoorTile;
             if (specialEntranceDoorTile != null && doorSpawner.SpecialEntranceDoorTile == null) doorSpawner.SpecialEntranceDoorTile = specialEntranceDoorTile;
@@ -173,6 +196,16 @@ namespace Dungeon
             // Step 4: Publish Room Data to GameManager
             PublishDungeonData();
 
+            // Step 5: Position player in starting room and reset stats if playing
+            PositionPlayerAtStartRoom();
+
+            // Step 6: Adjust camera bounds to starting room
+            CameraBounds cameraBounds = Object.FindAnyObjectByType<CameraBounds>();
+            if (cameraBounds != null)
+            {
+                cameraBounds.AdjustToStartRoom();
+            }
+
             // Debug visualization
             if (debugTilemap != null && debugPathTile != null)
             {
@@ -180,6 +213,34 @@ namespace Dungeon
             }
 
             MarkTilemapsDirtyInEditor();
+        }
+
+        private void PositionPlayerAtStartRoom()
+        {
+            if (GeneratedRooms == null || GeneratedRooms.Count == 0) return;
+
+            Vector3 startPos = GeneratedRooms[0].CenterTilePosition;
+            PlayerMovement playerMovement = Object.FindAnyObjectByType<PlayerMovement>();
+            if (playerMovement != null)
+            {
+                if (Application.isPlaying)
+                {
+                    playerMovement.TeleportTo(startPos);
+                    if (playerMovement.TryGetComponent<PlayerStats>(out var stats))
+                    {
+                        stats.ResetHealth();
+                    }
+                }
+                else
+                {
+                    Vector3 target = startPos;
+                    target.z = playerMovement.transform.position.z;
+                    playerMovement.transform.position = target;
+#if UNITY_EDITOR
+                    EditorUtility.SetDirty(playerMovement.gameObject);
+#endif
+                }
+            }
         }
 
         private void SpawnRoomContents()

@@ -55,6 +55,14 @@ namespace Dungeon.Spawning
             GameObject pawn = Object.Instantiate(pawnPrefab, worldPos, Quaternion.identity, parentContainer);
             _spawnedEnemies.Add(pawn);
 
+#if UNITY_EDITOR
+            if (!Application.isPlaying)
+            {
+                UnityEditor.Undo.RegisterCreatedObjectUndo(pawn, "Spawn Enemy Pawn");
+                UnityEditor.EditorUtility.SetDirty(pawn);
+            }
+#endif
+
             if (pawn.TryGetComponent<EnemyBase>(out var enemy) && GameManager.Instance != null)
             {
                 GameManager.Instance.RegisterEnemy(enemy);
