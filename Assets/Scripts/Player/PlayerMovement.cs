@@ -1,4 +1,5 @@
 using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.InputSystem;
 
@@ -28,13 +29,21 @@ public class PlayerMovement : MonoBehaviour
     private InputAction interactAction;
 
     private bool isMoving = false;
+    private bool canTakeTurn = true;
+    private float nextMoveTime = 0f;
     private bool hasEnteredInitialRoom;
-    private float lastMoveTime = -999f; 
     private float doorTriggerBlockedUntil;
     private Vector2 lastDirection = Vector2.down;
+    private PlayerStats playerStats;
 
     private void Awake()
     {
+        playerStats = GetComponent<PlayerStats>();
+        if (playerStats == null)
+        {
+            playerStats = gameObject.AddComponent<PlayerStats>();
+        }
+
         if (animator == null) 
         {
             Debug.LogError("Animator component is missing!");
@@ -52,6 +61,7 @@ public class PlayerMovement : MonoBehaviour
         inputActions.Enable();
         EventBus<DoorTriggeredEvent>.Subscribe(OnDoorTriggered);
         EventBus<RoomEnteredEvent>.Subscribe(OnRoomEntered);
+        EventBus<EnemyTurnCompletedEvent>.Subscribe(OnEnemyTurnCompleted);
         attackAction.performed += OnAttackPerformed;
         interactAction.performed += OnInteractPerformed;
     }
@@ -62,6 +72,7 @@ public class PlayerMovement : MonoBehaviour
         interactAction.performed -= OnInteractPerformed;
         EventBus<DoorTriggeredEvent>.Unsubscribe(OnDoorTriggered);
         EventBus<RoomEnteredEvent>.Unsubscribe(OnRoomEntered);
+        EventBus<EnemyTurnCompletedEvent>.Unsubscribe(OnEnemyTurnCompleted);
 
         inputActions.Disable();
     }
@@ -73,6 +84,8 @@ public class PlayerMovement : MonoBehaviour
 
     private void Start()
     {
+        if (playerStats == null) playerStats = GetComponent<PlayerStats>();
+
         if (GameManager.Instance == null) return;
         if (GameManager.Instance.DungeonDictionary.TryGetValue(GameManager.Instance.CurrentRoomIndex, out GameManager.RoomData room))
         {
@@ -80,9 +93,14 @@ public class PlayerMovement : MonoBehaviour
         }
     }
 
+    private void OnEnemyTurnCompleted(EnemyTurnCompletedEvent evt)
+    {
+        canTakeTurn = true;
+    }
+
     private void HandleMovement()
     {
-        if (isMoving || (ScreenFadeTransition.Instance != null && ScreenFadeTransition.Instance.IsTransitioning) || Time.time < lastMoveTime + moveCooldown) return;
+        if (!canTakeTurn || isMoving || Time.time < nextMoveTime || (ScreenFadeTransition.Instance != null && ScreenFadeTransition.Instance.IsTransitioning)) return;
 
         Vector2 inputDir = moveAction.ReadValue<Vector2>();
 
@@ -106,7 +124,8 @@ public class PlayerMovement : MonoBehaviour
 
         if (!IsTileBlocked(targetPosition))
         {
-            lastMoveTime = Time.time; 
+            canTakeTurn = false;
+            nextMoveTime = Time.time + moveCooldown;
             StartCoroutine(MoveToTile(targetPosition));
         }
     }
@@ -128,18 +147,80 @@ public class PlayerMovement : MonoBehaviour
         animator.SetBool(Moving, false);
 
         TryTriggerDoorAtCurrentPosition();
+
+        EventBus<PlayerActionCompletedEvent>.Raise(new PlayerActionCompletedEvent());
     }
 
     private bool IsTileBlocked(Vector3 targetPos)
     {
-        return Physics2D.OverlapBox(targetPos, new Vector2(tileSize * 0.8f, tileSize * 0.8f), 0f, obstacleLayer) != null;
+        Collider2D hit = Physics2D.OverlapBox(targetPos, new Vector2(tileSize * 0.8f, tileSize * 0.8f), 0f, obstacleLayer);
+        return hit != null && hit.gameObject != gameObject;
     }
 
     private void OnAttackPerformed(InputAction.CallbackContext context)
     {
-        if (isMoving || (ScreenFadeTransition.Instance != null && ScreenFadeTransition.Instance.IsTransitioning)) return;
+        if (!canTakeTurn || isMoving || (ScreenFadeTransition.Instance != null && ScreenFadeTransition.Instance.IsTransitioning)) return;
 
+        canTakeTurn = false;
         animator.SetTrigger(attackTrigger);
+
+        if (playerStats == null) playerStats = GetComponent<PlayerStats>();
+        int damage = playerStats != null ? playerStats.TotalAttackDamage : 3;
+
+        AttackPattern pattern = playerStats != null ? playerStats.CurrentAttackPattern : AttackPattern.SurroundingOrthogonal;
+        ExecuteAttack(pattern, damage);
+
+        StartCoroutine(CompleteAttackTurn());
+    }
+
+    private void ExecuteAttack(AttackPattern pattern, int damage)
+    {
+        HashSet<IDamageable> damagedEntities = new HashSet<IDamageable>();
+
+        if (pattern == AttackPattern.SingleFacing)
+        {
+            Vector3 targetPos = transform.position + new Vector3(lastDirection.x, lastDirection.y, 0) * tileSize;
+            DamageAtTile(targetPos, damage, damagedEntities);
+        }
+        else
+        {
+            // Surrounding orthogonal tiles (Up, Down, Left, Right)
+            Vector3[] checkPositions = new Vector3[]
+            {
+                transform.position + Vector3.up * tileSize,
+                transform.position + Vector3.down * tileSize,
+                transform.position + Vector3.left * tileSize,
+                transform.position + Vector3.right * tileSize
+            };
+
+            foreach (var pos in checkPositions)
+            {
+                DamageAtTile(pos, damage, damagedEntities);
+            }
+        }
+    }
+
+    private void DamageAtTile(Vector3 targetPos, int damage, HashSet<IDamageable> damagedEntities)
+    {
+        Collider2D[] hits = Physics2D.OverlapBoxAll(targetPos, new Vector2(tileSize * 0.85f, tileSize * 0.85f), 0f);
+        foreach (var hit in hits)
+        {
+            if (hit == null || hit.gameObject == gameObject) continue;
+
+            if (hit.TryGetComponent<IDamageable>(out var damageable) || hit.GetComponentInParent<IDamageable>() is { } parentDamageable && (damageable = parentDamageable) != null)
+            {
+                if (damagedEntities.Add(damageable))
+                {
+                    damageable.TakeDamage(damage, gameObject);
+                }
+            }
+        }
+    }
+
+    private IEnumerator CompleteAttackTurn()
+    {
+        yield return new WaitForSeconds(0.25f);
+        EventBus<PlayerActionCompletedEvent>.Raise(new PlayerActionCompletedEvent());
     }
 
     private void OnInteractPerformed(InputAction.CallbackContext context)

@@ -1,4 +1,4 @@
-﻿using UnityEngine;
+using UnityEngine;
 
 public enum GameState
 {
@@ -40,5 +40,51 @@ public readonly struct RoomEnteredEvent : IEvent
     public RoomEnteredEvent(GameManager.RoomData room)
     {
         Room = room;
+    }
+}
+
+public readonly struct PlayerActionCompletedEvent : IEvent
+{
+}
+
+public readonly struct EnemyTurnCompletedEvent : IEvent
+{
+}
+
+public readonly struct EntityDamagedEvent : IEvent
+{
+    public readonly GameObject Target;
+    public readonly GameObject Source;
+    public readonly int Damage;
+    public readonly int RemainingHealth;
+
+    public EntityDamagedEvent(GameObject target, GameObject source, int damage, int remainingHealth)
+    {
+        Target = target;
+        Source = source;
+        Damage = damage;
+        RemainingHealth = remainingHealth;
+    }
+}
+
+public readonly struct EntityDiedEvent : IEvent
+{
+    public readonly GameObject Entity;
+
+    public EntityDiedEvent(GameObject entity)
+    {
+        Entity = entity;
+    }
+}
+
+public readonly struct PlayerHealthChangedEvent : IEvent
+{
+    public readonly int CurrentHealth;
+    public readonly int MaxHealth;
+
+    public PlayerHealthChangedEvent(int currentHealth, int maxHealth)
+    {
+        CurrentHealth = currentHealth;
+        MaxHealth = maxHealth;
     }
 }

@@ -16,6 +16,21 @@ public class UIManager : MonoBehaviour
     [SerializeField] private Sprite fullHeartSprite;
     [SerializeField] private Sprite emptyHeartSprite;
 
+    private void OnEnable()
+    {
+        EventBus<PlayerHealthChangedEvent>.Subscribe(OnPlayerHealthChanged);
+    }
+
+    private void OnDisable()
+    {
+        EventBus<PlayerHealthChangedEvent>.Unsubscribe(OnPlayerHealthChanged);
+    }
+
+    private void OnPlayerHealthChanged(PlayerHealthChangedEvent evt)
+    {
+        UpdateHealth(evt.CurrentHealth);
+    }
+
     private void Update()
     {
         // 1. Update Timer (Format 00:00:00:00 -> Hrs:Mins:Secs:MS)
@@ -27,9 +42,18 @@ public class UIManager : MonoBehaviour
 
     public void UpdateHealth(int currentHealth)
     {
+        if (heartImages == null) return;
+
         for (int i = 0; i < heartImages.Length; i++)
         {
-            heartImages[i].sprite = (i < currentHealth) ? fullHeartSprite : emptyHeartSprite;
+            if (heartImages[i] == null) continue;
+
+            Sprite targetSprite = (i < currentHealth) ? fullHeartSprite : emptyHeartSprite;
+            if (targetSprite != null)
+            {
+                heartImages[i].sprite = targetSprite;
+            }
+            heartImages[i].enabled = (i < currentHealth);
         }
     }
 

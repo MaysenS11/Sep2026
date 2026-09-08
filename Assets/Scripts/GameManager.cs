@@ -49,10 +49,122 @@ public class GameManager : MonoBehaviour
 
     public Tilemap DoorTilemap => doorTilemap;
 
+    private readonly List<EnemyBase> activeEnemies = new List<EnemyBase>();
+    private Transform playerTransform;
+    private Coroutine enemyTurnCoroutine;
+
     private void Awake()
     {
         if (Instance != null && Instance != this) { Destroy(gameObject); return; }
         Instance = this;
+    }
+
+    private void Start()
+    {
+        // Find any existing enemies in scene that loaded before GameManager
+        EnemyBase[] existing = Object.FindObjectsByType<EnemyBase>();
+        for (int i = 0; i < existing.Length; i++)
+        {
+            RegisterEnemy(existing[i]);
+        }
+    }
+
+    private void OnEnable()
+    {
+        EventBus<PlayerActionCompletedEvent>.Subscribe(OnPlayerActionCompleted);
+        EventBus<EntityDiedEvent>.Subscribe(OnEntityDied);
+    }
+
+    private void OnDisable()
+    {
+        EventBus<PlayerActionCompletedEvent>.Unsubscribe(OnPlayerActionCompleted);
+        EventBus<EntityDiedEvent>.Unsubscribe(OnEntityDied);
+    }
+
+    public void RegisterEnemy(EnemyBase enemy)
+    {
+        if (enemy != null && !activeEnemies.Contains(enemy))
+        {
+            activeEnemies.Add(enemy);
+        }
+    }
+
+    public void UnregisterEnemy(EnemyBase enemy)
+    {
+        if (enemy != null)
+        {
+            activeEnemies.Remove(enemy);
+        }
+    }
+
+    public void ClearEnemies()
+    {
+        activeEnemies.Clear();
+        EnemyBase.ClearReservations();
+    }
+
+    private void OnEntityDied(EntityDiedEvent evt)
+    {
+        if (evt.Entity != null && evt.Entity.TryGetComponent<EnemyBase>(out var enemy))
+        {
+            UnregisterEnemy(enemy);
+        }
+    }
+
+    private void OnPlayerActionCompleted(PlayerActionCompletedEvent evt)
+    {
+        if (enemyTurnCoroutine != null)
+        {
+            StopCoroutine(enemyTurnCoroutine);
+        }
+        enemyTurnCoroutine = StartCoroutine(ExecuteSimultaneousEnemyTurn());
+    }
+
+    private System.Collections.IEnumerator ExecuteSimultaneousEnemyTurn()
+    {
+        // Clean up null or dead references
+        activeEnemies.RemoveAll(e => e == null || (e.Stats != null && e.Stats.IsDead));
+
+        if (activeEnemies.Count == 0)
+        {
+            EventBus<EnemyTurnCompletedEvent>.Raise(new EnemyTurnCompletedEvent());
+            yield break;
+        }
+
+        if (playerTransform == null)
+        {
+            PlayerMovement player = Object.FindAnyObjectByType<PlayerMovement>();
+            if (player != null) playerTransform = player.transform;
+        }
+
+        EnemyBase.ClearReservations();
+
+        // Launch all enemy turn coroutines simultaneously
+        int pendingEnemies = activeEnemies.Count;
+
+        for (int i = 0; i < activeEnemies.Count; i++)
+        {
+            EnemyBase enemy = activeEnemies[i];
+            StartCoroutine(RunSingleEnemyTurn(enemy, playerTransform, () => pendingEnemies--));
+        }
+
+        // Wait until all enemies complete their turn
+        while (pendingEnemies > 0)
+        {
+            yield return null;
+        }
+
+        EnemyBase.ClearReservations();
+        EventBus<EnemyTurnCompletedEvent>.Raise(new EnemyTurnCompletedEvent());
+    }
+
+    private System.Collections.IEnumerator RunSingleEnemyTurn(EnemyBase enemy, Transform targetPlayer, System.Action onComplete)
+    {
+        if (enemy != null)
+        {
+            yield return StartCoroutine(enemy.ExecuteTurnCoroutine(targetPlayer));
+        }
+        onComplete?.Invoke();
     }
 
     public void ConfigureDoorTiles(Tilemap tilemap, TileBase entryTile, TileBase exitTile, TileBase specialEntryTile, TileBase specialExitTile)
