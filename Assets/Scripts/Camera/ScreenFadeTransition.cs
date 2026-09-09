@@ -130,7 +130,6 @@ public class ScreenFadeTransition : MonoBehaviour
 
         onBlackout?.Invoke();
 
-        // Wait a frame so transforms and Cinemachine have updated at least once behind the black overlay
         yield return null;
 
         if (blackHoldDuration > 0f)

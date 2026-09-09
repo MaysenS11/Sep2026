@@ -23,6 +23,7 @@ public class GameManager : MonoBehaviour
         private set => _instance = value;
     }
 
+    [System.Serializable]
     public class RoomData
     {
         public int RoomIndex;
@@ -33,21 +34,87 @@ public class GameManager : MonoBehaviour
         public LRotation LRot;
         public Vector2Int Size;
         public Vector2Int WorldOriginTile;
-        
-        public Vector2Int? EntranceDoorTile;
-        public Vector2Int? ExitDoorTile;
 
-        public Vector3? EntryDoorPosition;
-        public Vector3? ExitDoorPosition;
+        [SerializeField] private bool hasEntranceDoorTile;
+        [SerializeField] private Vector2Int entranceDoorTileValue;
+        [SerializeField] private bool hasExitDoorTile;
+        [SerializeField] private Vector2Int exitDoorTileValue;
+
+        [SerializeField] private bool hasEntryDoorPosition;
+        [SerializeField] private Vector3 entryDoorPositionValue;
+        [SerializeField] private bool hasExitDoorPosition;
+        [SerializeField] private Vector3 exitDoorPositionValue;
 
         public bool HasSpecialChestRoom;
         public int SpecialChestRoomIndex = -1;
-        public Vector3? SpecialExitDoorPosition;
-        public Vector3? SpecialEntryDoorPosition;
+        [SerializeField] private bool hasSpecialExitDoorPosition;
+        [SerializeField] private Vector3 specialExitDoorPositionValue;
+        [SerializeField] private bool hasSpecialEntryDoorPosition;
+        [SerializeField] private Vector3 specialEntryDoorPositionValue;
 
         public Vector2Int CenterTile;
         public Vector3 CenterPosition;
         public Vector3 CenterTilePosition;
+
+        public Vector2Int? EntranceDoorTile
+        {
+            get => hasEntranceDoorTile ? entranceDoorTileValue : (Vector2Int?)null;
+            set
+            {
+                hasEntranceDoorTile = value.HasValue;
+                entranceDoorTileValue = value ?? Vector2Int.zero;
+            }
+        }
+
+        public Vector2Int? ExitDoorTile
+        {
+            get => hasExitDoorTile ? exitDoorTileValue : (Vector2Int?)null;
+            set
+            {
+                hasExitDoorTile = value.HasValue;
+                exitDoorTileValue = value ?? Vector2Int.zero;
+            }
+        }
+
+        public Vector3? EntryDoorPosition
+        {
+            get => hasEntryDoorPosition ? entryDoorPositionValue : (Vector3?)null;
+            set
+            {
+                hasEntryDoorPosition = value.HasValue;
+                entryDoorPositionValue = value ?? Vector3.zero;
+            }
+        }
+
+        public Vector3? ExitDoorPosition
+        {
+            get => hasExitDoorPosition ? exitDoorPositionValue : (Vector3?)null;
+            set
+            {
+                hasExitDoorPosition = value.HasValue;
+                exitDoorPositionValue = value ?? Vector3.zero;
+            }
+        }
+
+        public Vector3? SpecialExitDoorPosition
+        {
+            get => hasSpecialExitDoorPosition ? specialExitDoorPositionValue : (Vector3?)null;
+            set
+            {
+                hasSpecialExitDoorPosition = value.HasValue;
+                specialExitDoorPositionValue = value ?? Vector3.zero;
+            }
+        }
+
+        public Vector3? SpecialEntryDoorPosition
+        {
+            get => hasSpecialEntryDoorPosition ? specialEntryDoorPositionValue : (Vector3?)null;
+            set
+            {
+                hasSpecialEntryDoorPosition = value.HasValue;
+                specialEntryDoorPositionValue = value ?? Vector3.zero;
+            }
+        }
     }
 
     public Dictionary<int, RoomData> DungeonDictionary = new Dictionary<int, RoomData>();
@@ -73,7 +140,6 @@ public class GameManager : MonoBehaviour
 
     private void Start()
     {
-        // Find any existing enemies in scene that loaded before GameManager
         EnemyBase[] existing = Object.FindObjectsByType<EnemyBase>();
         for (int i = 0; i < existing.Length; i++)
         {
@@ -85,12 +151,26 @@ public class GameManager : MonoBehaviour
     {
         EventBus<PlayerActionCompletedEvent>.Subscribe(OnPlayerActionCompleted);
         EventBus<EntityDiedEvent>.Subscribe(OnEntityDied);
+        EventBus<EnemyRegisteredEvent>.Subscribe(OnEnemyRegistered);
+        EventBus<EnemyUnregisteredEvent>.Subscribe(OnEnemyUnregistered);
     }
 
     private void OnDisable()
     {
         EventBus<PlayerActionCompletedEvent>.Unsubscribe(OnPlayerActionCompleted);
         EventBus<EntityDiedEvent>.Unsubscribe(OnEntityDied);
+        EventBus<EnemyRegisteredEvent>.Unsubscribe(OnEnemyRegistered);
+        EventBus<EnemyUnregisteredEvent>.Unsubscribe(OnEnemyUnregistered);
+    }
+
+    private void OnEnemyRegistered(EnemyRegisteredEvent evt)
+    {
+        RegisterEnemy(evt.Enemy);
+    }
+
+    private void OnEnemyUnregistered(EnemyUnregisteredEvent evt)
+    {
+        UnregisterEnemy(evt.Enemy);
     }
 
     public void RegisterEnemy(EnemyBase enemy)
@@ -112,7 +192,7 @@ public class GameManager : MonoBehaviour
     public void ClearEnemies()
     {
         activeEnemies.Clear();
-        EnemyBase.ClearReservations();
+        TileReservationSystem.ClearAll();
     }
 
     private void OnEntityDied(EntityDiedEvent evt)
@@ -129,10 +209,10 @@ public class GameManager : MonoBehaviour
         {
             StopCoroutine(enemyTurnCoroutine);
         }
-        enemyTurnCoroutine = StartCoroutine(ExecuteSimultaneousEnemyTurn());
+        enemyTurnCoroutine = StartCoroutine(ExecuteEnemyTurn());
     }
 
-    private System.Collections.IEnumerator ExecuteSimultaneousEnemyTurn()
+    private System.Collections.IEnumerator ExecuteEnemyTurn()
     {
         // Clean up null or dead references
         activeEnemies.RemoveAll(e => e == null || (e.Stats != null && e.Stats.IsDead));
@@ -149,32 +229,106 @@ public class GameManager : MonoBehaviour
             if (player != null) playerTransform = player.transform;
         }
 
-        EnemyBase.ClearReservations();
+        TileReservationSystem.ClearAll();
 
-        // Launch all enemy turn coroutines simultaneously
-        int pendingEnemies = activeEnemies.Count;
+        Vector3 playerPos = playerTransform != null ? playerTransform.position : Vector3.zero;
+        activeEnemies.Sort((a, b) =>
+        {
+            int pa = a.GetMovePriority();
+            int pb = b.GetMovePriority();
+            if (pa != pb) return pa.CompareTo(pb);
+
+            float da = Vector3.Distance(a.transform.position, playerPos);
+            float db = Vector3.Distance(b.transform.position, playerPos);
+            return da.CompareTo(db);
+        });
+
+        int plannedCount = 0;
+        int skippedCount = 0;
 
         for (int i = 0; i < activeEnemies.Count; i++)
         {
             EnemyBase enemy = activeEnemies[i];
-            StartCoroutine(RunSingleEnemyTurn(enemy, playerTransform, () => pendingEnemies--));
+            if (enemy == null) continue;
+
+            MoveIntent intent = enemy.PlanMove(playerTransform);
+
+            if (intent.HasMove)
+            {
+                var reservationPath = new List<Vector2Int>(intent.Path);
+                if (intent.IsAttack && intent.PlayerPushTile.HasValue)
+                {
+                    reservationPath.Add(intent.PlayerPushTile.Value);
+                }
+
+                if (TileReservationSystem.TryReservePath(reservationPath, enemy))
+                {
+                    enemy.PlannedPath = intent.Path;
+                    enemy.CurrentIntent = intent;
+                    plannedCount++;
+                }
+                else
+                {
+                    EventBus<EnemyMoveBlockedEvent>.Raise(new EnemyMoveBlockedEvent(
+                        enemy.gameObject,
+                        intent.Path.Count > 0 ? intent.Path[intent.Path.Count - 1] : Vector2Int.zero
+                    ));
+                    enemy.PlannedPath = null;
+                    skippedCount++;
+                }
+            }
+            else
+            {
+                enemy.PlannedPath = null;
+                skippedCount++;
+            }
         }
 
-        // Wait until all enemies complete their turn
+        EventBus<EnemyTurnPlannedEvent>.Raise(new EnemyTurnPlannedEvent(plannedCount, skippedCount));
+
+        for (int i = 0; i < activeEnemies.Count; i++)
+        {
+            if (activeEnemies[i] != null && activeEnemies[i].PlannedPath != null)
+            {
+                activeEnemies[i].SetKinematic(true);
+            }
+        }
+
+        int pendingEnemies = 0;
+
+        for (int i = 0; i < activeEnemies.Count; i++)
+        {
+            EnemyBase enemy = activeEnemies[i];
+            if (enemy != null && enemy.PlannedPath != null)
+            {
+                pendingEnemies++;
+                StartCoroutine(RunSingleEnemyMove(enemy, () => pendingEnemies--));
+            }
+        }
+
         while (pendingEnemies > 0)
         {
             yield return null;
         }
 
-        EnemyBase.ClearReservations();
+        for (int i = 0; i < activeEnemies.Count; i++)
+        {
+            if (activeEnemies[i] != null)
+            {
+                activeEnemies[i].SetKinematic(false);
+                activeEnemies[i].PlannedPath = null;
+            }
+        }
+
+        TileReservationSystem.ClearAll();
         EventBus<EnemyTurnCompletedEvent>.Raise(new EnemyTurnCompletedEvent());
     }
 
-    private System.Collections.IEnumerator RunSingleEnemyTurn(EnemyBase enemy, Transform targetPlayer, System.Action onComplete)
+    private System.Collections.IEnumerator RunSingleEnemyMove(EnemyBase enemy, System.Action onComplete)
     {
         if (enemy != null)
         {
-            yield return StartCoroutine(enemy.ExecuteTurnCoroutine(targetPlayer));
+            yield return StartCoroutine(enemy.ExecuteMove());
         }
         onComplete?.Invoke();
     }

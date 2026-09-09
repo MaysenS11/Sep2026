@@ -1,4 +1,5 @@
 using System.Collections;
+using System.Collections.Generic;
 using UnityEngine;
 
 public class EnemyController : EnemyBase
@@ -31,222 +32,424 @@ public class EnemyController : EnemyBase
         new Vector2Int(-2, -1)
     };
 
+    private static readonly Vector2Int[] AllEightDirections = new Vector2Int[]
+    {
+        Vector2Int.up,
+        Vector2Int.down,
+        Vector2Int.left,
+        Vector2Int.right,
+        new Vector2Int(1, 1),
+        new Vector2Int(-1, 1),
+        new Vector2Int(1, -1),
+        new Vector2Int(-1, -1)
+    };
+
     private int moveTurnCounter = 0;
 
-    public override IEnumerator ExecuteTurnCoroutine(Transform playerTransform)
-    {
-        if (stats != null && stats.IsDead) yield break;
-        if (playerTransform == null) yield break;
+    private readonly List<Vector2Int> _shuffleBuffer = new List<Vector2Int>(8);
 
-        EnemyMovementPattern movePattern = enemyData != null ? enemyData.MovementPattern : EnemyMovementPattern.OneStepOrthogonal;
-        EnemyAttackPattern attackPat = enemyData != null ? enemyData.AttackPattern : EnemyAttackPattern.AdjacentDiagonalTrigger;
-        float speed = enemyData != null ? enemyData.StepSpeed : 5.0f;
+    public override MoveIntent PlanMove(Transform playerTransform)
+    {
+        var noMove = new MoveIntent { HasMove = false };
+
+        if (stats != null && stats.IsDead) return noMove;
+        if (ShouldSkipTurn()) return noMove;
+        if (playerTransform == null) return noMove;
+
+        EnemyMovementPattern movePattern = enemyData != null ? enemyData.MovementPattern : EnemyMovementPattern.SingleMove;
+        bool usesDiagonal = enemyData != null && enemyData.UsesDiagonalAttack;
+        EnemySmartness smartness = enemyData != null ? enemyData.Smartness : EnemySmartness.Mid;
         int detection = enemyData != null ? enemyData.DetectionRange : 6;
         int maxLineSteps = enemyData != null ? enemyData.MaxLineSteps : 1;
         int interval = enemyData != null ? enemyData.MovesInterval : 1;
 
-        Vector3 currentPos = transform.position;
-        Vector3 playerPos = playerTransform.position;
+        Vector3 currentPos = TileReservationSystem.SnapToTileCenter(transform.position);
+        Vector3 playerPos = TileReservationSystem.SnapToTileCenter(playerTransform.position);
 
-        int distX = Mathf.RoundToInt(Mathf.Abs(currentPos.x - playerPos.x) / tileSize);
-        int distY = Mathf.RoundToInt(Mathf.Abs(currentPos.y - playerPos.y) / tileSize);
+        Vector2Int currentGrid = TileReservationSystem.WorldToGridTile(currentPos);
+        Vector2Int playerGrid = TileReservationSystem.WorldToGridTile(playerPos);
+
+        int distX = Mathf.Abs(currentGrid.x - playerGrid.x);
+        int distY = Mathf.Abs(currentGrid.y - playerGrid.y);
         int manhattanDist = distX + distY;
 
-        // Check detection range
-        if (manhattanDist > detection)
-        {
-            yield break;
-        }
+        if (manhattanDist > detection) return noMove;
 
-        // Paced movement check (e.g. Knight moves every 2 player moves)
         moveTurnCounter++;
-        if (interval > 1 && (moveTurnCounter % interval) != 0)
-        {
-            yield break;
-        }
+        if (interval > 1 && (moveTurnCounter % interval) != 0) return noMove;
 
-        // 1. Attack Check: Adjacent Diagonal Trigger (Pawn)
-        if (attackPat == EnemyAttackPattern.AdjacentDiagonalTrigger && distX == 1 && distY == 1)
+        attackPlayerTransform = playerTransform;
+
+        if (usesDiagonal && distX == 1 && distY == 1)
         {
             Vector2Int diagDir = new Vector2Int(
-                Mathf.RoundToInt(Mathf.Sign(playerPos.x - currentPos.x)),
-                Mathf.RoundToInt(Mathf.Sign(playerPos.y - currentPos.y))
+                Mathf.RoundToInt(Mathf.Sign(playerGrid.x - currentGrid.x)),
+                Mathf.RoundToInt(Mathf.Sign(playerGrid.y - currentGrid.y))
             );
-            lastDirection = diagDir;
 
-            // Attack by moving diagonally onto the player's tile and pushing the player 1 tile diagonally in the same direction
-            yield return StartCoroutine(AttackAndPushPlayer(playerTransform, playerPos, diagDir, speed));
-            yield break;
+            Vector2Int pushTile = playerGrid + diagDir;
+
+            return new MoveIntent
+            {
+                Path = new List<Vector2Int> { playerGrid },
+                FinalDestination = playerPos,
+                Direction = diagDir,
+                IsAttack = true,
+                PlayerPushTile = pushTile,
+                HasMove = true
+            };
         }
 
-        // Execute movement and attack patterns based on EnemyData
         switch (movePattern)
         {
-            case EnemyMovementPattern.OneStepOrthogonal:
-                yield return StartCoroutine(ExecuteOneStepOrthogonal(playerTransform, currentPos, playerPos, manhattanDist, speed));
-                break;
+            case EnemyMovementPattern.SingleMove:
+                return PlanOneStepOrthogonal(currentPos, playerPos, manhattanDist, smartness);
 
-            case EnemyMovementPattern.DiagonalLine:
-                yield return StartCoroutine(ExecuteLineTurn(playerTransform, currentPos, playerPos, DiagonalDirections, maxLineSteps, speed));
-                break;
+            case EnemyMovementPattern.BishopMove:
+                return PlanLineTurn(currentPos, playerPos, DiagonalDirections, maxLineSteps, smartness);
 
-            case EnemyMovementPattern.OrthogonalLine:
-                yield return StartCoroutine(ExecuteLineTurn(playerTransform, currentPos, playerPos, OrthogonalDirections, maxLineSteps, speed));
-                break;
+            case EnemyMovementPattern.RookMove:
+                return PlanLineTurn(currentPos, playerPos, OrthogonalDirections, maxLineSteps, smartness);
 
-            case EnemyMovementPattern.KnightLPattern:
-                yield return StartCoroutine(ExecuteKnightTurn(playerTransform, currentPos, playerPos, speed));
-                break;
+            case EnemyMovementPattern.QueenMove:
+                return PlanLineTurn(currentPos, playerPos, AllEightDirections, maxLineSteps, smartness);
+
+            case EnemyMovementPattern.KnightMove:
+                return PlanKnightTurn(currentPos, playerPos, smartness);
+
+            default:
+                return noMove;
         }
     }
 
-    /// <summary>
-    /// Pawn movement: strictly moves 1 tile orthogonally towards the player.
-    /// If already adjacent (distance == 1), it stands its ground and never moves away.
-    /// Regular diagonal movement is strictly forbidden.
-    /// </summary>
-    private IEnumerator ExecuteOneStepOrthogonal(Transform playerTransform, Vector3 currentPos, Vector3 playerPos, int manhattanDist, float speed)
+    private MoveIntent PlanOneStepOrthogonal(Vector3 currentPos, Vector3 playerPos, int manhattanDist, EnemySmartness smartness)
     {
-        // If already orthogonally adjacent to player, do not move away
-        if (manhattanDist <= 1)
-        {
-            yield break;
-        }
+        var noMove = new MoveIntent { HasMove = false };
 
-        Vector2Int bestDir = Vector2Int.zero;
-        int bestDist = int.MaxValue;
+        if (manhattanDist <= 1) return noMove;
+
+        Vector2Int currentGrid = TileReservationSystem.WorldToGridTile(currentPos);
+        Vector2Int playerGrid = TileReservationSystem.WorldToGridTile(playerPos);
+        float currentDistToPlayer = Vector3.Distance(currentPos, playerPos);
+
+        var validCandidates = new List<(Vector2Int dir, Vector2Int grid, Vector3 pos, float dist)>();
+        var closerCandidates = new List<(Vector2Int dir, Vector2Int grid, Vector3 pos, float dist)>();
 
         foreach (var dir in OrthogonalDirections)
         {
-            Vector3 candidatePos = currentPos + new Vector3(dir.x, dir.y, 0) * tileSize;
+            Vector2Int candidateGrid = currentGrid + dir;
+            Vector3 candidatePos = TileReservationSystem.GetTileCenterWorld(candidateGrid, currentPos.z);
+
+            if (candidateGrid == playerGrid) continue;
+
             if (!IsTileBlocked(candidatePos))
             {
-                int newDistX = Mathf.RoundToInt(Mathf.Abs(candidatePos.x - playerPos.x) / tileSize);
-                int newDistY = Mathf.RoundToInt(Mathf.Abs(candidatePos.y - playerPos.y) / tileSize);
-                int newDist = newDistX + newDistY;
-
-                // Only move closer to the player, never move directly onto player during normal movement
-                if (newDist > 0 && newDist < bestDist)
-                {
-                    bestDist = newDist;
-                    bestDir = dir;
-                }
-            }
-        }
-
-        if (bestDir != Vector2Int.zero)
-        {
-            lastDirection = bestDir;
-            Vector3 targetPos = currentPos + new Vector3(bestDir.x, bestDir.y, 0) * tileSize;
-            yield return StartCoroutine(StepToTile(targetPos, speed));
-        }
-    }
-
-    /// <summary>
-    /// Line movement for Rook (Orthogonal) and Bishop (Diagonal) up to maxLineSteps.
-    /// Attacks if moving onto the player tile, pushing the player in that direction.
-    /// </summary>
-    private IEnumerator ExecuteLineTurn(Transform playerTransform, Vector3 currentPos, Vector3 playerPos, Vector2Int[] directions, int maxSteps, float speed)
-    {
-        // 1. Check direct line of sight attack to player within maxSteps
-        foreach (var dir in directions)
-        {
-            for (int s = 1; s <= maxSteps; s++)
-            {
-                Vector3 checkPos = currentPos + new Vector3(dir.x * s, dir.y * s, 0) * tileSize;
-
-                if (Vector3.Distance(checkPos, playerPos) < 0.1f)
-                {
-                    lastDirection = dir;
-                    yield return StartCoroutine(AttackAndPushPlayer(playerTransform, playerPos, dir, speed));
-                    yield break;
-                }
-
-                if (IsTileBlocked(checkPos))
-                {
-                    break;
-                }
-            }
-        }
-
-        // 2. Normal movement along the line that brings enemy closest to player
-        Vector3 bestStepPos = currentPos;
-        float bestDistToPlayer = Vector3.Distance(currentPos, playerPos);
-        Vector2 bestDir = Vector2.zero;
-
-        foreach (var dir in directions)
-        {
-            for (int s = 1; s <= maxSteps; s++)
-            {
-                Vector3 candidatePos = currentPos + new Vector3(dir.x * s, dir.y * s, 0) * tileSize;
-                if (IsTileBlocked(candidatePos))
-                {
-                    break;
-                }
-
                 float dist = Vector3.Distance(candidatePos, playerPos);
-                if (dist > 0.1f && dist < bestDistToPlayer)
+                var entry = (dir, candidateGrid, candidatePos, dist);
+                validCandidates.Add(entry);
+                if (dist < currentDistToPlayer)
                 {
-                    bestDistToPlayer = dist;
-                    bestStepPos = candidatePos;
-                    bestDir = dir;
+                    closerCandidates.Add(entry);
                 }
             }
         }
 
-        if (bestStepPos != currentPos)
+        if (validCandidates.Count == 0) return noMove;
+
+        (Vector2Int dir, Vector2Int grid, Vector3 pos, float dist) chosen;
+
+        if (smartness == EnemySmartness.Lazy)
         {
-            lastDirection = bestDir;
-            yield return StartCoroutine(StepToTile(bestStepPos, speed));
+            chosen = validCandidates[Random.Range(0, validCandidates.Count)];
         }
+        else if (smartness == EnemySmartness.Mid)
+        {
+            if (closerCandidates.Count > 0)
+            {
+                chosen = closerCandidates[Random.Range(0, closerCandidates.Count)];
+            }
+            else
+            {
+                chosen = validCandidates[Random.Range(0, validCandidates.Count)];
+            }
+        }
+        else
+        {
+            validCandidates.Sort((a, b) => a.dist.CompareTo(b.dist));
+            chosen = validCandidates[0];
+        }
+
+        return new MoveIntent
+        {
+            Path = new List<Vector2Int> { chosen.grid },
+            FinalDestination = chosen.pos,
+            Direction = chosen.dir,
+            IsAttack = false,
+            PlayerPushTile = null,
+            HasMove = true
+        };
     }
 
-    /// <summary>
-    /// Knight L-pattern movement: leaps directly onto player tile if in range (attack & push),
-    /// otherwise leaps to the unblocked L-tile closest to player.
-    /// </summary>
-    private IEnumerator ExecuteKnightTurn(Transform playerTransform, Vector3 currentPos, Vector3 playerPos, float speed)
+    private MoveIntent PlanLineTurn(Vector3 currentPos, Vector3 playerPos,
+        Vector2Int[] directions, int exactSteps, EnemySmartness smartness)
     {
-        Vector2Int playerOffset = new Vector2Int(
-            Mathf.RoundToInt((playerPos.x - currentPos.x) / tileSize),
-            Mathf.RoundToInt((playerPos.y - currentPos.y) / tileSize)
-        );
+        var noMove = new MoveIntent { HasMove = false };
 
-        // 1. Check direct attack leap
+        Vector2Int currentGrid = TileReservationSystem.WorldToGridTile(currentPos);
+        Vector2Int playerGrid = TileReservationSystem.WorldToGridTile(playerPos);
+
+        foreach (var dir in directions)
+        {
+            var attackPath = new List<Vector2Int>();
+
+            for (int s = 1; s <= exactSteps; s++)
+            {
+                Vector2Int checkGrid = currentGrid + dir * s;
+                Vector3 checkPos = TileReservationSystem.GetTileCenterWorld(checkGrid, currentPos.z);
+
+                if (checkGrid == playerGrid)
+                {
+                    attackPath.Add(checkGrid);
+                    Vector2Int pushTile = checkGrid + dir;
+
+                    return new MoveIntent
+                    {
+                        Path = attackPath,
+                        FinalDestination = checkPos,
+                        Direction = dir,
+                        IsAttack = true,
+                        PlayerPushTile = pushTile,
+                        HasMove = true
+                    };
+                }
+
+                if (IsTileBlocked(checkPos)) break;
+
+                attackPath.Add(checkGrid);
+            }
+        }
+
+        float currentDistToPlayer = Vector3.Distance(currentPos, playerPos);
+        var closerCandidates = new List<(List<Vector2Int> path, Vector3 dest, Vector2Int dir, float dist)>();
+        var allCandidates = new List<(List<Vector2Int> path, Vector3 dest, Vector2Int dir, float dist)>();
+
+        foreach (var dir in directions)
+        {
+            var pathSoFar = new List<Vector2Int>();
+            bool blocked = false;
+
+            for (int s = 1; s <= exactSteps; s++)
+            {
+                Vector2Int stepGrid = currentGrid + dir * s;
+                Vector3 stepPos = TileReservationSystem.GetTileCenterWorld(stepGrid, currentPos.z);
+
+                if (IsTileBlocked(stepPos))
+                {
+                    blocked = true;
+                    break;
+                }
+
+                pathSoFar.Add(stepGrid);
+            }
+
+            if (blocked || pathSoFar.Count < exactSteps) continue;
+
+            Vector2Int finalGrid = currentGrid + dir * exactSteps;
+            Vector3 finalPos = TileReservationSystem.GetTileCenterWorld(finalGrid, currentPos.z);
+            if (finalGrid == playerGrid) continue;
+
+            float dist = Vector3.Distance(finalPos, playerPos);
+            var entry = (pathSoFar, finalPos, dir, dist);
+            allCandidates.Add(entry);
+
+            if (dist < currentDistToPlayer)
+            {
+                closerCandidates.Add(entry);
+            }
+        }
+
+        if (allCandidates.Count == 0) return noMove;
+
+        (List<Vector2Int> path, Vector3 dest, Vector2Int dir, float dist) selected;
+
+        if (smartness == EnemySmartness.Lazy)
+        {
+            selected = allCandidates[Random.Range(0, allCandidates.Count)];
+        }
+        else if (smartness == EnemySmartness.Mid)
+        {
+            if (closerCandidates.Count > 0)
+            {
+                selected = closerCandidates[Random.Range(0, closerCandidates.Count)];
+            }
+            else
+            {
+                selected = allCandidates[Random.Range(0, allCandidates.Count)];
+            }
+        }
+        else
+        {
+            allCandidates.Sort((a, b) => a.dist.CompareTo(b.dist));
+            selected = allCandidates[0];
+        }
+
+        return new MoveIntent
+        {
+            Path = selected.path,
+            FinalDestination = selected.dest,
+            Direction = selected.dir,
+            IsAttack = false,
+            HasMove = true
+        };
+    }
+
+    private MoveIntent PlanKnightTurn(Vector3 currentPos, Vector3 playerPos, EnemySmartness smartness)
+    {
+        var noMove = new MoveIntent { HasMove = false };
+
+        Vector2Int currentGrid = TileReservationSystem.WorldToGridTile(currentPos);
+        Vector2Int playerGrid = TileReservationSystem.WorldToGridTile(playerPos);
+        Vector2Int playerOffset = playerGrid - currentGrid;
+
+        float currentDistToPlayer = Vector3.Distance(currentPos, playerPos);
+
         foreach (var offset in KnightOffsets)
         {
             if (offset == playerOffset)
             {
-                Vector2 pushDir = new Vector2(offset.x, offset.y).normalized;
-                lastDirection = pushDir;
-                yield return StartCoroutine(AttackAndPushPlayer(playerTransform, playerPos, pushDir, speed));
-                yield break;
-            }
-        }
-
-        // 2. Leap to closest unblocked tile
-        Vector2Int bestOffset = Vector2Int.zero;
-        float bestDistance = float.MaxValue;
-
-        foreach (var offset in KnightOffsets)
-        {
-            Vector3 candidatePos = currentPos + new Vector3(offset.x, offset.y, 0) * tileSize;
-            if (!IsTileBlocked(candidatePos))
-            {
-                float dist = Vector3.Distance(candidatePos, playerPos);
-                if (dist < bestDistance)
+                var lPath = TryBuildKnightLPath(currentGrid, offset, isAttack: true);
+                if (lPath != null)
                 {
-                    bestDistance = dist;
-                    bestOffset = offset;
+                    Vector2 pushDir = new Vector2(offset.x, offset.y).normalized;
+                    Vector2Int pushTile = playerGrid + new Vector2Int(
+                        Mathf.Clamp(offset.x, -1, 1),
+                        Mathf.Clamp(offset.y, -1, 1)
+                    );
+
+                    return new MoveIntent
+                    {
+                        Path = lPath,
+                        FinalDestination = playerPos,
+                        Direction = pushDir,
+                        IsAttack = true,
+                        PlayerPushTile = pushTile,
+                        HasMove = true
+                    };
                 }
             }
         }
 
-        if (bestOffset != Vector2Int.zero)
+        var closerCandidates = new List<(List<Vector2Int> path, Vector3 dest, Vector2 dir, float dist)>();
+        var allCandidates = new List<(List<Vector2Int> path, Vector3 dest, Vector2 dir, float dist)>();
+
+        foreach (var offset in KnightOffsets)
         {
-            lastDirection = new Vector2(bestOffset.x, bestOffset.y).normalized;
-            Vector3 targetPos = currentPos + new Vector3(bestOffset.x, bestOffset.y, 0) * tileSize;
-            yield return StartCoroutine(StepToTile(targetPos, speed));
+            Vector2Int destGrid = currentGrid + offset;
+            Vector3 destPos = TileReservationSystem.GetTileCenterWorld(destGrid, currentPos.z);
+
+            if (destGrid == playerGrid) continue;
+
+            if (IsTileBlocked(destPos)) continue;
+
+            var lPath = TryBuildKnightLPath(currentGrid, offset, isAttack: false);
+            if (lPath == null) continue;
+
+            float dist = Vector3.Distance(destPos, playerPos);
+            Vector2 dir = new Vector2(offset.x, offset.y).normalized;
+
+            var entry = (lPath, destPos, dir, dist);
+            allCandidates.Add(entry);
+            if (dist < currentDistToPlayer)
+            {
+                closerCandidates.Add(entry);
+            }
+        }
+
+        if (allCandidates.Count == 0) return noMove;
+
+        (List<Vector2Int> path, Vector3 dest, Vector2 dir, float dist) chosen;
+
+        if (smartness == EnemySmartness.Lazy)
+        {
+            chosen = allCandidates[Random.Range(0, allCandidates.Count)];
+        }
+        else if (smartness == EnemySmartness.Mid)
+        {
+            if (closerCandidates.Count > 0)
+            {
+                chosen = closerCandidates[Random.Range(0, closerCandidates.Count)];
+            }
+            else
+            {
+                chosen = allCandidates[Random.Range(0, allCandidates.Count)];
+            }
+        }
+        else
+        {
+            allCandidates.Sort((a, b) => a.dist.CompareTo(b.dist));
+            chosen = allCandidates[0];
+        }
+
+        return new MoveIntent
+        {
+            Path = chosen.path,
+            FinalDestination = chosen.dest,
+            Direction = chosen.dir,
+            IsAttack = false,
+            HasMove = true
+        };
+    }
+
+    private List<Vector2Int> TryBuildKnightLPath(Vector2Int origin, Vector2Int offset, bool isAttack)
+    {
+        var routeH = BuildLSteps(origin, offset.x, 0, 0, offset.y, isAttack);
+        if (routeH != null) return routeH;
+
+        var routeV = BuildLSteps(origin, 0, offset.y, offset.x, 0, isAttack);
+        if (routeV != null) return routeV;
+
+        return null;
+    }
+
+    private List<Vector2Int> BuildLSteps(Vector2Int origin, int leg1X, int leg1Y, int leg2X, int leg2Y, bool isAttack)
+    {
+        var steps = new List<Vector2Int>();
+        Vector2Int current = origin;
+
+        int steps1 = Mathf.Max(Mathf.Abs(leg1X), Mathf.Abs(leg1Y));
+        Vector2Int dir1 = new Vector2Int(Mathf.Clamp(leg1X, -1, 1), Mathf.Clamp(leg1Y, -1, 1));
+        for (int i = 0; i < steps1; i++)
+        {
+            current += dir1;
+            steps.Add(current);
+            Vector3 worldPos = TileReservationSystem.GetTileCenterWorld(current, transform.position.z);
+            if (IsTileBlocked(worldPos)) return null;
+        }
+
+        int steps2 = Mathf.Max(Mathf.Abs(leg2X), Mathf.Abs(leg2Y));
+        Vector2Int dir2 = new Vector2Int(Mathf.Clamp(leg2X, -1, 1), Mathf.Clamp(leg2Y, -1, 1));
+        for (int i = 0; i < steps2; i++)
+        {
+            current += dir2;
+            steps.Add(current);
+            bool isFinalTile = (i == steps2 - 1);
+            if (!isFinalTile || !isAttack)
+            {
+                Vector3 worldPos = TileReservationSystem.GetTileCenterWorld(current, transform.position.z);
+                if (IsTileBlocked(worldPos)) return null;
+            }
+        }
+
+        return steps;
+    }
+    private static void ShuffleList<T>(List<T> list)
+    {
+        for (int i = list.Count - 1; i > 0; i--)
+        {
+            int j = Random.Range(0, i + 1);
+            T temp = list[i];
+            list[i] = list[j];
+            list[j] = temp;
         }
     }
 }

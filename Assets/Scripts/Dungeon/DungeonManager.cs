@@ -60,7 +60,12 @@ namespace Dungeon
         [SerializeField] private EnemySpawner enemySpawner = new EnemySpawner();
         [SerializeField] private PropSpawner propSpawner = new PropSpawner();
 
-        public List<GameManager.RoomData> GeneratedRooms { get; private set; } = new List<GameManager.RoomData>();
+        public EnemySpawner EnemySpawner => enemySpawner;
+        public DoorSpawner DoorSpawner => doorSpawner;
+        public PropSpawner PropSpawner => propSpawner;
+
+        [SerializeField, HideInInspector] private List<GameManager.RoomData> generatedRooms = new List<GameManager.RoomData>();
+        public List<GameManager.RoomData> GeneratedRooms => generatedRooms;
 
         private readonly DungeonLayoutPlanner _layoutPlanner = new DungeonLayoutPlanner();
         private readonly DungeonTilemapRenderer _tilemapRenderer = new DungeonTilemapRenderer();
@@ -92,11 +97,33 @@ namespace Dungeon
 
         private void Start()
         {
-            // Do not generate a new dungeon on Start.
-            // If the dungeon was generated in editor, ensure data is published to GameManager.
-            if (GeneratedRooms != null && GeneratedRooms.Count > 0)
+            SyncLegacyFields();
+            RegisterDefaultSpawners();
+
+            if (GameManager.Instance != null)
+            {
+                GameManager.Instance.ConfigureDoorTiles(
+                    objectTilemap,
+                    doorSpawner.EntranceDoorTile,
+                    doorSpawner.ExitDoorTile,
+                    doorSpawner.SpecialEntranceDoorTile,
+                    doorSpawner.SpecialExitDoorTile
+                );
+            }
+
+            if (generatedRooms != null && generatedRooms.Count > 0)
             {
                 PublishDungeonData();
+                PositionPlayerAtStartRoom();
+                CameraBounds cameraBounds = Object.FindAnyObjectByType<CameraBounds>();
+                if (cameraBounds != null)
+                {
+                    cameraBounds.AdjustToStartRoom();
+                }
+            }
+            else
+            {
+                GenerateAndBuildDungeon();
             }
         }
 
@@ -166,8 +193,7 @@ namespace Dungeon
             ClearDungeonTiles();
             _tileQuery.ClearOccupancy();
 
-            // Step 1: Layout Planning
-            GeneratedRooms = _layoutPlanner.GenerateLayout(
+            generatedRooms = _layoutPlanner.GenerateLayout(
                 minRooms,
                 maxRooms,
                 macroCellSize,
@@ -177,9 +203,8 @@ namespace Dungeon
                 fixedChestRoomSize
             );
 
-            // Step 2: Tilemap Floor / Wall / Roof Rendering
             _tilemapRenderer.RenderRooms(
-                GeneratedRooms,
+                generatedRooms,
                 roofTilemap,
                 wallTilemap,
                 borderFloorTilemap,
@@ -190,26 +215,25 @@ namespace Dungeon
                 fillFloorRuleTile
             );
 
-            // Step 3: Content Spawning (Doors -> Enemies -> Props)
+            if (generatedRooms != null && generatedRooms.Count > 0)
+            {
+                _tileQuery.MarkOccupied(generatedRooms[0].CenterTile);
+            }
             SpawnRoomContents();
 
-            // Step 4: Publish Room Data to GameManager
             PublishDungeonData();
 
-            // Step 5: Position player in starting room and reset stats if playing
             PositionPlayerAtStartRoom();
 
-            // Step 6: Adjust camera bounds to starting room
             CameraBounds cameraBounds = Object.FindAnyObjectByType<CameraBounds>();
             if (cameraBounds != null)
             {
                 cameraBounds.AdjustToStartRoom();
             }
 
-            // Debug visualization
             if (debugTilemap != null && debugPathTile != null)
             {
-                _tilemapRenderer.DrawDebugConnections(GeneratedRooms, debugTilemap, debugPathTile);
+                _tilemapRenderer.DrawDebugConnections(generatedRooms, debugTilemap, debugPathTile);
             }
 
             MarkTilemapsDirtyInEditor();
@@ -269,6 +293,9 @@ namespace Dungeon
             {
                 _spawners[s].ClearSpawnedContent();
             }
+
+            generatedRooms.Clear();
+            MarkTilemapsDirtyInEditor();
         }
 
         private void PublishDungeonData()
@@ -335,6 +362,7 @@ namespace Dungeon
 #if UNITY_EDITOR
             if (!Application.isPlaying)
             {
+                EditorUtility.SetDirty(this);
                 if (roofTilemap != null) EditorUtility.SetDirty(roofTilemap);
                 if (wallTilemap != null) EditorUtility.SetDirty(wallTilemap);
                 if (borderFloorTilemap != null) EditorUtility.SetDirty(borderFloorTilemap);

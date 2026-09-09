@@ -25,7 +25,6 @@ namespace Dungeon.Spawning
         {
             if (floorTilemap == null) return;
 
-            // Chest room spawning
             if (room.Type == RoomType.Chest && normalChestPrefab != null)
             {
                 Vector2Int chestTile = room.CenterTile;
@@ -35,7 +34,6 @@ namespace Dungeon.Spawning
                 tileQuery.MarkOccupied(chestTile);
             }
 
-            // Extensible hooks for obstacles and crates in Normal rooms
             if (room.Type == RoomType.Normal)
             {
                 // Can spawn crates and obstacles on unoccupied tiles

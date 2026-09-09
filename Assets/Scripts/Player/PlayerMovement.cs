@@ -37,6 +37,7 @@ public class PlayerMovement : MonoBehaviour
     private float doorTriggerBlockedUntil;
     private Vector2 lastDirection = Vector2.down;
     private PlayerStats playerStats;
+    private readonly Collider2D[] hitBuffer = new Collider2D[16];
 
     private void Awake()
     {
@@ -110,10 +111,8 @@ public class PlayerMovement : MonoBehaviour
 
     private IEnumerator HandlePlayerDeathSequence()
     {
-        // Wait for the die animation (approx 0.92s) to finish playing before reloading
         yield return new WaitForSeconds(0.95f);
 
-        // Player died: trigger dungeon regeneration
         EventBus<GenerateDungeonEvent>.Raise(new GenerateDungeonEvent());
     }
 
@@ -125,18 +124,16 @@ public class PlayerMovement : MonoBehaviour
 
     private IEnumerator ExecutePushCoroutine(PlayerPushedEvent evt)
     {
-        // Check if pushed destination is blocked
-        Vector3 destination = evt.TargetPosition;
+        Vector3 destination = TileReservationSystem.SnapToTileCenter(evt.TargetPosition);
+        destination.z = transform.position.z;
         if (IsTileBlocked(destination))
         {
-            // Destination is blocked by obstacle/wall, keep current position but still take damage
             destination = transform.position;
         }
 
         if (destination != transform.position)
         {
             isMoving = true;
-            // Note: Keep player facing the way it was when attack began (do NOT change lastDirection or MoveX/MoveY)
             float pushSpeed = evt.PushSpeed > 0f ? evt.PushSpeed : moveSpeed * 1.5f;
             while (Vector3.Distance(transform.position, destination) > 0.001f)
             {
@@ -148,7 +145,6 @@ public class PlayerMovement : MonoBehaviour
             TryTriggerDoorAtCurrentPosition();
         }
 
-        // Apply damage after push or upon impact
         if (playerStats != null && evt.Damage > 0)
         {
             playerStats.TakeDamage(evt.Damage, evt.Attacker);
@@ -164,10 +160,19 @@ public class PlayerMovement : MonoBehaviour
     {
         if (playerStats == null) playerStats = GetComponent<PlayerStats>();
 
-        if (GameManager.Instance == null) return;
+        if (GameManager.Instance == null)
+        {
+            transform.position = TileReservationSystem.SnapToTileCenter(transform.position);
+            return;
+        }
+
         if (GameManager.Instance.DungeonDictionary.TryGetValue(GameManager.Instance.CurrentRoomIndex, out GameManager.RoomData room))
         {
-            MoveToPosition(room.CenterTilePosition);
+            MoveToPosition(TileReservationSystem.SnapToTileCenter(room.CenterTilePosition));
+        }
+        else
+        {
+            transform.position = TileReservationSystem.SnapToTileCenter(transform.position);
         }
     }
 
@@ -197,15 +202,34 @@ public class PlayerMovement : MonoBehaviour
             return;
         }
 
-        lastDirection = inputDir;
-        Vector3 targetPosition = transform.position + new Vector3(inputDir.x, inputDir.y, 0) * tileSize;
+        Vector2Int currentGrid = TileReservationSystem.WorldToGridTile(transform.position);
+        Vector2Int targetGrid = currentGrid + new Vector2Int(Mathf.RoundToInt(inputDir.x), Mathf.RoundToInt(inputDir.y));
+        Vector3 targetPosition = TileReservationSystem.GetTileCenterWorld(targetGrid, transform.position.z);
 
-        if (!IsTileBlocked(targetPosition))
+        if (IsTileBlocked(targetPosition))
         {
-            canTakeTurn = false;
-            nextMoveTime = Time.time + moveCooldown;
-            StartCoroutine(MoveToTile(targetPosition));
+            if (lastDirection != inputDir)
+            {
+                lastDirection = inputDir;
+                if (animator != null)
+                {
+                    animator.SetFloat(MoveX, lastDirection.x);
+                    animator.SetFloat(MoveY, lastDirection.y);
+                }
+            }
+            return;
         }
+
+        lastDirection = inputDir;
+        if (animator != null)
+        {
+            animator.SetFloat(MoveX, lastDirection.x);
+            animator.SetFloat(MoveY, lastDirection.y);
+        }
+
+        canTakeTurn = false;
+        nextMoveTime = Time.time + moveCooldown;
+        StartCoroutine(MoveToTile(targetPosition));
     }
 
     private IEnumerator MoveToTile(Vector3 targetPos)
@@ -231,7 +255,8 @@ public class PlayerMovement : MonoBehaviour
 
     private bool IsTileBlocked(Vector3 targetPos)
     {
-        Collider2D hit = Physics2D.OverlapBox(targetPos, new Vector2(tileSize * 0.8f, tileSize * 0.8f), 0f, obstacleLayer);
+        Vector3 centerPos = TileReservationSystem.SnapToTileCenter(targetPos);
+        Collider2D hit = Physics2D.OverlapBox(centerPos, new Vector2(tileSize * 0.8f, tileSize * 0.8f), 0f, obstacleLayer);
         return hit != null && hit.gameObject != gameObject;
     }
 
@@ -240,6 +265,7 @@ public class PlayerMovement : MonoBehaviour
         if (!canTakeTurn || isMoving || (ScreenFadeTransition.Instance != null && ScreenFadeTransition.Instance.IsTransitioning)) return;
 
         canTakeTurn = false;
+        nextMoveTime = Time.time + moveCooldown;
         animator.SetTrigger(attackTrigger);
 
         if (playerStats == null) playerStats = GetComponent<PlayerStats>();
@@ -280,9 +306,10 @@ public class PlayerMovement : MonoBehaviour
 
     private void DamageAtTile(Vector3 targetPos, int damage, HashSet<IDamageable> damagedEntities)
     {
-        Collider2D[] hits = Physics2D.OverlapBoxAll(targetPos, new Vector2(tileSize * 0.85f, tileSize * 0.85f), 0f);
-        foreach (var hit in hits)
+        int hitCount = Physics2D.OverlapBox(targetPos, new Vector2(tileSize * 0.85f, tileSize * 0.85f), 0f, default, hitBuffer);
+        for (int i = 0; i < hitCount; i++)
         {
+            Collider2D hit = hitBuffer[i];
             if (hit == null || hit.gameObject == gameObject) continue;
 
             if (hit.TryGetComponent<IDamageable>(out var damageable) || hit.GetComponentInParent<IDamageable>() is { } parentDamageable && (damageable = parentDamageable) != null)
@@ -331,7 +358,6 @@ public class PlayerMovement : MonoBehaviour
     {
         if (hasEnteredInitialRoom || evt.Room.RoomIndex != 0) return;
         hasEnteredInitialRoom = true;
-        //MoveToPosition(evt.Room.CenterTilePosition);
     }
 
     private void TransitionThroughDoor(DoorType doorType)
@@ -366,7 +392,7 @@ public class PlayerMovement : MonoBehaviour
 
         if (ScreenFadeTransition.Instance != null)
         {
-            StartCoroutine(ScreenFadeTransition.Instance.PlayTransition(() =>
+            ScreenFadeTransition.Instance.StartCoroutine(ScreenFadeTransition.Instance.PlayTransition(() =>
             {
                 MoveToPosition(targetDoor.Value);
                 GameManager.NotifyNewRoomEntered(nextRoom);
@@ -413,11 +439,25 @@ public class PlayerMovement : MonoBehaviour
         canTakeTurn = true;
         nextMoveTime = 0f;
         doorTriggerBlockedUntil = 0f;
-        if (animator != null)
-        {
-            animator.SetBool(Moving, false);
-        }
+        ResetAnimator();
         MoveToPosition(position);
+    }
+
+    public void ResetAnimator()
+    {
+        if (animator == null) return;
+
+        animator.ResetTrigger(dieTrigger);
+        animator.ResetTrigger(takeDamageTrigger);
+        animator.ResetTrigger(attackTrigger);
+
+        animator.SetBool(Moving, false);
+        animator.SetFloat(MoveX, lastDirection.x);
+        animator.SetFloat(MoveY, lastDirection.y);
+
+        animator.Rebind();
+        animator.Play("IdleTree", 0, 0f);
+        animator.Update(0f);
     }
 
     public void ResetTurnState()
@@ -435,10 +475,8 @@ public class PlayerMovement : MonoBehaviour
     private void OnDrawGizmos()
 {
     Gizmos.color = Color.red;
-    // Calculates where the next tile check will happen based on last direction
     Vector3 testPos = transform.position + new Vector3(lastDirection.x, lastDirection.y, 0) * tileSize;
     
-    // Draw both the circle check and a square box check
     Gizmos.DrawWireSphere(testPos, 0.2f);
     Gizmos.DrawWireCube(testPos, new Vector3(tileSize * 0.8f, tileSize * 0.8f, 0f));
 }

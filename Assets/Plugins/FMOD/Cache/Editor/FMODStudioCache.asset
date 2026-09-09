@@ -1,5 +1,32 @@
 %YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
+--- !u!114 &-8586769742397547177
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ceb653cd98e289a4e8697a1af55201f2, type: 3}
+  m_Name: event:/SFX_ChestDestroy
+  m_EditorClassIdentifier: FMODUnityEditor::FMODUnity.EditorEventRef
+  Path: event:/SFX_ChestDestroy
+  Guid:
+    Data1: -2121069913
+    Data2: 1147798284
+    Data3: 491654552
+    Data4: -71093064
+  Banks:
+  - {fileID: 8994020168354651884}
+  IsStream: 0
+  Is3D: 0
+  IsOneShot: 1
+  Parameters: []
+  MinDistance: 1
+  MaxDistance: 20
+  Length: 929
 --- !u!114 &-8272736750473392735
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -15,11 +42,65 @@ MonoBehaviour:
   Path: FMOD/Desktop/Master.strings.bank
   Name: Master.strings
   StudioPath: bank:/Master.strings
-  lastModified: 639239621976081397
+  lastModified: 639245654161460803
   FileSizes:
   - Name: 
-    Value: 970
+    Value: 1424
   Exists: 1
+--- !u!114 &-8200343375964216599
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ceb653cd98e289a4e8697a1af55201f2, type: 3}
+  m_Name: event:/SFX_ThrowingFlaskImpact
+  m_EditorClassIdentifier: FMODUnityEditor::FMODUnity.EditorEventRef
+  Path: event:/SFX_ThrowingFlaskImpact
+  Guid:
+    Data1: -486917564
+    Data2: 1157640113
+    Data3: -1129874281
+    Data4: 1646498558
+  Banks:
+  - {fileID: 8994020168354651884}
+  IsStream: 0
+  Is3D: 0
+  IsOneShot: 1
+  Parameters: []
+  MinDistance: 1
+  MaxDistance: 20
+  Length: 750
+--- !u!114 &-7656085967289854956
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ceb653cd98e289a4e8697a1af55201f2, type: 3}
+  m_Name: event:/SFX_EnemyHitFeedback
+  m_EditorClassIdentifier: FMODUnityEditor::FMODUnity.EditorEventRef
+  Path: event:/SFX_EnemyHitFeedback
+  Guid:
+    Data1: -1987344568
+    Data2: 1282363803
+    Data3: 1811267462
+    Data4: -1942081555
+  Banks:
+  - {fileID: 8994020168354651884}
+  IsStream: 0
+  Is3D: 0
+  IsOneShot: 1
+  Parameters: []
+  MinDistance: 1
+  MaxDistance: 20
+  Length: 492
 --- !u!114 &-6266127237227849991
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -47,7 +128,7 @@ MonoBehaviour:
   MinDistance: 1
   MaxDistance: 20
   Length: 339617
---- !u!114 &-4583872329141889365
+--- !u!114 &-4625762085046492903
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -57,14 +138,68 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: ceb653cd98e289a4e8697a1af55201f2, type: 3}
-  m_Name: event:/SFX_EnemyHitFeedback
+  m_Name: event:/Music_CanonInDForTwoRenaissanceHarps 2
   m_EditorClassIdentifier: FMODUnityEditor::FMODUnity.EditorEventRef
-  Path: event:/SFX_EnemyHitFeedback
+  Path: event:/Music_CanonInDForTwoRenaissanceHarps 2
   Guid:
-    Data1: -76629434
-    Data2: 1291566663
-    Data3: 1537142955
-    Data4: 1099843362
+    Data1: 1913188724
+    Data2: 1083881963
+    Data3: -1294722143
+    Data4: -1882291899
+  Banks:
+  - {fileID: 8994020168354651884}
+  IsStream: 1
+  Is3D: 0
+  IsOneShot: 1
+  Parameters: []
+  MinDistance: 1
+  MaxDistance: 20
+  Length: 339617
+--- !u!114 &-4498747104001291675
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ceb653cd98e289a4e8697a1af55201f2, type: 3}
+  m_Name: event:/SFX_Low_Health
+  m_EditorClassIdentifier: FMODUnityEditor::FMODUnity.EditorEventRef
+  Path: event:/SFX_Low_Health
+  Guid:
+    Data1: 962069595
+    Data2: 1124375226
+    Data3: -785506633
+    Data4: 3795157
+  Banks:
+  - {fileID: 8994020168354651884}
+  IsStream: 1
+  Is3D: 0
+  IsOneShot: 1
+  Parameters: []
+  MinDistance: 1
+  MaxDistance: 20
+  Length: 15618
+--- !u!114 &-4304000294084117980
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ceb653cd98e289a4e8697a1af55201f2, type: 3}
+  m_Name: event:/SFX_Degen
+  m_EditorClassIdentifier: FMODUnityEditor::FMODUnity.EditorEventRef
+  Path: event:/SFX_Degen
+  Guid:
+    Data1: -1813573033
+    Data2: 1155356579
+    Data3: 1215495095
+    Data4: 52795855
   Banks:
   - {fileID: 8994020168354651884}
   IsStream: 0
@@ -73,7 +208,61 @@ MonoBehaviour:
   Parameters: []
   MinDistance: 1
   MaxDistance: 20
-  Length: 492
+  Length: 579
+--- !u!114 &-4029808705657358906
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ceb653cd98e289a4e8697a1af55201f2, type: 3}
+  m_Name: event:/SFX_ChestOpen
+  m_EditorClassIdentifier: FMODUnityEditor::FMODUnity.EditorEventRef
+  Path: event:/SFX_ChestOpen
+  Guid:
+    Data1: 42543081
+    Data2: 1263798927
+    Data3: 1448623271
+    Data4: 650560144
+  Banks:
+  - {fileID: 8994020168354651884}
+  IsStream: 0
+  Is3D: 0
+  IsOneShot: 1
+  Parameters: []
+  MinDistance: 1
+  MaxDistance: 20
+  Length: 1262
+--- !u!114 &-44121688164064018
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ceb653cd98e289a4e8697a1af55201f2, type: 3}
+  m_Name: event:/SFX_Enemy_Pawn_Hit
+  m_EditorClassIdentifier: FMODUnityEditor::FMODUnity.EditorEventRef
+  Path: event:/SFX_Enemy_Pawn_Hit
+  Guid:
+    Data1: -1822293208
+    Data2: 1314602818
+    Data3: -91101812
+    Data4: 1310387326
+  Banks:
+  - {fileID: 8994020168354651884}
+  IsStream: 0
+  Is3D: 0
+  IsOneShot: 1
+  Parameters: []
+  MinDistance: 1
+  MaxDistance: 20
+  Length: 421
 --- !u!114 &11400000
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -90,20 +279,131 @@ MonoBehaviour:
   - {fileID: -8272736750473392735}
   - {fileID: 8994020168354651884}
   EditorEvents:
-  - {fileID: -4583872329141889365}
   - {fileID: -6266127237227849991}
+  - {fileID: -44121688164064018}
+  - {fileID: -8200343375964216599}
+  - {fileID: -7656085967289854956}
+  - {fileID: -4304000294084117980}
+  - {fileID: -4498747104001291675}
+  - {fileID: -4625762085046492903}
+  - {fileID: 8157392089012265577}
+  - {fileID: -8586769742397547177}
+  - {fileID: 7777637249014849769}
+  - {fileID: 2918255425568734672}
+  - {fileID: -4029808705657358906}
   EditorParameters: []
   MasterBanks:
   - {fileID: 8994020168354651884}
   StringsBanks:
   - {fileID: -8272736750473392735}
   cacheVersion: 131860
-  cacheTime: 639239621976081397
+  cacheTime: 639245654161460803
   SerializableEventsDict:
-  - key: event:/SFX_EnemyHitFeedback
-    index: 0
   - key: event:/Music_CanonInDForTwoRenaissanceHarps
+    index: 0
+  - key: event:/SFX_Enemy_Pawn_Hit
     index: 1
+  - key: event:/SFX_ThrowingFlaskImpact
+    index: 2
+  - key: event:/SFX_EnemyHitFeedback
+    index: 3
+  - key: event:/SFX_Degen
+    index: 4
+  - key: event:/SFX_Low_Health
+    index: 5
+  - key: event:/Music_CanonInDForTwoRenaissanceHarps 2
+    index: 6
+  - key: event:/SFX_Footsteps_Stairs
+    index: 7
+  - key: event:/SFX_ChestDestroy
+    index: 8
+  - key: event:/SFX_HealPot
+    index: 9
+  - key: event:/SFX_Enemy_Pawn_Hit 2
+    index: 10
+  - key: event:/SFX_ChestOpen
+    index: 11
+--- !u!114 &2918255425568734672
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ceb653cd98e289a4e8697a1af55201f2, type: 3}
+  m_Name: event:/SFX_Enemy_Pawn_Hit 2
+  m_EditorClassIdentifier: FMODUnityEditor::FMODUnity.EditorEventRef
+  Path: event:/SFX_Enemy_Pawn_Hit 2
+  Guid:
+    Data1: 375999966
+    Data2: 1176377801
+    Data3: 112510090
+    Data4: 1031350854
+  Banks:
+  - {fileID: 8994020168354651884}
+  IsStream: 0
+  Is3D: 0
+  IsOneShot: 1
+  Parameters: []
+  MinDistance: 1
+  MaxDistance: 20
+  Length: 421
+--- !u!114 &7777637249014849769
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ceb653cd98e289a4e8697a1af55201f2, type: 3}
+  m_Name: event:/SFX_HealPot
+  m_EditorClassIdentifier: FMODUnityEditor::FMODUnity.EditorEventRef
+  Path: event:/SFX_HealPot
+  Guid:
+    Data1: 1295985849
+    Data2: 1216794068
+    Data3: 1865326252
+    Data4: 954905244
+  Banks:
+  - {fileID: 8994020168354651884}
+  IsStream: 0
+  Is3D: 0
+  IsOneShot: 1
+  Parameters: []
+  MinDistance: 1
+  MaxDistance: 20
+  Length: 1351
+--- !u!114 &8157392089012265577
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ceb653cd98e289a4e8697a1af55201f2, type: 3}
+  m_Name: event:/SFX_Footsteps_Stairs
+  m_EditorClassIdentifier: FMODUnityEditor::FMODUnity.EditorEventRef
+  Path: event:/SFX_Footsteps_Stairs
+  Guid:
+    Data1: 1376657567
+    Data2: 1233475862
+    Data3: -1686733919
+    Data4: 947716615
+  Banks:
+  - {fileID: 8994020168354651884}
+  IsStream: 0
+  Is3D: 0
+  IsOneShot: 1
+  Parameters: []
+  MinDistance: 1
+  MaxDistance: 20
+  Length: 477
 --- !u!114 &8994020168354651884
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -119,6 +419,6 @@ MonoBehaviour:
   Path: FMOD/Desktop/Master.bank
   Name: Master
   StudioPath: bank:/Master
-  lastModified: 639239621976005188
+  lastModified: 639245654161450523
   FileSizes: []
   Exists: 1

@@ -46,7 +46,6 @@ namespace Dungeon.Spawning
 
             if (_validFloorTilesBuffer.Count < 2) return;
 
-            // 1. Calculate entrance / exit door coordinates
             if (room.Type == RoomType.Start)
             {
                 room.EntranceDoorTile = null;
@@ -104,7 +103,6 @@ namespace Dungeon.Spawning
                 tileQuery.MarkOccupied(chosenExit);
             }
 
-            // 2. Stamp door tiles onto tilemaps
             if (_objectTilemap == null || floorTilemap == null) return;
 
             TileBase inTile = room.Type == RoomType.Chest && specialEntranceDoorTile != null ? specialEntranceDoorTile : entranceDoorTile;

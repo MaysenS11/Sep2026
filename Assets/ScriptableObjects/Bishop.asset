@@ -10,18 +10,18 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: 06b8e2f9b37b2ef438cefd2f82a4264c, type: 3}
-  m_Name: Pawn
+  m_Name: Bishop
   m_EditorClassIdentifier: Assembly-CSharp::EnemyData
-  enemyName: Pawn
+  enemyName: Bishop
   prefab: {fileID: 0}
-  maxHealth: 2
-  attackDamage: 2
+  maxHealth: 8
+  attackDamage: 4
   stepSpeed: 5
-  detectionRange: 6
-  movementPattern: 0
-  usesDiagonalAttack: 1
-  smartness: 0
-  maxLineSteps: 1
+  detectionRange: 8
+  movementPattern: 1
+  usesDiagonalAttack: 0
+  smartness: 1
+  maxLineSteps: 2
   movesInterval: 1
-  movePriority: 0
-  populationPercentage: 0.35
+  movePriority: 1
+  populationPercentage: 0.25

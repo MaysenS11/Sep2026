@@ -108,22 +108,7 @@ public class CameraBounds : MonoBehaviour
         if (startRoom == null) return;
 
         SetRoomBounds(startRoom.CenterPosition, startRoom.Size.x, startRoom.Size.y, startRoom.CenterPosition);
-
-#if UNITY_EDITOR
-        if (!Application.isPlaying)
-        {
-            EditorUtility.SetDirty(gameObject);
-            CinemachineCamera vcam = virtualCamera != null ? virtualCamera : (confiner != null ? confiner.GetComponent<CinemachineCamera>() : null);
-            if (vcam != null)
-            {
-                EditorUtility.SetDirty(vcam.gameObject);
-            }
-            if (confiner != null)
-            {
-                EditorUtility.SetDirty(confiner.gameObject);
-            }
-        }
-#endif
+        MarkEditorDirty();
     }
 
     private void OnDoorTriggered(DoorTriggeredEvent evt)
@@ -144,19 +129,16 @@ public class CameraBounds : MonoBehaviour
 
     private void ApplyRoomBounds(GameManager.RoomData room)
     {
-        Debug.Log(currentDoorType + " " + room.RoomIndex);
         if (boundsCollider == null || mainCamera == null || room == null) return;
         Vector3 initialCamPos = Vector3.zero;
 
         switch (currentDoorType)
         {
             case DoorType.EntryDoor:
-                // Entering from an EntryDoor (going back) -> Player spawns at ExitDoor of previous room (offset down)
                 if (!room.ExitDoorPosition.HasValue) return;
                 initialCamPos = new Vector3(room.ExitDoorPosition.Value.x, room.ExitDoorPosition.Value.y - cameraTransitionOffset, transform.position.z);
                 break;
             case DoorType.ExitDoor:
-                // Entering from an ExitDoor (moving forward) -> Player spawns at EntryDoor of next room (offset down)
                 if (!room.EntryDoorPosition.HasValue) return;
                 initialCamPos = new Vector3(room.EntryDoorPosition.Value.x, room.EntryDoorPosition.Value.y - cameraTransitionOffset, transform.position.z);
                 break;
@@ -222,5 +204,24 @@ public class CameraBounds : MonoBehaviour
                 follow.enabled = true;
             }
         }
+    }
+
+    private void MarkEditorDirty()
+    {
+#if UNITY_EDITOR
+        if (!Application.isPlaying)
+        {
+            EditorUtility.SetDirty(gameObject);
+            CinemachineCamera vcam = virtualCamera != null ? virtualCamera : (confiner != null ? confiner.GetComponent<CinemachineCamera>() : null);
+            if (vcam != null)
+            {
+                EditorUtility.SetDirty(vcam.gameObject);
+            }
+            if (confiner != null)
+            {
+                EditorUtility.SetDirty(confiner.gameObject);
+            }
+        }
+#endif
     }
 }

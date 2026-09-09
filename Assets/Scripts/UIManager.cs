@@ -16,12 +16,6 @@ public class UIManager : MonoBehaviour
     [Tooltip("Assign the HeartFillContainer transforms in left-to-right order, or leave empty to auto-find from HUD/HealthContainer")]
     [SerializeField] private Transform[] heartFillContainers;
 
-    [Header("Legacy Health Display (Optional)")]
-    [SerializeField] private Image[] heartImages; // Drag your Heart Image components here
-    [SerializeField] private Sprite fullHeartSprite;
-    [SerializeField] private Sprite emptyHeartSprite;
-
-    // Flattened list of all individual fill pieces ordered from rightmost to leftmost
     private readonly List<GameObject> rightToLeftFills = new List<GameObject>();
     private bool isInitialized = false;
 
@@ -34,7 +28,6 @@ public class UIManager : MonoBehaviour
     {
         if (isInitialized) return;
 
-        // Auto-find containers under HealthContainer if not assigned in Inspector
         if (heartFillContainers == null || heartFillContainers.Length == 0)
         {
             Transform healthContainer = transform.Find("IngamePanel/HealthContainer");
@@ -68,13 +61,11 @@ public class UIManager : MonoBehaviour
 
         if (heartFillContainers != null && heartFillContainers.Length > 0)
         {
-            // Traverse containers from rightmost container to leftmost container
             for (int c = heartFillContainers.Length - 1; c >= 0; c--)
             {
                 Transform container = heartFillContainers[c];
                 if (container == null) continue;
 
-                // Within each container, disable fills in reverse order (fill 3, fill 2, fill 1, fill 0)
                 for (int f = container.childCount - 1; f >= 0; f--)
                 {
                     Transform fillChild = container.GetChild(f);
@@ -106,7 +97,6 @@ public class UIManager : MonoBehaviour
 
     private void Update()
     {
-        // 1. Update Timer (Format 00:00:00:00 -> Hrs:Mins:Secs:MS)
         elapsedTime += Time.deltaTime;
         System.TimeSpan t = System.TimeSpan.FromSeconds(elapsedTime);
         if (timerText != null)
@@ -123,7 +113,6 @@ public class UIManager : MonoBehaviour
             InitializeHeartFills();
         }
 
-        // Heart fill display: disable a fill from the rightmost container for each damage point taken
         if (rightToLeftFills.Count > 0)
         {
             int damageTaken = Mathf.Max(0, maxHealth - currentHealth);
@@ -131,32 +120,11 @@ public class UIManager : MonoBehaviour
             for (int i = 0; i < rightToLeftFills.Count; i++)
             {
                 if (rightToLeftFills[i] == null) continue;
-                // If index < damageTaken, this fill was consumed (disabled); otherwise enabled
+
                 bool isActive = i >= damageTaken;
                 rightToLeftFills[i].SetActive(isActive);
             }
         }
-
-        // Backward compatibility for full-heart image array if assigned
-        if (heartImages != null && heartImages.Length > 0)
-        {
-            for (int i = 0; i < heartImages.Length; i++)
-            {
-                if (heartImages[i] == null) continue;
-
-                Sprite targetSprite = (i < currentHealth) ? fullHeartSprite : emptyHeartSprite;
-                if (targetSprite != null)
-                {
-                    heartImages[i].sprite = targetSprite;
-                }
-                heartImages[i].enabled = (i < currentHealth);
-            }
-        }
-    }
-
-    public void UpdateHealth(int currentHealth)
-    {
-        UpdateHealth(currentHealth, 16);
     }
 
     public void SetMaskSprite(Sprite newMask)

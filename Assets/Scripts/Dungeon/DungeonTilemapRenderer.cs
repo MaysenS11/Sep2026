@@ -84,9 +84,16 @@ namespace Dungeon
             for (int i = 0; i < chestRooms.Count; i++)
             {
                 GameManager.RoomData chest = chestRooms[i];
-                if (chest.ParentRoomIndex != -1 && GameManager.Instance != null && GameManager.Instance.DungeonDictionary.TryGetValue(chest.ParentRoomIndex, out var parentRoom))
+                if (chest.ParentRoomIndex != -1)
                 {
-                    DrawOrthogonalPath(debugTilemap, debugPathTile, parentRoom.CenterTile, chest.CenterTile);
+                    for (int r = 0; r < rooms.Count; r++)
+                    {
+                        if (rooms[r].RoomIndex == chest.ParentRoomIndex)
+                        {
+                            DrawOrthogonalPath(debugTilemap, debugPathTile, rooms[r].CenterTile, chest.CenterTile);
+                            break;
+                        }
+                    }
                 }
             }
         }

@@ -15,7 +15,6 @@ namespace Dungeon.Editor
             EditorGUILayout.Space(10);
             if (GUILayout.Button("Generate Dungeon (In Editor)", GUILayout.Height(30)))
             {
-                manager.GenerateAndBuildDungeon();
                 EventBus<GenerateDungeonEvent>.Raise(new GenerateDungeonEvent());
                 UnityEditor.SceneManagement.EditorSceneManager.MarkSceneDirty(manager.gameObject.scene);
             }

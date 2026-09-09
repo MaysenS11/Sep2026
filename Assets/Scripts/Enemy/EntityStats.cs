@@ -2,9 +2,6 @@ using UnityEngine;
 
 public class EntityStats : MonoBehaviour, IDamageable
 {
-    [Header("Data (Optional Override)")]
-    [SerializeField] private EnemyData enemyData;
-
     [Header("Stats")]
     [SerializeField] private int maxHealth = 10;
     [SerializeField] private int currentHealth;
@@ -17,24 +14,17 @@ public class EntityStats : MonoBehaviour, IDamageable
 
     private void Awake()
     {
-        if (enemyData != null)
-        {
-            maxHealth = enemyData.MaxHealth;
-            attackDamage = enemyData.AttackDamage;
-        }
-
         currentHealth = maxHealth;
     }
 
     public void Initialize(EnemyData data)
     {
-        enemyData = data;
-        if (enemyData != null)
+        if (data != null)
         {
-            maxHealth = enemyData.MaxHealth;
-            attackDamage = enemyData.AttackDamage;
-            currentHealth = maxHealth;
+            maxHealth = data.MaxHealth;
+            attackDamage = data.AttackDamage;
         }
+        currentHealth = maxHealth;
     }
 
     public void TakeDamage(int amount, GameObject source)

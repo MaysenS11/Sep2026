@@ -1,3 +1,4 @@
+using System.Collections.Generic;
 using UnityEngine;
 
 public enum GameState
@@ -110,5 +111,73 @@ public readonly struct PlayerPushedEvent : IEvent
         PushSpeed = pushSpeed;
         Damage = damage;
         Attacker = attacker;
+    }
+}
+
+public readonly struct EnemyTurnPlannedEvent : IEvent
+{
+    public readonly int PlannedMoveCount;
+    public readonly int SkippedCount;
+
+    public EnemyTurnPlannedEvent(int plannedMoveCount, int skippedCount)
+    {
+        PlannedMoveCount = plannedMoveCount;
+        SkippedCount = skippedCount;
+    }
+}
+
+public readonly struct EnemyMoveBlockedEvent : IEvent
+{
+    public readonly GameObject Enemy;
+    public readonly Vector2Int BlockedTile;
+
+    public EnemyMoveBlockedEvent(GameObject enemy, Vector2Int blockedTile)
+    {
+        Enemy = enemy;
+        BlockedTile = blockedTile;
+    }
+}
+
+public readonly struct EnemyPathDebugEvent : IEvent
+{
+    public readonly EnemyBase Enemy;
+    public readonly List<Vector2Int> Path;
+    public readonly Color Color;
+
+    public EnemyPathDebugEvent(EnemyBase enemy, List<Vector2Int> path, Color color)
+    {
+        Enemy = enemy;
+        Path = path;
+        Color = color;
+    }
+}
+
+public readonly struct EnemyPathDebugClearedEvent : IEvent
+{
+    public readonly EnemyBase Enemy;
+
+    public EnemyPathDebugClearedEvent(EnemyBase enemy)
+    {
+        Enemy = enemy;
+    }
+}
+
+public readonly struct EnemyRegisteredEvent : IEvent
+{
+    public readonly EnemyBase Enemy;
+
+    public EnemyRegisteredEvent(EnemyBase enemy)
+    {
+        Enemy = enemy;
+    }
+}
+
+public readonly struct EnemyUnregisteredEvent : IEvent
+{
+    public readonly EnemyBase Enemy;
+
+    public EnemyUnregisteredEvent(EnemyBase enemy)
+    {
+        Enemy = enemy;
     }
 }

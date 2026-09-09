@@ -22,7 +22,6 @@ public static class EventBus<T> where T : IEvent
     {
         if (Bindings.Count == 0) return;
 
-        // Copy bindings to buffer in case a callback subscribes/unsubscribes during execution
         InvocationBuffer.Clear();
         InvocationBuffer.AddRange(Bindings);
 
