@@ -95,7 +95,7 @@ SpriteRenderer:
   m_AdaptiveModeThreshold: 0.5
   m_SpriteTileMode: 0
   m_WasSpriteAssigned: 1
-  m_SpriteSortPoint: 0
+  m_SpriteSortPoint: 1
 --- !u!95 &8181634155171235856
 Animator:
   serializedVersion: 7
@@ -194,7 +194,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a57dcda1d0d908b49b22ec636f934c3b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::EntityStats
-  enemyData: {fileID: 11400000, guid: 0a42cc2634daa9a4190a31f23a77b34a, type: 2}
   maxHealth: 10
   currentHealth: 0
   attackDamage: 2

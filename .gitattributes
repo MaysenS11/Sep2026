@@ -1,0 +1,9 @@
+# Set default behavior to auto-handle line endings
+* text=auto
+
+# Explicitly declare text files that should always use LF (recommended for Unity)
+*.asset text eol=lf
+*.meta text eol=lf
+*.prefab text eol=lf
+*.unity text eol=lf
+*.cs text eol=lf

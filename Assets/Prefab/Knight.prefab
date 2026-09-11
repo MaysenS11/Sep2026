@@ -86,8 +86,8 @@ SpriteRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 6
   m_MaskInteraction: 0
-  m_Sprite: {fileID: -3962246455862633825, guid: 76d1ee9b513d3a74bb5ab3a046f2ea7c, type: 3}
-  m_Color: {r: 0.9339623, g: 0.8574183, b: 0.24230155, a: 1}
+  m_Sprite: {fileID: 1048257111863024934, guid: ca5d68e74452f3441b2782fac45630e8, type: 3}
+  m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0
   m_DrawMode: 0
@@ -95,7 +95,7 @@ SpriteRenderer:
   m_AdaptiveModeThreshold: 0.5
   m_SpriteTileMode: 0
   m_WasSpriteAssigned: 1
-  m_SpriteSortPoint: 0
+  m_SpriteSortPoint: 1
 --- !u!95 &8181634155171235856
 Animator:
   serializedVersion: 7
@@ -194,7 +194,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: a57dcda1d0d908b49b22ec636f934c3b, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::EntityStats
-  enemyData: {fileID: 11400000, guid: 7fb1d3cb3e7a65c44a8e6a1aa4ec2e6f, type: 2}
   maxHealth: 10
   currentHealth: 0
   attackDamage: 2
