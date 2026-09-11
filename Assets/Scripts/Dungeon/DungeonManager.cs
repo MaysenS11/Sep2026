@@ -111,7 +111,12 @@ namespace Dungeon
                 );
             }
 
-            if (generatedRooms != null && generatedRooms.Count > 0)
+            if (GameSpawnSettings.SettingsModifiedSinceLastDungeon)
+            {
+                GameSpawnSettings.SettingsModifiedSinceLastDungeon = false;
+                GenerateAndBuildDungeon();
+            }
+            else if (generatedRooms != null && generatedRooms.Count > 0)
             {
                 PublishDungeonData();
                 PositionPlayerAtStartRoom();

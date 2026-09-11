@@ -74,7 +74,8 @@ namespace Dungeon.Spawning
 
             if (_validTilesBuffer.Count == 0) return;
 
-            int targetCount = Mathf.Max(1, Mathf.RoundToInt(roomDensity * _validTilesBuffer.Count));
+            float activeDensity = GameSpawnSettings.EnemyDensity;
+            int targetCount = Mathf.Max(1, Mathf.RoundToInt(activeDensity * _validTilesBuffer.Count));
 
             List<(GameObject prefab, float weight)> candidates = BuildWeightedCandidates(room);
             if (candidates.Count == 0) return;
@@ -124,7 +125,8 @@ namespace Dungeon.Spawning
 
                 if (prefab.TryGetComponent<EnemyBase>(out var enemy) && enemy.Data != null)
                 {
-                    float popPct = enemy.Data.PopulationPercentage;
+                    float configuredWeight = GameSpawnSettings.GetWeightForEnemy(enemy.Data.EnemyName);
+                    float popPct = enemy.Data.PopulationPercentage * configuredWeight;
                     if (popPct <= 0f) continue;
 
                     float priorityNorm = Mathf.Clamp01(enemy.Data.MovePriority / 5f);

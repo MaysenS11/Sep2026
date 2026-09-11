@@ -99,7 +99,13 @@ namespace Dungeon.Spawning
 
             if (_validTilesBuffer.Count == 0) return;
 
-            int targetCount = Mathf.RoundToInt(data.SpawnDensity * _validTilesBuffer.Count);
+            float density = data.SpawnDensity;
+            if (data.PropName != null && data.PropName.ToLowerInvariant().Contains("barrel"))
+            {
+                density = GameSpawnSettings.BarrelDensity;
+            }
+
+            int targetCount = Mathf.RoundToInt(density * _validTilesBuffer.Count);
             if (data.MinPerRoom > 0 && targetCount < data.MinPerRoom) targetCount = data.MinPerRoom;
             if (data.MaxPerRoom > 0 && targetCount > data.MaxPerRoom) targetCount = data.MaxPerRoom;
 
