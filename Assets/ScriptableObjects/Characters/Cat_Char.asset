@@ -1,0 +1,21 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a3a8592d7203c064eb76fe8bf24160bf, type: 3}
+  m_Name: Cat_Char
+  m_EditorClassIdentifier: Assembly-CSharp::CharacterDefinition
+  characterId: 0
+  characterName: Cat
+  maskSprite: {fileID: 10913, guid: 0000000000000000f000000000000000, type: 0}
+  fullBodySprite: {fileID: 7236782834462381477, guid: 47a81e62f7561694d98215e4b31c79a2, type: 3}
+  startHealth: 16
+  lockedByDefault: 0
+  lockedTint: {r: 0.25, g: 0.25, b: 0.25, a: 1}

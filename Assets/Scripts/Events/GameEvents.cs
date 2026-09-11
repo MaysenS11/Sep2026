@@ -181,3 +181,52 @@ public readonly struct EnemyUnregisteredEvent : IEvent
         Enemy = enemy;
     }
 }
+
+public readonly struct CharacterUnlockedEvent : IEvent
+{
+    public readonly int CharacterId;
+
+    public CharacterUnlockedEvent(int characterId)
+    {
+        CharacterId = characterId;
+    }
+}
+
+public readonly struct CharacterSelectedEvent : IEvent
+{
+    public readonly CharacterDefinition Character;
+
+    public CharacterSelectedEvent(CharacterDefinition character)
+    {
+        Character = character;
+    }
+}
+
+public readonly struct BossExitDoorTriggeredEvent : IEvent
+{
+}
+
+public readonly struct PropSpawnedEvent : IEvent
+{
+    public readonly GameObject Prop;
+    public readonly Vector2Int GridTile;
+    public readonly GameManager.RoomData Room;
+
+    public PropSpawnedEvent(GameObject prop, Vector2Int gridTile, GameManager.RoomData room)
+    {
+        Prop = prop;
+        GridTile = gridTile;
+        Room = room;
+    }
+}
+
+public readonly struct PropDestroyedEvent : IEvent
+{
+    public readonly GameObject Prop;
+
+    public PropDestroyedEvent(GameObject prop)
+    {
+        Prop = prop;
+    }
+}
+

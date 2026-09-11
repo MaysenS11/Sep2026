@@ -29,6 +29,7 @@ public class PlayerMovement : MonoBehaviour
     private InputAction moveAction;
     private InputAction attackAction;
     private InputAction interactAction;
+    private InputAction menuAction;
 
     private bool isMoving = false;
     private bool canTakeTurn = true;
@@ -57,6 +58,7 @@ public class PlayerMovement : MonoBehaviour
         moveAction = playerMap.FindAction("Move");
         attackAction = playerMap.FindAction("Attack");
         interactAction = playerMap.FindAction("Interact");
+        menuAction = playerMap.FindAction("Menu");
     }
 
     private void OnEnable()
@@ -70,12 +72,20 @@ public class PlayerMovement : MonoBehaviour
         EventBus<EntityDiedEvent>.Subscribe(OnEntityDied);
         attackAction.performed += OnAttackPerformed;
         interactAction.performed += OnInteractPerformed;
+        if (menuAction != null)
+        {
+            menuAction.performed += OnMenuPerformed;
+        }
     }
 
     private void OnDisable()
     {
         attackAction.performed -= OnAttackPerformed;
         interactAction.performed -= OnInteractPerformed;
+        if (menuAction != null)
+        {
+            menuAction.performed -= OnMenuPerformed;
+        }
         EventBus<DoorTriggeredEvent>.Unsubscribe(OnDoorTriggered);
         EventBus<RoomEnteredEvent>.Unsubscribe(OnRoomEntered);
         EventBus<EnemyTurnCompletedEvent>.Unsubscribe(OnEnemyTurnCompleted);
@@ -332,6 +342,11 @@ public class PlayerMovement : MonoBehaviour
     {
         if (isMoving || (ScreenFadeTransition.Instance != null && ScreenFadeTransition.Instance.IsTransitioning)) return;
         animator.SetTrigger(interactTrigger);
+    }
+
+    private void OnMenuPerformed(InputAction.CallbackContext context)
+    {
+        UnityEngine.SceneManagement.SceneManager.LoadScene("StartMenu");
     }
 
     private void OnDoorTriggered(DoorTriggeredEvent evt)

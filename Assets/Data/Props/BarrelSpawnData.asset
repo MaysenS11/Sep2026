@@ -1,0 +1,24 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: e4a8f94346a7c184493842c821e44592, type: 3}
+  m_Name: BarrelSpawnData
+  m_EditorClassIdentifier: Assembly-CSharp::Dungeon.Spawning.PropSpawnData
+  propName: Barrel
+  prefab: {fileID: 1228558132822369691, guid: 3f210e08ec862524499086022990d672, type: 3}
+  spawnDensity: 0.08
+  minPerRoom: 1
+  maxPerRoom: 5
+  allowInNormalRooms: 1
+  allowInChestRooms: 0
+  allowInBossRooms: 0
+  avoidDoorTiles: 1
+  avoidRoomCenter: 1

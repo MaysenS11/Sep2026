@@ -16,6 +16,13 @@ public class DoorTrigger : MonoBehaviour
         Vector3Int cell = objectTilemap.WorldToCell(other.transform.position);
         if (manager.TryResolveDoor(cell, out DoorType doorType))
         {
+            if (doorType == DoorType.SpecialExitDoor)
+            {
+                EventBus<BossExitDoorTriggeredEvent>.Raise(new BossExitDoorTriggeredEvent());
+                UnityEngine.SceneManagement.SceneManager.LoadScene("StartMenu");
+                return;
+            }
+
             GameManager.TriggerDoor(doorType, new Vector2Int(cell.x, cell.y));
         }
     }
