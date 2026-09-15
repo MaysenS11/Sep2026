@@ -230,3 +230,7 @@ public readonly struct PropDestroyedEvent : IEvent
     }
 }
 
+public readonly struct ClearDungeonEvent : IEvent
+{
+}
+

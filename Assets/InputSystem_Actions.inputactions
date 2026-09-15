@@ -82,7 +82,7 @@
                     "name": "Menu",
                     "type": "Button",
                     "id": "8a31e809-5431-4ec8-b328-3e4776db08c1",
-                    "expectedControlType": "Button",
+                    "expectedControlType": "",
                     "processors": "",
                     "interactions": "",
                     "initialStateCheck": false
@@ -1027,8 +1027,30 @@
                 },
                 {
                     "name": "",
+                    "id": "92e18feb-0c39-43a9-849a-eeea3305c937",
+                    "path": "<Keyboard>/d",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "WheelNext",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
                     "id": "a263ca3c-4ef6-42d6-8344-5844a62d604f",
                     "path": "<Keyboard>/leftArrow",
+                    "interactions": "",
+                    "processors": "",
+                    "groups": "",
+                    "action": "WheelPrev",
+                    "isComposite": false,
+                    "isPartOfComposite": false
+                },
+                {
+                    "name": "",
+                    "id": "d7ef807b-effc-4f50-a03d-4193a73e5db2",
+                    "path": "<Keyboard>/a",
                     "interactions": "",
                     "processors": "",
                     "groups": "",

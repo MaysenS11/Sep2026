@@ -12,8 +12,15 @@ namespace Dungeon.Spawning
     public class EnemySpawner : IDungeonSpawner
     {
         [Header("Spawn Settings")]
+        [Tooltip("Fraction of the room spawn budget allocated to enemies (0 = no enemies, 1 = 100% enemies)")]
         [Range(0f, 1f)]
-        [SerializeField] private float roomDensity = 0.08f;
+        [SerializeField] private float roomDensity = 0.5f;
+
+        [Header("Per-Enemy Type Distribution Weights (0.0 to 1.0)")]
+        [Range(0f, 1f)] [SerializeField] private float pawnWeight = 1.0f;
+        [Range(0f, 1f)] [SerializeField] private float knightWeight = 1.0f;
+        [Range(0f, 1f)] [SerializeField] private float rookWeight = 1.0f;
+        [Range(0f, 1f)] [SerializeField] private float bishopWeight = 1.0f;
 
         [Header("Enemy Prefabs")]
         [SerializeField] private GameObject pawnPrefab;
@@ -29,6 +36,11 @@ namespace Dungeon.Spawning
             get => roomDensity;
             set => roomDensity = Mathf.Clamp01(value);
         }
+
+        public float PawnWeight { get => pawnWeight; set => pawnWeight = Mathf.Clamp01(value); }
+        public float KnightWeight { get => knightWeight; set => knightWeight = Mathf.Clamp01(value); }
+        public float RookWeight { get => rookWeight; set => rookWeight = Mathf.Clamp01(value); }
+        public float BishopWeight { get => bishopWeight; set => bishopWeight = Mathf.Clamp01(value); }
 
         public GameObject PawnPrefab
         {
@@ -74,8 +86,11 @@ namespace Dungeon.Spawning
 
             if (_validTilesBuffer.Count == 0) return;
 
-            float activeDensity = GameSpawnSettings.EnemyDensity;
-            int targetCount = Mathf.Max(1, Mathf.RoundToInt(activeDensity * _validTilesBuffer.Count));
+            // 0% room density means explicitly 0 enemies spawned
+            if (roomDensity <= 0f) return;
+
+            int targetCount = Mathf.RoundToInt(roomDensity * _validTilesBuffer.Count);
+            if (targetCount <= 0 && roomDensity > 0f) targetCount = 1;
 
             List<(GameObject prefab, float weight)> candidates = BuildWeightedCandidates(room);
             if (candidates.Count == 0) return;
@@ -105,6 +120,17 @@ namespace Dungeon.Spawning
             }
         }
 
+        private float GetConfiguredWeight(string enemyName)
+        {
+            if (string.IsNullOrEmpty(enemyName)) return 1f;
+            string lower = enemyName.ToLowerInvariant();
+            if (lower.Contains("pawn")) return pawnWeight;
+            if (lower.Contains("knight")) return knightWeight;
+            if (lower.Contains("rook")) return rookWeight;
+            if (lower.Contains("bishop")) return bishopWeight;
+            return 1f;
+        }
+
         private List<(GameObject prefab, float weight)> BuildWeightedCandidates(GameManager.RoomData room)
         {
             List<(GameObject prefab, float weight)> candidates = new List<(GameObject prefab, float weight)>();
@@ -125,7 +151,7 @@ namespace Dungeon.Spawning
 
                 if (prefab.TryGetComponent<EnemyBase>(out var enemy) && enemy.Data != null)
                 {
-                    float configuredWeight = GameSpawnSettings.GetWeightForEnemy(enemy.Data.EnemyName);
+                    float configuredWeight = GetConfiguredWeight(enemy.Data.EnemyName);
                     float popPct = enemy.Data.PopulationPercentage * configuredWeight;
                     if (popPct <= 0f) continue;
 
@@ -137,7 +163,11 @@ namespace Dungeon.Spawning
                 }
                 else
                 {
-                    candidates.Add((prefab, 1f));
+                    float configuredWeight = GetConfiguredWeight(prefab.name);
+                    if (configuredWeight > 0f)
+                    {
+                        candidates.Add((prefab, configuredWeight));
+                    }
                 }
             }
 

@@ -8,8 +8,8 @@ public class ScreenFadeTransition : MonoBehaviour
     public static ScreenFadeTransition Instance { get; private set; }
 
     [SerializeField] private CanvasGroup fadeCanvasGroup;
-    [SerializeField] private float defaultFadeDuration = 0.25f;
-    [SerializeField] private float blackHoldDuration = 0.05f;
+    [SerializeField] private float defaultFadeDuration = 0.50f;
+    [SerializeField] private float blackHoldDuration = 0.20f;
     [SerializeField] private bool fadeInOnStart = true;
 
     public bool IsTransitioning { get; private set; }

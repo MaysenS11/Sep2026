@@ -55,6 +55,11 @@ namespace Dungeon
         [SerializeField] private Vector2Int fixedBossRoomSize = new Vector2Int(18, 16);
         [SerializeField] private Vector2Int fixedChestRoomSize = new Vector2Int(12, 12);
 
+        [Header("Room Density & Content Settings")]
+        [Tooltip("Master room density: 0.0 = completely empty room, 1.0 = every valid interior floor tile is used.")]
+        [Range(0f, 1f)]
+        [SerializeField] private float generalRoomDensity = 0.2f;
+
         [Header("Spawners")]
         [SerializeField] private DoorSpawner doorSpawner = new DoorSpawner();
         [SerializeField] private EnemySpawner enemySpawner = new EnemySpawner();
@@ -63,6 +68,11 @@ namespace Dungeon
         public EnemySpawner EnemySpawner => enemySpawner;
         public DoorSpawner DoorSpawner => doorSpawner;
         public PropSpawner PropSpawner => propSpawner;
+        public float GeneralRoomDensity
+        {
+            get => generalRoomDensity;
+            set => generalRoomDensity = Mathf.Clamp01(value);
+        }
 
         [SerializeField, HideInInspector] private List<GameManager.RoomData> generatedRooms = new List<GameManager.RoomData>();
         public List<GameManager.RoomData> GeneratedRooms => generatedRooms;
@@ -88,11 +98,18 @@ namespace Dungeon
         private void OnEnable()
         {
             EventBus<GenerateDungeonEvent>.Subscribe(OnGenerateDungeonEvent);
+            EventBus<ClearDungeonEvent>.Subscribe(OnClearDungeonEvent);
         }
 
         private void OnDisable()
         {
             EventBus<GenerateDungeonEvent>.Unsubscribe(OnGenerateDungeonEvent);
+            EventBus<ClearDungeonEvent>.Unsubscribe(OnClearDungeonEvent);
+        }
+
+        private void OnClearDungeonEvent(ClearDungeonEvent evt)
+        {
+            ClearDungeonTiles();
         }
 
         private void Start()
@@ -274,6 +291,13 @@ namespace Dungeon
 
         private void SpawnRoomContents()
         {
+            float savedEnemyDensity = enemySpawner.RoomDensity;
+            float savedPropDensity = propSpawner.PropDensity;
+
+            // Apply master generalRoomDensity: 0% means 0 items spawn, 100% allows full allocation
+            enemySpawner.RoomDensity = savedEnemyDensity * generalRoomDensity;
+            propSpawner.PropDensity = savedPropDensity * generalRoomDensity;
+
             for (int r = 0; r < GeneratedRooms.Count; r++)
             {
                 GameManager.RoomData room = GeneratedRooms[r];
@@ -282,6 +306,9 @@ namespace Dungeon
                     _spawners[s].SpawnContent(room, _tileQuery, fillFloorTilemap, transform);
                 }
             }
+
+            enemySpawner.RoomDensity = savedEnemyDensity;
+            propSpawner.PropDensity = savedPropDensity;
         }
 
         [ContextMenu("Clear Dungeon Tiles")]
@@ -297,6 +324,22 @@ namespace Dungeon
             for (int s = 0; s < _spawners.Count; s++)
             {
                 _spawners[s].ClearSpawnedContent();
+            }
+
+            var destructibles = GetComponentsInChildren<DestructibleProp>(true);
+            for (int i = 0; i < destructibles.Length; i++)
+            {
+                if (destructibles[i] != null)
+                {
+                    if (Application.isPlaying)
+                    {
+                        Destroy(destructibles[i].gameObject);
+                    }
+                    else
+                    {
+                        DestroyImmediate(destructibles[i].gameObject);
+                    }
+                }
             }
 
             generatedRooms.Clear();

@@ -14,16 +14,22 @@ namespace Dungeon.Spawning
         [Header("Chest Prefabs")]
         [SerializeField] private GameObject normalChestPrefab;
 
+        [Header("Prop Spawn Settings")]
+        [Range(0f, 1f)]
+        [SerializeField] private float propDensity = 0.5f;
+
         [Header("Prop Spawn Configurations")]
         [SerializeField] private PropSpawnData barrelSpawnData;
         [SerializeField] private List<PropSpawnData> additionalPropData = new List<PropSpawnData>();
 
-        [Header("Legacy Obstacle & Destructible Prefabs")]
-        [SerializeField] private GameObject obstaclePrefab;
-        [SerializeField] private GameObject cratePrefab;
-
         private readonly List<GameObject> _spawnedProps = new List<GameObject>();
         private readonly List<Vector2Int> _validTilesBuffer = new List<Vector2Int>(256);
+
+        public float PropDensity
+        {
+            get => propDensity;
+            set => propDensity = Mathf.Clamp01(value);
+        }
 
         public PropSpawnData BarrelSpawnData
         {
@@ -97,17 +103,25 @@ namespace Dungeon.Spawning
                 RemoveTilesNear(room.ExitDoorTile, 1);
             }
 
+            // Always prevent spawning on stair doors or directly on the interaction step in front (stair.y - 1)
+            RemoveStairAndLandingZone(room.EntranceDoorTile);
+            RemoveStairAndLandingZone(room.ExitDoorTile);
+
             if (_validTilesBuffer.Count == 0) return;
 
-            float density = data.SpawnDensity;
-            if (data.PropName != null && data.PropName.ToLowerInvariant().Contains("barrel"))
-            {
-                density = GameSpawnSettings.BarrelDensity;
-            }
+            // 0% prop density means explicitly 0 props spawned
+            if (propDensity <= 0f || data.SpawnDensity <= 0f) return;
 
-            int targetCount = Mathf.RoundToInt(density * _validTilesBuffer.Count);
-            if (data.MinPerRoom > 0 && targetCount < data.MinPerRoom) targetCount = data.MinPerRoom;
-            if (data.MaxPerRoom > 0 && targetCount > data.MaxPerRoom) targetCount = data.MaxPerRoom;
+            float combinedDensity = propDensity * data.SpawnDensity;
+            int targetCount = Mathf.RoundToInt(combinedDensity * _validTilesBuffer.Count);
+            if (targetCount <= 0 && combinedDensity > 0f && data.MinPerRoom > 0)
+            {
+                targetCount = data.MinPerRoom;
+            }
+            if (data.MaxPerRoom > 0 && targetCount > data.MaxPerRoom)
+            {
+                targetCount = data.MaxPerRoom;
+            }
 
             int toSpawn = Mathf.Min(targetCount, _validTilesBuffer.Count);
             for (int i = 0; i < toSpawn; i++)
@@ -135,6 +149,14 @@ namespace Dungeon.Spawning
             _validTilesBuffer.RemoveAll(t =>
                 Mathf.Abs(t.x - pos.x) <= radius &&
                 Mathf.Abs(t.y - pos.y) <= radius);
+        }
+
+        private void RemoveStairAndLandingZone(Vector2Int? doorTile)
+        {
+            if (!doorTile.HasValue) return;
+            Vector2Int pos = doorTile.Value;
+            Vector2Int landing = new Vector2Int(pos.x, pos.y - 1);
+            _validTilesBuffer.RemoveAll(t => t == pos || t == landing);
         }
 
         public void ClearSpawnedContent()
