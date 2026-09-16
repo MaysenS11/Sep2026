@@ -20,6 +20,7 @@ namespace Dungeon.Spawning
 
         [Header("Prop Spawn Configurations")]
         [SerializeField] private PropSpawnData barrelSpawnData;
+        [SerializeField] private PropSpawnData pillarSpawnData;
         [SerializeField] private List<PropSpawnData> additionalPropData = new List<PropSpawnData>();
 
         private readonly List<GameObject> _spawnedProps = new List<GameObject>();
@@ -35,6 +36,12 @@ namespace Dungeon.Spawning
         {
             get => barrelSpawnData;
             set => barrelSpawnData = value;
+        }
+
+        public PropSpawnData PillarSpawnData
+        {
+            get => pillarSpawnData;
+            set => pillarSpawnData = value;
         }
 
         public List<PropSpawnData> AdditionalPropData => additionalPropData;
@@ -60,6 +67,11 @@ namespace Dungeon.Spawning
             if (barrelSpawnData != null)
             {
                 SpawnConfiguredProp(barrelSpawnData, room, tileQuery, floorTilemap, parentContainer);
+            }
+
+            if (pillarSpawnData != null)
+            {
+                SpawnConfiguredProp(pillarSpawnData, room, tileQuery, floorTilemap, parentContainer);
             }
 
             if (additionalPropData != null)

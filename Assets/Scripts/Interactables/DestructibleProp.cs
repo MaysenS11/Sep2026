@@ -2,11 +2,13 @@ using UnityEngine;
 
 public class DestructibleProp : MonoBehaviour, IDamageable
 {
+    [SerializeField] private Dungeon.Spawning.PropSpawnData propData;
     [SerializeField] private int maxHealth = 1;
     [SerializeField] private int currentHealth;
     [SerializeField] private GameObject breakEffectPrefab;
     [SerializeField] private float destroyDelay = 0.05f;
 
+    public Dungeon.Spawning.PropSpawnData PropData => propData;
     public int MaxHealth => maxHealth;
     public int CurrentHealth => currentHealth;
     public bool IsDead => currentHealth <= 0;

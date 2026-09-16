@@ -115,7 +115,7 @@ namespace Dungeon.Spawning
                 Vector2Int spawnTile = _validTilesBuffer[pickIndex];
                 _validTilesBuffer.RemoveAt(pickIndex);
 
-                SpawnEnemyAt(chosenPrefab, spawnTile, floorTilemap, parentContainer);
+                SpawnEnemyAt(chosenPrefab, spawnTile, floorTilemap, parentContainer, room.RoomIndex);
                 tileQuery.MarkOccupied(spawnTile);
             }
         }
@@ -189,11 +189,16 @@ namespace Dungeon.Spawning
             return candidates[candidates.Count - 1].prefab;
         }
 
-        private void SpawnEnemyAt(GameObject prefab, Vector2Int tile, Tilemap floorTilemap, Transform parentContainer)
+        private void SpawnEnemyAt(GameObject prefab, Vector2Int tile, Tilemap floorTilemap, Transform parentContainer, int roomIndex)
         {
             Vector3 worldPos = floorTilemap.GetCellCenterWorld(new Vector3Int(tile.x, tile.y, 0));
             GameObject enemyObj = Object.Instantiate(prefab, worldPos, Quaternion.identity, parentContainer);
             _spawnedEnemies.Add(enemyObj);
+
+            if (enemyObj.TryGetComponent<EnemyBase>(out var enemyBase))
+            {
+                enemyBase.CurrentRoomIndex = roomIndex;
+            }
 
             RegisterUndoInEditor(enemyObj, prefab.name);
         }

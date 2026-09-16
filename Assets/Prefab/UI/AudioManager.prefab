@@ -1,0 +1,109 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!1 &79236493533099442
+GameObject:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  serializedVersion: 6
+  m_Component:
+  - component: {fileID: 5977301825670395641}
+  - component: {fileID: 3404003644966614839}
+  m_Layer: 0
+  m_Name: AudioManager
+  m_TagString: Untagged
+  m_Icon: {fileID: 0}
+  m_NavMeshLayer: 0
+  m_StaticEditorFlags: 0
+  m_IsActive: 1
+--- !u!4 &5977301825670395641
+Transform:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 79236493533099442}
+  serializedVersion: 2
+  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
+  m_LocalPosition: {x: 899.4211, y: 558.8151, z: 0}
+  m_LocalScale: {x: 1, y: 1, z: 1}
+  m_ConstrainProportionsScale: 0
+  m_Children: []
+  m_Father: {fileID: 0}
+  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+--- !u!114 &3404003644966614839
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 79236493533099442}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 93ffa21ca0122164b8bbc646744f4611, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::UIAudioManager
+  clickSound:
+    Guid:
+      Data1: 56583859
+      Data2: 1285841172
+      Data3: 1108495232
+      Data4: 255195178
+    Path: event:/UI_Click
+  hoverSound:
+    Guid:
+      Data1: -1006462174
+      Data2: 1121158249
+      Data3: -1645172569
+      Data4: 1025895690
+    Path: event:/UI_Hover
+  circleMenuSound:
+    Guid:
+      Data1: -628831539
+      Data2: 1248148858
+      Data3: -1710475585
+      Data4: -286214005
+    Path: event:/UI_Circle_Menu
+  openChestSound:
+    Guid:
+      Data1: 42543081
+      Data2: 1263798927
+      Data3: 1448623271
+      Data4: 650560144
+    Path: event:/SFX_Chest_Open
+  destroyBarrelSound:
+    Guid:
+      Data1: -2121069913
+      Data2: 1147798284
+      Data3: 491654552
+      Data4: -71093064
+    Path: event:/SFX_Chest_Destroy
+  moveSound:
+    Guid:
+      Data1: -609212374
+      Data2: 1146925921
+      Data3: 1816511674
+      Data4: 25415024
+    Path: event:/SFX_Caracter_Movement
+  hitSound:
+    Guid:
+      Data1: -1987344568
+      Data2: 1282363803
+      Data3: 1811267462
+      Data4: -1942081555
+    Path: event:/SFX_EnemyHitFeedback
+  lowLifeSound:
+    Guid:
+      Data1: 962069595
+      Data2: 1124375226
+      Data3: -785506633
+      Data4: 3795157
+    Path: event:/SFX_Low_Health
+  stairsSound:
+    Guid:
+      Data1: 1376657567
+      Data2: 1233475862
+      Data3: -1686733919
+      Data4: 947716615
+    Path: event:/SFX_Footsteps_Stairs

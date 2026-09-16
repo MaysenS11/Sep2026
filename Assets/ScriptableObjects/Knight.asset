@@ -25,3 +25,10 @@ MonoBehaviour:
   movesInterval: 2
   movePriority: 2
   populationPercentage: 0.15
+  attackSound:
+    Guid:
+      Data1: -455427375
+      Data2: 1192828503
+      Data3: -1542795134
+      Data4: -2073942234
+    Path: event:/SFX_Enemy_Knight_Attack

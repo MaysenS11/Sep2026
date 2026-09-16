@@ -14,8 +14,20 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::CharacterDefinition
   characterId: 1
   characterName: Rat
-  maskSprite: {fileID: 10915, guid: 0000000000000000f000000000000000, type: 0}
-  fullBodySprite: {fileID: -6067016981378950475, guid: 47a81e62f7561694d98215e4b31c79a2, type: 3}
+  maskSprite: {fileID: 1731565737718653159, guid: b2b36ba3a06c4804d95e779e24917f51, type: 3}
+  maskWhiteSprite: {fileID: -2525392422077248750, guid: 353b6209ec0a0874d8a4632ddecafa9f, type: 3}
+  fullBodySprite: {fileID: -4183879650981696548, guid: c3e3a3c11d31edd41bd68f5868d06206, type: 3}
   startHealth: 16
   lockedByDefault: 1
   lockedTint: {r: 0.25, g: 0.25, b: 0.25, a: 1}
+  attackDegenSound:
+    Guid:
+      Data1: 0
+      Data2: 0
+      Data3: 0
+      Data4: 0
+    Path: 
+  attackPatterns:
+  - {fileID: 11400000, guid: 27bc7f7bde32c334990d081901fe40ae, type: 2}
+  - {fileID: 11400000, guid: fed295beec14ccb4a80cee8cb4ef7d48, type: 2}
+  - {fileID: 11400000, guid: 4ac34d7c44925d546a88c9d0435a2c29, type: 2}

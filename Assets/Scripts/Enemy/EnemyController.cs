@@ -73,6 +73,7 @@ public class EnemyController : EnemyBase
         int distY = Mathf.Abs(currentGrid.y - playerGrid.y);
         int manhattanDist = distX + distY;
 
+        if (currentRoomIndex >= 0 && !isAggroed) return noMove;
         if (manhattanDist > detection) return noMove;
 
         moveTurnCounter++;
@@ -89,15 +90,18 @@ public class EnemyController : EnemyBase
 
             Vector2Int pushTile = playerGrid + diagDir;
 
-            return new MoveIntent
+            if (IsSafePushTile(pushTile))
             {
-                Path = new List<Vector2Int> { playerGrid },
-                FinalDestination = playerPos,
-                Direction = diagDir,
-                IsAttack = true,
-                PlayerPushTile = pushTile,
-                HasMove = true
-            };
+                return new MoveIntent
+                {
+                    Path = new List<Vector2Int> { playerGrid },
+                    FinalDestination = playerPos,
+                    Direction = diagDir,
+                    IsAttack = true,
+                    PlayerPushTile = pushTile,
+                    HasMove = true
+                };
+            }
         }
 
         switch (movePattern)
@@ -209,18 +213,21 @@ public class EnemyController : EnemyBase
 
                 if (checkGrid == playerGrid)
                 {
-                    attackPath.Add(checkGrid);
                     Vector2Int pushTile = checkGrid + dir;
-
-                    return new MoveIntent
+                    if (IsSafePushTile(pushTile))
                     {
-                        Path = attackPath,
-                        FinalDestination = checkPos,
-                        Direction = dir,
-                        IsAttack = true,
-                        PlayerPushTile = pushTile,
-                        HasMove = true
-                    };
+                        attackPath.Add(checkGrid);
+                        return new MoveIntent
+                        {
+                            Path = attackPath,
+                            FinalDestination = checkPos,
+                            Direction = dir,
+                            IsAttack = true,
+                            PlayerPushTile = pushTile,
+                            HasMove = true
+                        };
+                    }
+                    break;
                 }
 
                 if (IsTileBlocked(checkPos)) break;
@@ -326,15 +333,18 @@ public class EnemyController : EnemyBase
                         Mathf.Clamp(offset.y, -1, 1)
                     );
 
-                    return new MoveIntent
+                    if (IsSafePushTile(pushTile))
                     {
-                        Path = lPath,
-                        FinalDestination = playerPos,
-                        Direction = pushDir,
-                        IsAttack = true,
-                        PlayerPushTile = pushTile,
-                        HasMove = true
-                    };
+                        return new MoveIntent
+                        {
+                            Path = lPath,
+                            FinalDestination = playerPos,
+                            Direction = pushDir,
+                            IsAttack = true,
+                            PlayerPushTile = pushTile,
+                            HasMove = true
+                        };
+                    }
                 }
             }
         }
@@ -442,6 +452,28 @@ public class EnemyController : EnemyBase
 
         return steps;
     }
+    private static bool IsSafePushTile(Vector2Int pushTile)
+    {
+        if (GameManager.Instance == null || GameManager.Instance.DungeonDictionary == null) return true;
+
+        if (GameManager.Instance.DungeonDictionary.TryGetValue(GameManager.Instance.CurrentRoomIndex, out GameManager.RoomData room))
+        {
+            if (room.EntranceDoorTile.HasValue)
+            {
+                Vector2Int entry = room.EntranceDoorTile.Value;
+                if (pushTile == entry || pushTile == new Vector2Int(entry.x, entry.y - 1)) return false;
+            }
+
+            if (room.ExitDoorTile.HasValue)
+            {
+                Vector2Int exit = room.ExitDoorTile.Value;
+                if (pushTile == exit || pushTile == new Vector2Int(exit.x, exit.y - 1)) return false;
+            }
+        }
+
+        return true;
+    }
+
     private static void ShuffleList<T>(List<T> list)
     {
         for (int i = list.Count - 1; i > 0; i--)

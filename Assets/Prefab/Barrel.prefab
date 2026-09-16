@@ -170,6 +170,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: c9dac1254c48f3349b950d3a24c29c0f, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::DestructibleProp
+  propData: {fileID: 11400000, guid: 0dc01897a7365ca41b61484fa58eebb0, type: 2}
   maxHealth: 1
   currentHealth: 0
   breakEffectPrefab: {fileID: 0}

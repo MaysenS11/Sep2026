@@ -25,3 +25,10 @@ MonoBehaviour:
   movesInterval: 1
   movePriority: 0
   populationPercentage: 0.35
+  attackSound:
+    Guid:
+      Data1: 1262669971
+      Data2: 1156809913
+      Data3: 1512986760
+      Data4: -645404666
+    Path: event:/SFX_Enemy_Pawn_Attack

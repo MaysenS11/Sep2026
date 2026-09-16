@@ -2,6 +2,7 @@ using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.InputSystem;
+using FMODUnity;
 
 public class PlayerMovement : MonoBehaviour
 {
@@ -17,6 +18,9 @@ public class PlayerMovement : MonoBehaviour
     [Header("Animation")]
     [SerializeField] private Animator animator;
 
+    [Header("Character Definition")]
+    [SerializeField] private CharacterDefinition characterDefinition;
+
     // Animation Parameter Hashes
     private readonly int Moving = Animator.StringToHash("IsMoving");
     private readonly int MoveX = Animator.StringToHash("MoveX");
@@ -26,10 +30,15 @@ public class PlayerMovement : MonoBehaviour
     private readonly int takeDamageTrigger = Animator.StringToHash("TakeDamage");
     private readonly int dieTrigger = Animator.StringToHash("Die");
 
+    private EventReference moveSound;
+
     private InputAction moveAction;
     private InputAction attackAction;
     private InputAction interactAction;
     private InputAction menuAction;
+    private InputAction pattern1Action;
+    private InputAction pattern2Action;
+    private InputAction pattern3Action;
 
     private bool isMoving = false;
     private bool canTakeTurn = true;
@@ -39,6 +48,9 @@ public class PlayerMovement : MonoBehaviour
     private Vector2 lastDirection = Vector2.down;
     private PlayerStats playerStats;
     private readonly Collider2D[] hitBuffer = new Collider2D[16];
+
+    public Vector2 LastDirection => lastDirection;
+    public event System.Action<Vector2Int, Vector2, AttackPatternData> OnAttackTargetingChanged;
 
     private void Awake()
     {
@@ -59,6 +71,9 @@ public class PlayerMovement : MonoBehaviour
         attackAction = playerMap.FindAction("Attack");
         interactAction = playerMap.FindAction("Interact");
         menuAction = playerMap.FindAction("Menu");
+        pattern1Action = playerMap.FindAction("1");
+        pattern2Action = playerMap.FindAction("2");
+        pattern3Action = playerMap.FindAction("3");
     }
 
     private void OnEnable()
@@ -70,6 +85,7 @@ public class PlayerMovement : MonoBehaviour
         EventBus<PlayerPushedEvent>.Subscribe(OnPlayerPushed);
         EventBus<EntityDamagedEvent>.Subscribe(OnEntityDamaged);
         EventBus<EntityDiedEvent>.Subscribe(OnEntityDied);
+        EventBus<SharedAudioConfiguredEvent>.Subscribe(OnSharedAudioConfigured);
         attackAction.performed += OnAttackPerformed;
         interactAction.performed += OnInteractPerformed;
         if (menuAction != null)
@@ -92,8 +108,14 @@ public class PlayerMovement : MonoBehaviour
         EventBus<PlayerPushedEvent>.Unsubscribe(OnPlayerPushed);
         EventBus<EntityDamagedEvent>.Unsubscribe(OnEntityDamaged);
         EventBus<EntityDiedEvent>.Unsubscribe(OnEntityDied);
+        EventBus<SharedAudioConfiguredEvent>.Unsubscribe(OnSharedAudioConfigured);
 
         inputActions.Disable();
+    }
+
+    private void OnSharedAudioConfigured(SharedAudioConfiguredEvent evt)
+    {
+        moveSound = evt.MoveSound;
     }
 
     private void OnEntityDamaged(EntityDamagedEvent evt)
@@ -163,6 +185,23 @@ public class PlayerMovement : MonoBehaviour
 
     private void Update()
     {
+        bool p1 = (pattern1Action != null && pattern1Action.triggered) || (Keyboard.current != null && (Keyboard.current[Key.Digit1].wasPressedThisFrame || Keyboard.current[Key.Numpad1].wasPressedThisFrame));
+        bool p2 = (pattern2Action != null && pattern2Action.triggered) || (Keyboard.current != null && (Keyboard.current[Key.Digit2].wasPressedThisFrame || Keyboard.current[Key.Numpad2].wasPressedThisFrame));
+        bool p3 = (pattern3Action != null && pattern3Action.triggered) || (Keyboard.current != null && (Keyboard.current[Key.Digit3].wasPressedThisFrame || Keyboard.current[Key.Numpad3].wasPressedThisFrame));
+
+        if (p1)
+        {
+            SelectAttackPattern(0);
+        }
+        else if (p2)
+        {
+            SelectAttackPattern(1);
+        }
+        else if (p3)
+        {
+            SelectAttackPattern(2);
+        }
+
         HandleMovement();
     }
 
@@ -170,9 +209,24 @@ public class PlayerMovement : MonoBehaviour
     {
         if (playerStats == null) playerStats = GetComponent<PlayerStats>();
 
+        if (characterDefinition != null && playerStats != null)
+        {
+            AttackPatternData initialPattern = characterDefinition.GetAttackPattern(0);
+            if (initialPattern != null)
+            {
+                playerStats.SetAttackPattern(initialPattern, 0);
+            }
+        }
+
+        if (moveSound.IsNull)
+        {
+            EventBus<RequestSharedAudioEvent>.Raise(new RequestSharedAudioEvent());
+        }
+
         if (GameManager.Instance == null)
         {
             transform.position = TileReservationSystem.SnapToTileCenter(transform.position);
+            NotifyTargetingChanged();
             return;
         }
 
@@ -184,6 +238,8 @@ public class PlayerMovement : MonoBehaviour
         {
             transform.position = TileReservationSystem.SnapToTileCenter(transform.position);
         }
+
+        NotifyTargetingChanged();
     }
 
     private void OnEnemyTurnCompleted(EnemyTurnCompletedEvent evt)
@@ -226,15 +282,21 @@ public class PlayerMovement : MonoBehaviour
                     animator.SetFloat(MoveX, lastDirection.x);
                     animator.SetFloat(MoveY, lastDirection.y);
                 }
+                NotifyTargetingChanged();
             }
             return;
         }
 
+        bool dirChanged = lastDirection != inputDir;
         lastDirection = inputDir;
         if (animator != null)
         {
             animator.SetFloat(MoveX, lastDirection.x);
             animator.SetFloat(MoveY, lastDirection.y);
+        }
+        if (dirChanged)
+        {
+            NotifyTargetingChanged();
         }
 
         canTakeTurn = false;
@@ -245,6 +307,11 @@ public class PlayerMovement : MonoBehaviour
     private IEnumerator MoveToTile(Vector3 targetPos)
     {
         isMoving = true;
+        if (!moveSound.IsNull)
+        {
+            RuntimeManager.PlayOneShot(moveSound);
+        }
+
         animator.SetBool(Moving, true);
         animator.SetFloat(MoveX, lastDirection.x);
         animator.SetFloat(MoveY, lastDirection.y);
@@ -257,6 +324,8 @@ public class PlayerMovement : MonoBehaviour
         transform.position = targetPos;
         isMoving = false;
         animator.SetBool(Moving, false);
+
+        NotifyTargetingChanged();
 
         TryTriggerDoorAtCurrentPosition();
 
@@ -278,39 +347,69 @@ public class PlayerMovement : MonoBehaviour
         nextMoveTime = Time.time + moveCooldown;
         animator.SetTrigger(attackTrigger);
 
+        if (characterDefinition != null)
+        {
+            if (!characterDefinition.AttackDegenSound.IsNull)
+            {
+                RuntimeManager.PlayOneShot(characterDefinition.AttackDegenSound);
+            }
+            else
+            {
+                Debug.LogWarning($"[PlayerMovement] Attack sound not assigned for character: {characterDefinition.CharacterName}");
+            }
+        }
+        else
+        {
+            Debug.LogWarning("[PlayerMovement] characterDefinition is not assigned.");
+        }
+
         if (playerStats == null) playerStats = GetComponent<PlayerStats>();
         int damage = playerStats != null ? playerStats.TotalAttackDamage : 3;
 
-        AttackPattern pattern = playerStats != null ? playerStats.CurrentAttackPattern : AttackPattern.SurroundingOrthogonal;
+        AttackPatternData pattern = playerStats != null ? playerStats.CurrentAttackPattern : null;
         ExecuteAttack(pattern, damage);
 
         StartCoroutine(CompleteAttackTurn());
     }
 
-    private void ExecuteAttack(AttackPattern pattern, int damage)
+    private void ExecuteAttack(AttackPatternData pattern, int damage)
     {
         HashSet<IDamageable> damagedEntities = new HashSet<IDamageable>();
+        Vector2Int currentGrid = TileReservationSystem.WorldToGridTile(transform.position);
 
-        if (pattern == AttackPattern.SingleFacing)
+        if (pattern != null)
         {
-            Vector3 targetPos = transform.position + new Vector3(lastDirection.x, lastDirection.y, 0) * tileSize;
-            DamageAtTile(targetPos, damage, damagedEntities);
+            List<Vector2Int> targetTiles = pattern.GetAffectedTiles(currentGrid, lastDirection);
+            for (int i = 0; i < targetTiles.Count; i++)
+            {
+                Vector3 targetWorld = TileReservationSystem.GetTileCenterWorld(targetTiles[i], transform.position.z);
+                DamageAtTile(targetWorld, damage, damagedEntities);
+            }
         }
         else
         {
-            // Surrounding orthogonal tiles (Up, Down, Left, Right)
-            Vector3[] checkPositions = new Vector3[]
-            {
-                transform.position + Vector3.up * tileSize,
-                transform.position + Vector3.down * tileSize,
-                transform.position + Vector3.left * tileSize,
-                transform.position + Vector3.right * tileSize
-            };
+            Vector2Int cardinal = AttackPatternData.GetCardinalDirection(lastDirection);
+            Vector3 targetWorld = TileReservationSystem.GetTileCenterWorld(currentGrid + cardinal, transform.position.z);
+            DamageAtTile(targetWorld, damage, damagedEntities);
+        }
+    }
 
-            foreach (var pos in checkPositions)
-            {
-                DamageAtTile(pos, damage, damagedEntities);
-            }
+    public void NotifyTargetingChanged()
+    {
+        if (playerStats == null) playerStats = GetComponent<PlayerStats>();
+        AttackPatternData pattern = playerStats != null ? playerStats.CurrentAttackPattern : null;
+        Vector2Int currentGrid = TileReservationSystem.WorldToGridTile(transform.position);
+        OnAttackTargetingChanged?.Invoke(currentGrid, lastDirection, pattern);
+    }
+
+    public void SelectAttackPattern(int index)
+    {
+        if (characterDefinition == null || playerStats == null) return;
+        AttackPatternData pattern = characterDefinition.GetAttackPattern(index);
+        if (pattern != null)
+        {
+            playerStats.SetAttackPattern(pattern, index);
+            NotifyTargetingChanged();
         }
     }
 

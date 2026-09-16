@@ -1,11 +1,5 @@
 using UnityEngine;
-
-public enum AttackPattern
-{
-    SingleFacing,
-    SurroundingOrthogonal,
-    CleaveAndSurround
-}
+using FMODUnity;
 
 public class PlayerStats : MonoBehaviour, IDamageable
 {
@@ -16,12 +10,17 @@ public class PlayerStats : MonoBehaviour, IDamageable
     [Header("Attack Settings")]
     [SerializeField] private int baseAttackDamage = 3;
     [SerializeField] private int bonusAttackDamage = 0;
-    [SerializeField] private AttackPattern attackPattern = AttackPattern.SurroundingOrthogonal;
+    [SerializeField] private AttackPatternData defaultAttackPattern;
+
+    private AttackPatternData currentAttackPattern;
+    private int currentPatternIndex = 0;
+    private EventReference lowLifeSound;
 
     public int MaxHealth => maxHealth;
     public int CurrentHealth => currentHealth;
     public int TotalAttackDamage => Mathf.Max(0, baseAttackDamage + bonusAttackDamage);
-    public AttackPattern CurrentAttackPattern => attackPattern;
+    public AttackPatternData CurrentAttackPattern => currentAttackPattern != null ? currentAttackPattern : defaultAttackPattern;
+    public int CurrentPatternIndex => currentPatternIndex;
     public bool IsDead => currentHealth <= 0;
 
     private void Awake()
@@ -29,20 +28,42 @@ public class PlayerStats : MonoBehaviour, IDamageable
         currentHealth = maxHealth;
     }
 
+    private void OnEnable()
+    {
+        EventBus<SharedAudioConfiguredEvent>.Subscribe(OnSharedAudioConfigured);
+    }
+
+    private void OnDisable()
+    {
+        EventBus<SharedAudioConfiguredEvent>.Unsubscribe(OnSharedAudioConfigured);
+    }
+
+    private void OnSharedAudioConfigured(SharedAudioConfiguredEvent evt)
+    {
+        lowLifeSound = evt.LowLifeSound;
+    }
+
     private void Start()
     {
         EventBus<PlayerHealthChangedEvent>.Raise(new PlayerHealthChangedEvent(currentHealth, maxHealth));
+        if (lowLifeSound.IsNull)
+        {
+            EventBus<RequestSharedAudioEvent>.Raise(new RequestSharedAudioEvent());
+        }
     }
 
-    public void SetAttackPattern(AttackPattern pattern)
+    public void SetAttackPattern(AttackPatternData pattern, int index = 0)
     {
-        attackPattern = pattern;
+        currentAttackPattern = pattern;
+        currentPatternIndex = index;
     }
 
     public void AddBonusDamage(int amount)
     {
         bonusAttackDamage += amount;
     }
+
+    private bool hasPlayedLowLifeSound = false;
 
     public void IncreaseMaxHealth(int amount, bool healAmount = true)
     {
@@ -51,6 +72,10 @@ public class PlayerStats : MonoBehaviour, IDamageable
         {
             currentHealth = Mathf.Min(maxHealth, currentHealth + amount);
         }
+        if (currentHealth > 4)
+        {
+            hasPlayedLowLifeSound = false;
+        }
         EventBus<PlayerHealthChangedEvent>.Raise(new PlayerHealthChangedEvent(currentHealth, maxHealth));
     }
 
@@ -58,6 +83,10 @@ public class PlayerStats : MonoBehaviour, IDamageable
     {
         if (IsDead) return;
         currentHealth = Mathf.Min(maxHealth, currentHealth + amount);
+        if (currentHealth > 4)
+        {
+            hasPlayedLowLifeSound = false;
+        }
         EventBus<PlayerHealthChangedEvent>.Raise(new PlayerHealthChangedEvent(currentHealth, maxHealth));
     }
 
@@ -69,6 +98,22 @@ public class PlayerStats : MonoBehaviour, IDamageable
         EventBus<EntityDamagedEvent>.Raise(new EntityDamagedEvent(gameObject, source, amount, currentHealth));
         EventBus<PlayerHealthChangedEvent>.Raise(new PlayerHealthChangedEvent(currentHealth, maxHealth));
 
+        if (!IsDead && currentHealth <= 4)
+        {
+            if (!hasPlayedLowLifeSound)
+            {
+                hasPlayedLowLifeSound = true;
+                if (!lowLifeSound.IsNull)
+                {
+                    RuntimeManager.PlayOneShot(lowLifeSound);
+                }
+                else
+                {
+                    Debug.LogWarning("[PlayerStats] Low life sound is not assigned.");
+                }
+            }
+        }
+
         if (IsDead)
         {
             Die();
@@ -77,6 +122,7 @@ public class PlayerStats : MonoBehaviour, IDamageable
 
     private void Die()
     {
+        hasPlayedLowLifeSound = false;
         EventBus<EntityDiedEvent>.Raise(new EntityDiedEvent(gameObject));
         Debug.Log("Player has died.");
     }
@@ -84,6 +130,7 @@ public class PlayerStats : MonoBehaviour, IDamageable
     public void ResetHealth()
     {
         currentHealth = maxHealth;
+        hasPlayedLowLifeSound = false;
         EventBus<PlayerHealthChangedEvent>.Raise(new PlayerHealthChangedEvent(currentHealth, maxHealth));
     }
 }

@@ -1,6 +1,7 @@
 using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using FMODUnity;
 
 public struct MoveIntent
 {
@@ -20,6 +21,9 @@ public abstract class EnemyBase : MonoBehaviour
     [SerializeField] protected float tileSize = 1.0f;
     [SerializeField] protected LayerMask blockingLayers;
     [SerializeField] protected Animator animator;
+
+    protected EventReference moveSound;
+    protected EventReference hitSound;
 
     protected EntityStats stats;
     protected bool isMoving;
@@ -75,6 +79,10 @@ public abstract class EnemyBase : MonoBehaviour
     protected virtual void Start()
     {
         transform.position = TileReservationSystem.SnapToTileCenter(transform.position);
+        if (moveSound.IsNull || hitSound.IsNull)
+        {
+            EventBus<RequestSharedAudioEvent>.Raise(new RequestSharedAudioEvent());
+        }
     }
 
     [Header("Animation & Death Settings")]
@@ -83,11 +91,28 @@ public abstract class EnemyBase : MonoBehaviour
     protected static readonly int damageHash = Animator.StringToHash("TakeDamage");
     protected static readonly int dieHash = Animator.StringToHash("Die");
 
+    protected int currentRoomIndex = -1;
+    protected bool isAggroed = false;
+
+    public int CurrentRoomIndex
+    {
+        get => currentRoomIndex;
+        set => currentRoomIndex = value;
+    }
+
+    public bool IsAggroed
+    {
+        get => isAggroed;
+        set => isAggroed = value;
+    }
+
     protected virtual void OnEnable()
     {
         EventBus<EnemyRegisteredEvent>.Raise(new EnemyRegisteredEvent(this));
         EventBus<EntityDamagedEvent>.Subscribe(OnEntityDamaged);
         EventBus<EntityDiedEvent>.Subscribe(OnEntityDied);
+        EventBus<SharedAudioConfiguredEvent>.Subscribe(OnSharedAudioConfigured);
+        EventBus<RoomEnteredEvent>.Subscribe(OnRoomEntered);
     }
 
     protected virtual void OnDisable()
@@ -95,7 +120,48 @@ public abstract class EnemyBase : MonoBehaviour
         EventBus<EnemyUnregisteredEvent>.Raise(new EnemyUnregisteredEvent(this));
         EventBus<EntityDamagedEvent>.Unsubscribe(OnEntityDamaged);
         EventBus<EntityDiedEvent>.Unsubscribe(OnEntityDied);
+        EventBus<SharedAudioConfiguredEvent>.Unsubscribe(OnSharedAudioConfigured);
+        EventBus<RoomEnteredEvent>.Unsubscribe(OnRoomEntered);
         EventBus<EnemyPathDebugClearedEvent>.Raise(new EnemyPathDebugClearedEvent(this));
+    }
+
+    protected virtual void OnRoomEntered(RoomEnteredEvent evt)
+    {
+        if (currentRoomIndex < 0)
+        {
+            Vector2Int myTile = GetGridPosition();
+            if (evt.Room != null &&
+                myTile.x >= evt.Room.WorldOriginTile.x && myTile.x < evt.Room.WorldOriginTile.x + evt.Room.Size.x &&
+                myTile.y >= evt.Room.WorldOriginTile.y && myTile.y < evt.Room.WorldOriginTile.y + evt.Room.Size.y)
+            {
+                currentRoomIndex = evt.Room.RoomIndex;
+            }
+        }
+
+        if (evt.Room != null && currentRoomIndex == evt.Room.RoomIndex)
+        {
+            isAggroed = true;
+        }
+        else
+        {
+            isAggroed = false;
+        }
+    }
+
+    protected virtual void OnCollisionEnter2D(Collision2D collision)
+    {
+        SnapToGridCenter();
+    }
+
+    public void SnapToGridCenter()
+    {
+        transform.position = TileReservationSystem.SnapToTileCenter(transform.position);
+    }
+
+    private void OnSharedAudioConfigured(SharedAudioConfiguredEvent evt)
+    {
+        moveSound = evt.MoveSound;
+        hitSound = evt.HitSound;
     }
 
     protected bool hasDied = false;
@@ -103,6 +169,11 @@ public abstract class EnemyBase : MonoBehaviour
     protected virtual void OnEntityDamaged(EntityDamagedEvent evt)
     {
         if (evt.Target != gameObject) return;
+
+        if (!hitSound.IsNull)
+        {
+            RuntimeManager.PlayOneShot(hitSound);
+        }
 
         if (evt.Source != null && evt.Source.GetComponent<PlayerMovement>() != null)
         {
@@ -156,6 +227,11 @@ public abstract class EnemyBase : MonoBehaviour
 
         if (currentIntent.IsAttack && attackPlayerTransform != null)
         {
+            if (enemyData != null && !enemyData.AttackSound.IsNull)
+            {
+                RuntimeManager.PlayOneShot(enemyData.AttackSound);
+            }
+
             int damage = stats != null ? stats.AttackDamage : 2;
             Vector3 pushDir3 = new Vector3(currentIntent.Direction.x, currentIntent.Direction.y, 0);
             Vector3 playerPushedPos = currentIntent.FinalDestination + pushDir3 * tileSize;
@@ -211,6 +287,10 @@ public abstract class EnemyBase : MonoBehaviour
     protected IEnumerator StepToTile(Vector3 targetPos, float speed)
     {
         isMoving = true;
+        if (!moveSound.IsNull)
+        {
+            RuntimeManager.PlayOneShot(moveSound);
+        }
 
         while (Vector3.Distance(transform.position, targetPos) > 0.001f)
         {
@@ -218,7 +298,7 @@ public abstract class EnemyBase : MonoBehaviour
             yield return null;
         }
 
-        transform.position = targetPos;
+        transform.position = TileReservationSystem.SnapToTileCenter(targetPos);
         isMoving = false;
     }
 

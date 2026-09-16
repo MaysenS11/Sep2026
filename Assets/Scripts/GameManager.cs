@@ -132,6 +132,15 @@ public class GameManager : MonoBehaviour
     private Transform playerTransform;
     private Coroutine enemyTurnCoroutine;
 
+    [Header("Turn Ticket Configuration")]
+    [SerializeField] private EnemyTicketSettings enemyTicketSettings;
+
+    public EnemyTicketSettings TicketSettings
+    {
+        get => enemyTicketSettings;
+        set => enemyTicketSettings = value;
+    }
+
     private void Awake()
     {
         if (Instance != null && Instance != this) { Destroy(gameObject); return; }
@@ -245,11 +254,19 @@ public class GameManager : MonoBehaviour
 
         int plannedCount = 0;
         int skippedCount = 0;
+        int maxTickets = enemyTicketSettings != null ? enemyTicketSettings.MaxActiveFollowers : int.MaxValue;
 
         for (int i = 0; i < activeEnemies.Count; i++)
         {
             EnemyBase enemy = activeEnemies[i];
             if (enemy == null) continue;
+
+            if (plannedCount >= maxTickets)
+            {
+                enemy.PlannedPath = null;
+                skippedCount++;
+                continue;
+            }
 
             MoveIntent intent = enemy.PlanMove(playerTransform);
 

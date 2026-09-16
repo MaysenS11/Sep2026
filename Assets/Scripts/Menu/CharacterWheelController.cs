@@ -7,7 +7,21 @@ public class CharacterWheelController : MonoBehaviour
 {
     [SerializeField] private CharacterSlotUI[] slots;
     [SerializeField] private Image fullBodyPreview;
+    public enum WheelLayoutMode
+    {
+        RadialArc,
+        ManualWaypoints
+    }
+
+    [Header("Layout Settings")]
+    [SerializeField] private WheelLayoutMode layoutMode = WheelLayoutMode.RadialArc;
+    [SerializeField] private Vector2 centerOffset = Vector2.zero;
     [SerializeField] private float radius = 220f;
+    [SerializeField] private float startAngleDeg = 90f;
+    [SerializeField] private float arcSpreadDeg = 360f;
+    [SerializeField] private RectTransform[] customWaypointTransforms;
+
+    [Header("Animation & Input")]
     [SerializeField] private float spinDuration = 0.15f;
     [SerializeField] private float inputCooldown = 0.2f;
 
@@ -17,6 +31,7 @@ public class CharacterWheelController : MonoBehaviour
     private int totalSlots;
     private float lastInputTime;
     private Coroutine spinCoroutine;
+    private Vector2[] cachedWaypoints;
 
     private InputAction wheelSpinAction;
     private InputAction wheelNextAction;
@@ -25,7 +40,35 @@ public class CharacterWheelController : MonoBehaviour
     private void Awake()
     {
         totalSlots = slots != null ? slots.Length : 0;
+        CacheWaypoints();
         SetupInputActions();
+    }
+
+    private void CacheWaypoints()
+    {
+        if (totalSlots == 0) return;
+
+        cachedWaypoints = new Vector2[totalSlots];
+
+        if (customWaypointTransforms != null && customWaypointTransforms.Length >= totalSlots)
+        {
+            for (int i = 0; i < totalSlots; i++)
+            {
+                cachedWaypoints[i] = customWaypointTransforms[i] != null 
+                    ? customWaypointTransforms[i].anchoredPosition 
+                    : Vector2.zero;
+            }
+        }
+        else
+        {
+            for (int i = 0; i < totalSlots; i++)
+            {
+                if (slots[i] != null && slots[i].transform is RectTransform rt)
+                {
+                    cachedWaypoints[i] = rt.anchoredPosition;
+                }
+            }
+        }
     }
 
     private void SetupInputActions()
@@ -120,6 +163,7 @@ public class CharacterWheelController : MonoBehaviour
         }
         spinCoroutine = StartCoroutine(AnimateSlotsToTargets());
         UpdatePreview();
+        EventBus<PlayUISoundEvent>.Raise(new PlayUISoundEvent(UISoundType.CircleMenu));
     }
 
     private Vector2 GetTargetPositionForSlot(int slotIndex)
@@ -127,10 +171,19 @@ public class CharacterWheelController : MonoBehaviour
         int relativeOffset = (slotIndex - selectedIndex) % totalSlots;
         if (relativeOffset < 0) relativeOffset += totalSlots;
 
-        float angleDeg = 90f - (relativeOffset * (360f / totalSlots));
+        if (layoutMode == WheelLayoutMode.ManualWaypoints && cachedWaypoints != null && cachedWaypoints.Length == totalSlots)
+        {
+            return cachedWaypoints[relativeOffset];
+        }
+
+        float step = totalSlots > 1 && Mathf.Approximately(Mathf.Abs(arcSpreadDeg), 360f) 
+            ? (arcSpreadDeg / totalSlots) 
+            : (totalSlots > 1 ? (arcSpreadDeg / (totalSlots - 1)) : 0f);
+
+        float angleDeg = startAngleDeg - (relativeOffset * step);
         float angleRad = angleDeg * Mathf.Deg2Rad;
 
-        return new Vector2(Mathf.Cos(angleRad) * radius, Mathf.Sin(angleRad) * radius);
+        return centerOffset + new Vector2(Mathf.Cos(angleRad) * radius, Mathf.Sin(angleRad) * radius);
     }
 
     private void UpdateSlotPositionsImmediate()
@@ -143,6 +196,61 @@ public class CharacterWheelController : MonoBehaviour
             {
                 rect.anchoredPosition = GetTargetPositionForSlot(i);
             }
+        }
+    }
+
+    private void OnValidate()
+    {
+        if (slots == null || slots.Length == 0) return;
+        totalSlots = slots.Length;
+
+        if (layoutMode == WheelLayoutMode.RadialArc && !Application.isPlaying)
+        {
+            for (int i = 0; i < totalSlots; i++)
+            {
+                if (slots[i] != null && slots[i].transform is RectTransform rect)
+                {
+                    rect.anchoredPosition = GetTargetPositionForSlot(i);
+                }
+            }
+        }
+    }
+
+    private void OnDrawGizmosSelected()
+    {
+        if (slots == null || slots.Length == 0) return;
+
+        Gizmos.matrix = transform.localToWorldMatrix;
+
+        Vector3 center = (Vector3)centerOffset;
+        Gizmos.color = new Color(0.2f, 0.8f, 1f, 0.4f);
+
+        int count = slots.Length;
+        float step = count > 1 && Mathf.Approximately(Mathf.Abs(arcSpreadDeg), 360f) 
+            ? (arcSpreadDeg / count) 
+            : (count > 1 ? (arcSpreadDeg / (count - 1)) : 0f);
+
+        for (int i = 0; i < count; i++)
+        {
+            Vector3 targetPos;
+            if (layoutMode == WheelLayoutMode.ManualWaypoints && customWaypointTransforms != null && i < customWaypointTransforms.Length && customWaypointTransforms[i] != null)
+            {
+                targetPos = customWaypointTransforms[i].localPosition;
+            }
+            else if (layoutMode == WheelLayoutMode.ManualWaypoints && slots[i] != null)
+            {
+                targetPos = slots[i].transform.localPosition;
+            }
+            else
+            {
+                float angleDeg = startAngleDeg - (i * step);
+                float angleRad = angleDeg * Mathf.Deg2Rad;
+                targetPos = center + new Vector3(Mathf.Cos(angleRad) * radius, Mathf.Sin(angleRad) * radius, 0f);
+            }
+
+            Gizmos.color = (i == 0) ? Color.green : new Color(0.3f, 0.7f, 1f, 0.8f);
+            Gizmos.DrawWireSphere(targetPos, 16f);
+            Gizmos.DrawLine(center, targetPos);
         }
     }
 

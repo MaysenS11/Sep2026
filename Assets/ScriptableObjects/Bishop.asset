@@ -25,3 +25,10 @@ MonoBehaviour:
   movesInterval: 1
   movePriority: 1
   populationPercentage: 0.25
+  attackSound:
+    Guid:
+      Data1: -9732435
+      Data2: 1219518078
+      Data3: 2018217617
+      Data4: -259456307
+    Path: event:/SFX_Enemy_Bishop_Attack

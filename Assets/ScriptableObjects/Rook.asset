@@ -24,4 +24,11 @@ MonoBehaviour:
   maxLineSteps: 3
   movesInterval: 1
   movePriority: 3
-  populationPercentage: 0.20
+  populationPercentage: 0.2
+  attackSound:
+    Guid:
+      Data1: -714030937
+      Data2: 1341731329
+      Data3: -466244678
+      Data4: -611393518
+    Path: event:/SFX_Enemy_Rook_Attack

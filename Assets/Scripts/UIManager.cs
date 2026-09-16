@@ -12,23 +12,31 @@ public class UIManager : MonoBehaviour
     [Header("Player Equipment")]
     [SerializeField] private Image maskDisplayImage;
 
-    [Header("Health Display (Heart Fills)")]
-    [Tooltip("Assign the HeartFillContainer transforms in left-to-right order, or leave empty to auto-find from HUD/HealthContainer")]
-    [SerializeField] private Transform[] heartFillContainers;
+    [Header("Health Display (Hearts)")]
+    [Tooltip("Assign heart roots in left-to-right order, or leave empty to auto-find from HealthContainer")]
+    [SerializeField] private Transform[] heartSlots;
 
-    private readonly List<GameObject> rightToLeftFills = new List<GameObject>();
+    private struct HeartSlotItem
+    {
+        public GameObject Half;
+        public GameObject Full;
+    }
+
+    private readonly List<HeartSlotItem> registeredHearts = new List<HeartSlotItem>();
     private bool isInitialized = false;
 
     private void Awake()
     {
-        InitializeHeartFills();
+        InitializeHearts();
     }
 
-    private void InitializeHeartFills()
+    private void InitializeHearts()
     {
         if (isInitialized) return;
 
-        if (heartFillContainers == null || heartFillContainers.Length == 0)
+        registeredHearts.Clear();
+
+        if (heartSlots == null || heartSlots.Length == 0)
         {
             Transform healthContainer = transform.Find("IngamePanel/HealthContainer");
             if (healthContainer == null)
@@ -46,34 +54,27 @@ public class UIManager : MonoBehaviour
                 var containerList = new List<Transform>();
                 for (int i = 0; i < healthContainer.childCount; i++)
                 {
-                    Transform child = healthContainer.GetChild(i);
-                    Transform fillContainer = child.Find("HeartFillContainer");
-                    if (fillContainer != null)
-                    {
-                        containerList.Add(fillContainer);
-                    }
+                    containerList.Add(healthContainer.GetChild(i));
                 }
-                heartFillContainers = containerList.ToArray();
+                heartSlots = containerList.ToArray();
             }
         }
 
-        rightToLeftFills.Clear();
-
-        if (heartFillContainers != null && heartFillContainers.Length > 0)
+        if (heartSlots != null)
         {
-            for (int c = heartFillContainers.Length - 1; c >= 0; c--)
+            for (int i = 0; i < heartSlots.Length; i++)
             {
-                Transform container = heartFillContainers[c];
-                if (container == null) continue;
+                Transform slotTransform = heartSlots[i];
+                if (slotTransform == null) continue;
 
-                for (int f = container.childCount - 1; f >= 0; f--)
+                Transform halfTrans = slotTransform.Find("HeartHalf");
+                Transform fullTrans = slotTransform.Find("HeartFull");
+
+                registeredHearts.Add(new HeartSlotItem
                 {
-                    Transform fillChild = container.GetChild(f);
-                    if (fillChild != null)
-                    {
-                        rightToLeftFills.Add(fillChild.gameObject);
-                    }
-                }
+                    Half = halfTrans != null ? halfTrans.gameObject : null,
+                    Full = fullTrans != null ? fullTrans.gameObject : null
+                });
             }
         }
 
@@ -110,19 +111,30 @@ public class UIManager : MonoBehaviour
     {
         if (!isInitialized)
         {
-            InitializeHeartFills();
+            InitializeHearts();
         }
 
-        if (rightToLeftFills.Count > 0)
+        int halfHeartsRemaining = Mathf.Max(0, currentHealth / 2);
+
+        for (int i = 0; i < registeredHearts.Count; i++)
         {
-            int damageTaken = Mathf.Max(0, maxHealth - currentHealth);
+            HeartSlotItem slot = registeredHearts[i];
+            int heartValue = (i + 1) * 2;
 
-            for (int i = 0; i < rightToLeftFills.Count; i++)
+            if (halfHeartsRemaining >= heartValue)
             {
-                if (rightToLeftFills[i] == null) continue;
-
-                bool isActive = i >= damageTaken;
-                rightToLeftFills[i].SetActive(isActive);
+                if (slot.Half != null) slot.Half.SetActive(true);
+                if (slot.Full != null) slot.Full.SetActive(true);
+            }
+            else if (halfHeartsRemaining == heartValue - 1)
+            {
+                if (slot.Half != null) slot.Half.SetActive(true);
+                if (slot.Full != null) slot.Full.SetActive(false);
+            }
+            else
+            {
+                if (slot.Half != null) slot.Half.SetActive(false);
+                if (slot.Full != null) slot.Full.SetActive(false);
             }
         }
     }

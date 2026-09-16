@@ -25,3 +25,10 @@ MonoBehaviour:
   movesInterval: 3
   movePriority: 4
   populationPercentage: 0.05
+  attackSound:
+    Guid:
+      Data1: -283684841
+      Data2: 1190245487
+      Data3: 23213976
+      Data4: -1005532945
+    Path: event:/SFX_Enemy_Queen_Attack

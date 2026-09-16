@@ -1,4 +1,5 @@
 using UnityEngine;
+using FMODUnity;
 
 public enum EnemyMovementPattern
 {
@@ -45,6 +46,9 @@ public class EnemyData : ScriptableObject
     [Range(0f, 1f)]
     [SerializeField] private float populationPercentage = 0.2f;
 
+    [Header("Audio")]
+    [SerializeField] private EventReference attackSound;
+
     public string EnemyName => enemyName;
     public GameObject Prefab => prefab;
     public int MaxHealth => maxHealth;
@@ -59,4 +63,5 @@ public class EnemyData : ScriptableObject
     public int MovesInterval => movesInterval;
     public int MovePriority => movePriority;
     public float PopulationPercentage => populationPercentage;
+    public EventReference AttackSound => attackSound;
 }

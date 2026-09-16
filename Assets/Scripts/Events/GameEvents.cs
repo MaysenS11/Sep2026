@@ -234,3 +234,48 @@ public readonly struct ClearDungeonEvent : IEvent
 {
 }
 
+public enum UISoundType
+{
+    Click,
+    Hover,
+    CircleMenu
+}
+
+public readonly struct PlayUISoundEvent : IEvent
+{
+    public readonly UISoundType SoundType;
+
+    public PlayUISoundEvent(UISoundType soundType)
+    {
+        SoundType = soundType;
+    }
+}
+
+public readonly struct SharedAudioConfiguredEvent : IEvent
+{
+    public readonly FMODUnity.EventReference MoveSound;
+    public readonly FMODUnity.EventReference HitSound;
+    public readonly FMODUnity.EventReference LowLifeSound;
+    public readonly FMODUnity.EventReference OpenChestSound;
+    public readonly FMODUnity.EventReference DestroyBarrelSound;
+
+    public SharedAudioConfiguredEvent(
+        FMODUnity.EventReference moveSound,
+        FMODUnity.EventReference hitSound,
+        FMODUnity.EventReference lowLifeSound,
+        FMODUnity.EventReference openChestSound,
+        FMODUnity.EventReference destroyBarrelSound)
+    {
+        MoveSound = moveSound;
+        HitSound = hitSound;
+        LowLifeSound = lowLifeSound;
+        OpenChestSound = openChestSound;
+        DestroyBarrelSound = destroyBarrelSound;
+    }
+}
+
+public readonly struct RequestSharedAudioEvent : IEvent
+{
+}
+
+
