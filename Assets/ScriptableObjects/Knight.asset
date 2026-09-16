@@ -15,7 +15,7 @@ MonoBehaviour:
   enemyName: Knight
   prefab: {fileID: 0}
   maxHealth: 4
-  attackDamage: 8
+  attackDamage: 6
   stepSpeed: 5
   detectionRange: 10
   movementPattern: 3

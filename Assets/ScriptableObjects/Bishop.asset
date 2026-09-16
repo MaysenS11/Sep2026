@@ -14,7 +14,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::EnemyData
   enemyName: Bishop
   prefab: {fileID: 0}
-  maxHealth: 8
+  maxHealth: 6
   attackDamage: 4
   stepSpeed: 5
   detectionRange: 8
