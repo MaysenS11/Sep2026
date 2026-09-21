@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: Knight
   m_EditorClassIdentifier: Assembly-CSharp::EnemyData
   enemyName: Knight
-  prefab: {fileID: 0}
+  prefab: {fileID: 1228558132822369691, guid: d76ba61e6effa3c4992ea6e9567cbb25, type: 3}
   maxHealth: 4
   attackDamage: 6
   stepSpeed: 5
@@ -32,3 +32,5 @@ MonoBehaviour:
       Data3: -1542795134
       Data4: -2073942234
     Path: event:/SFX_Enemy_Knight_Attack
+  heartFullSprite: {fileID: 21300000, guid: 5c341d93a0822b84491c18f7cc14453d, type: 3}
+  heartEmptySprite: {fileID: 21300000, guid: 82b5b6f996979204fa5a1017b5e1ce60, type: 3}

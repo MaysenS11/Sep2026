@@ -15,6 +15,7 @@ GameObject:
   - component: {fileID: 1830716079412913766}
   - component: {fileID: 1798089781929234135}
   - component: {fileID: 2234665136217097738}
+  - component: {fileID: 1152252136422012536}
   m_Layer: 6
   m_Name: Knight
   m_TagString: Untagged
@@ -36,7 +37,6 @@ Transform:
   m_ConstrainProportionsScale: 1
   m_Children:
   - {fileID: 4170996888173604433}
-  - {fileID: 6487150287935867737}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!212 &1611507659431043392
@@ -217,39 +217,31 @@ MonoBehaviour:
     serializedVersion: 2
     m_Bits: 64
   animator: {fileID: 8181634155171235856}
+  heartDisplay: {fileID: 1152252136422012536}
+  heartsRoot: {fileID: 4372861161617389452}
+  heartSlots:
+  - {fileID: 3518403021531789073}
+  - {fileID: 6611382542564157719}
   destroyDelayAfterDeath: 0.5
---- !u!1 &1591633646358845770
-GameObject:
+--- !u!114 &1152252136422012536
+MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
   m_PrefabInstance: {fileID: 0}
   m_PrefabAsset: {fileID: 0}
-  serializedVersion: 6
-  m_Component:
-  - component: {fileID: 6487150287935867737}
-  m_Layer: 6
-  m_Name: Hearts (1)
-  m_TagString: Untagged
-  m_Icon: {fileID: 0}
-  m_NavMeshLayer: 0
-  m_StaticEditorFlags: 0
-  m_IsActive: 1
---- !u!4 &6487150287935867737
-Transform:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1591633646358845770}
-  serializedVersion: 2
-  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: -0.1, y: 0.726, z: 0}
-  m_LocalScale: {x: 1, y: 1, z: 1}
-  m_ConstrainProportionsScale: 0
-  m_Children:
-  - {fileID: 2762567754016451692}
-  m_Father: {fileID: 6338785862651598517}
-  m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
+  m_GameObject: {fileID: 1228558132822369691}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: aa6eeab85f83fae42872c558540ec92d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::EnemyHeartDisplay
+  heartsRoot: {fileID: 4372861161617389452}
+  heartSlots:
+  - {fileID: 3518403021531789073}
+  - {fileID: 6611382542564157719}
+  depletionOrder: 0
+  fullHeartSprite: {fileID: 21300000, guid: 5c341d93a0822b84491c18f7cc14453d, type: 3}
+  emptyHeartSprite: {fileID: 21300000, guid: 82b5b6f996979204fa5a1017b5e1ce60, type: 3}
 --- !u!1 &2754797754405028210
 GameObject:
   m_ObjectHideFlags: 0
@@ -261,7 +253,7 @@ GameObject:
   - component: {fileID: 2762567754016451692}
   - component: {fileID: 3518403021531789073}
   m_Layer: 6
-  m_Name: Heart
+  m_Name: Heart (1)
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -276,11 +268,11 @@ Transform:
   m_GameObject: {fileID: 2754797754405028210}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 1.733, z: 0}
+  m_LocalPosition: {x: -0.1, y: 1.73, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
-  m_Father: {fileID: 6487150287935867737}
+  m_Father: {fileID: 4170996888173604433}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!212 &3518403021531789073
 SpriteRenderer:
@@ -356,7 +348,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &4170996888173604433
 Transform:
   m_ObjectHideFlags: 0
@@ -366,11 +358,12 @@ Transform:
   m_GameObject: {fileID: 4372861161617389452}
   serializedVersion: 2
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: 0.1, y: 0.726, z: 0}
+  m_LocalPosition: {x: 0, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:
   - {fileID: 6975378850562065973}
+  - {fileID: 2762567754016451692}
   m_Father: {fileID: 6338785862651598517}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1 &7351989445766703657
@@ -399,7 +392,7 @@ Transform:
   m_GameObject: {fileID: 7351989445766703657}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 1.733, z: 0}
+  m_LocalPosition: {x: 0.1, y: 1.73, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []

@@ -106,6 +106,7 @@ GameObject:
   - component: {fileID: 1830716079412913766}
   - component: {fileID: 1798089781929234135}
   - component: {fileID: 2234665136217097738}
+  - component: {fileID: 3541320482356850222}
   m_Layer: 6
   m_Name: Queen
   m_TagString: Untagged
@@ -307,7 +308,41 @@ MonoBehaviour:
     serializedVersion: 2
     m_Bits: 64
   animator: {fileID: 8181634155171235856}
+  heartDisplay: {fileID: 3541320482356850222}
+  heartsRoot: {fileID: 6221520783464708702}
+  heartSlots:
+  - {fileID: 2036953907014965638}
+  - {fileID: 2182518209597775179}
+  - {fileID: 1403376561627743267}
+  - {fileID: 5023469003591378467}
+  - {fileID: 7593806151459542266}
+  - {fileID: 7945062980952998151}
+  - {fileID: 1825976798987246616}
   destroyDelayAfterDeath: 0.5
+--- !u!114 &3541320482356850222
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1228558132822369691}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: aa6eeab85f83fae42872c558540ec92d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::EnemyHeartDisplay
+  heartsRoot: {fileID: 6221520783464708702}
+  heartSlots:
+  - {fileID: 2036953907014965638}
+  - {fileID: 2182518209597775179}
+  - {fileID: 1403376561627743267}
+  - {fileID: 5023469003591378467}
+  - {fileID: 7593806151459542266}
+  - {fileID: 7945062980952998151}
+  - {fileID: 1825976798987246616}
+  depletionOrder: 0
+  fullHeartSprite: {fileID: 21300000, guid: 5c341d93a0822b84491c18f7cc14453d, type: 3}
+  emptyHeartSprite: {fileID: 21300000, guid: 82b5b6f996979204fa5a1017b5e1ce60, type: 3}
 --- !u!1 &3301085753144389195
 GameObject:
   m_ObjectHideFlags: 0
@@ -505,7 +540,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &4929600193007359932
 Transform:
   m_ObjectHideFlags: 0

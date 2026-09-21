@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: Bishop
   m_EditorClassIdentifier: Assembly-CSharp::EnemyData
   enemyName: Bishop
-  prefab: {fileID: 0}
+  prefab: {fileID: 1228558132822369691, guid: f1340b7356fa31e49953db71e7ee8b08, type: 3}
   maxHealth: 6
   attackDamage: 4
   stepSpeed: 5
@@ -32,3 +32,5 @@ MonoBehaviour:
       Data3: 2018217617
       Data4: -259456307
     Path: event:/SFX_Enemy_Bishop_Attack
+  heartFullSprite: {fileID: 21300000, guid: 5c341d93a0822b84491c18f7cc14453d, type: 3}
+  heartEmptySprite: {fileID: 21300000, guid: 82b5b6f996979204fa5a1017b5e1ce60, type: 3}

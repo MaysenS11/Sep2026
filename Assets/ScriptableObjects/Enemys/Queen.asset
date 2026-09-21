@@ -13,7 +13,7 @@ MonoBehaviour:
   m_Name: Queen
   m_EditorClassIdentifier: Assembly-CSharp::EnemyData
   enemyName: Queen
-  prefab: {fileID: 0}
+  prefab: {fileID: 1228558132822369691, guid: 5a428a17024c1d4418ec0834fbe6a6c6, type: 3}
   maxHealth: 14
   attackDamage: 14
   stepSpeed: 5
@@ -32,3 +32,5 @@ MonoBehaviour:
       Data3: 23213976
       Data4: -1005532945
     Path: event:/SFX_Enemy_Queen_Attack
+  heartFullSprite: {fileID: 21300000, guid: 5c341d93a0822b84491c18f7cc14453d, type: 3}
+  heartEmptySprite: {fileID: 21300000, guid: 82b5b6f996979204fa5a1017b5e1ce60, type: 3}

@@ -51,6 +51,14 @@ public class PlayerMovement : MonoBehaviour
     private readonly HashSet<IDamageable> damagedEntitiesBuffer = new HashSet<IDamageable>();
     private readonly List<Vector2Int> attackTilesBuffer = new List<Vector2Int>(16);
 
+    private static readonly HashSet<Vector2Int> currentAttackTiles = new HashSet<Vector2Int>();
+    public static IReadOnlyCollection<Vector2Int> CurrentAttackTiles => currentAttackTiles;
+
+    public static bool IsPositionInAttackRange(Vector2Int tile)
+    {
+        return currentAttackTiles.Contains(tile);
+    }
+
     public Vector2 LastDirection => lastDirection;
     public event System.Action<Vector2Int, Vector2, AttackPatternData> OnAttackTargetingChanged;
 
@@ -118,6 +126,7 @@ public class PlayerMovement : MonoBehaviour
         EventBus<EntityDiedEvent>.Unsubscribe(OnEntityDied);
         EventBus<SharedAudioConfiguredEvent>.Unsubscribe(OnSharedAudioConfigured);
 
+        currentAttackTiles.Clear();
         inputActions.Disable();
     }
 
@@ -442,7 +451,7 @@ public class PlayerMovement : MonoBehaviour
         Vector2Int currentGrid = TileReservationSystem.WorldToGridTile(transform.position);
         OnAttackTargetingChanged?.Invoke(currentGrid, lastDirection, pattern);
 
-        HashSet<Vector2Int> affectedTiles = new HashSet<Vector2Int>();
+        currentAttackTiles.Clear();
         if (playerStats == null || !playerStats.IsDead)
         {
             if (pattern != null)
@@ -450,16 +459,16 @@ public class PlayerMovement : MonoBehaviour
                 pattern.GetAffectedTiles(currentGrid, lastDirection, attackTilesBuffer);
                 for (int i = 0; i < attackTilesBuffer.Count; i++)
                 {
-                    affectedTiles.Add(attackTilesBuffer[i]);
+                    currentAttackTiles.Add(attackTilesBuffer[i]);
                 }
             }
             else
             {
-                affectedTiles.Add(currentGrid + AttackPatternData.GetCardinalDirection(lastDirection));
+                currentAttackTiles.Add(currentGrid + AttackPatternData.GetCardinalDirection(lastDirection));
             }
         }
 
-        EventBus<AttackTargetingChangedEvent>.Raise(new AttackTargetingChangedEvent(affectedTiles));
+        EventBus<AttackTargetingChangedEvent>.Raise(new AttackTargetingChangedEvent(new HashSet<Vector2Int>(currentAttackTiles)));
     }
 
     public void SelectAttackPattern(int index)

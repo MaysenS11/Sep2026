@@ -23,6 +23,7 @@ public abstract class EnemyBase : MonoBehaviour
     [SerializeField] protected Animator animator;
 
     [Header("Hearts Display")]
+    [SerializeField] protected EnemyHeartDisplay heartDisplay;
     [SerializeField] protected GameObject heartsRoot;
     [SerializeField] protected SpriteRenderer[] heartSlots;
 
@@ -78,10 +79,15 @@ public abstract class EnemyBase : MonoBehaviour
         {
             stats.Initialize(enemyData);
         }
-        if (heartsRoot != null)
+        if (heartDisplay == null)
         {
-            heartsRoot.SetActive(false);
+            heartDisplay = GetComponentInChildren<EnemyHeartDisplay>(true);
         }
+        if (heartDisplay != null && enemyData != null)
+        {
+            heartDisplay.SetSprites(enemyData.HeartFullSprite, enemyData.HeartEmptySprite);
+        }
+        SetHeartVisibility(false);
         UpdateHeartVisuals(stats != null ? stats.CurrentHealth : (enemyData != null ? enemyData.MaxHealth : 0));
     }
 
@@ -92,6 +98,7 @@ public abstract class EnemyBase : MonoBehaviour
         {
             EventBus<RequestSharedAudioEvent>.Raise(new RequestSharedAudioEvent());
         }
+        SetHeartVisibility(PlayerMovement.IsPositionInAttackRange(GetGridPosition()));
     }
 
     [Header("Animation & Death Settings")]
@@ -199,23 +206,45 @@ public abstract class EnemyBase : MonoBehaviour
         UpdateHeartVisuals(evt.RemainingHealth);
     }
 
+    public void SetHeartVisibility(bool visible)
+    {
+        if (hasDied) visible = false;
+
+        if (heartDisplay != null)
+        {
+            heartDisplay.SetVisible(visible);
+        }
+        else if (heartsRoot != null && heartsRoot.activeSelf != visible)
+        {
+            heartsRoot.SetActive(visible);
+        }
+    }
+
     protected virtual void OnAttackTargetingChanged(AttackTargetingChangedEvent evt)
     {
         if (hasDied)
         {
-            if (heartsRoot != null) heartsRoot.SetActive(false);
+            SetHeartVisibility(false);
             return;
         }
 
         bool inRange = evt.AffectedTiles != null && evt.AffectedTiles.Contains(GetGridPosition());
-        if (heartsRoot != null)
-        {
-            heartsRoot.SetActive(inRange);
-        }
+        SetHeartVisibility(inRange);
     }
 
     public virtual void UpdateHeartVisuals(int remainingHealth)
     {
+        int maxHealth = stats != null ? stats.MaxHealth : (enemyData != null ? enemyData.MaxHealth : remainingHealth);
+        if (heartDisplay != null)
+        {
+            if (enemyData != null)
+            {
+                heartDisplay.SetSprites(enemyData.HeartFullSprite, enemyData.HeartEmptySprite);
+            }
+            heartDisplay.UpdateHearts(remainingHealth, maxHealth);
+            return;
+        }
+
         if (heartSlots == null || enemyData == null) return;
 
         for (int i = 0; i < heartSlots.Length; i++)
@@ -230,10 +259,7 @@ public abstract class EnemyBase : MonoBehaviour
         if (hasDied || evt.Entity != gameObject) return;
         hasDied = true;
 
-        if (heartsRoot != null)
-        {
-            heartsRoot.SetActive(false);
-        }
+        SetHeartVisibility(false);
 
         EventBus<EntityDamagedEvent>.Unsubscribe(OnEntityDamaged);
         EventBus<EntityDiedEvent>.Unsubscribe(OnEntityDied);
@@ -303,6 +329,8 @@ public abstract class EnemyBase : MonoBehaviour
         }
 
         transform.position = TileReservationSystem.SnapToTileCenter(transform.position);
+
+        SetHeartVisibility(PlayerMovement.IsPositionInAttackRange(GetGridPosition()));
 
         plannedPath = null;
         EventBus<EnemyPathDebugClearedEvent>.Raise(new EnemyPathDebugClearedEvent(this));

@@ -15,6 +15,7 @@ GameObject:
   - component: {fileID: 1830716079412913766}
   - component: {fileID: 1798089781929234135}
   - component: {fileID: 2234665136217097738}
+  - component: {fileID: 5646629020273204545}
   m_Layer: 6
   m_Name: Pawn
   m_TagString: Untagged
@@ -216,7 +217,29 @@ MonoBehaviour:
     serializedVersion: 2
     m_Bits: 64
   animator: {fileID: 8181634155171235856}
+  heartDisplay: {fileID: 5646629020273204545}
+  heartsRoot: {fileID: 3222477846940996604}
+  heartSlots:
+  - {fileID: 8154636317183556937}
   destroyDelayAfterDeath: 0.5
+--- !u!114 &5646629020273204545
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1228558132822369691}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: aa6eeab85f83fae42872c558540ec92d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::EnemyHeartDisplay
+  heartsRoot: {fileID: 3222477846940996604}
+  heartSlots:
+  - {fileID: 8154636317183556937}
+  depletionOrder: 0
+  fullHeartSprite: {fileID: 21300000, guid: 5c341d93a0822b84491c18f7cc14453d, type: 3}
+  emptyHeartSprite: {fileID: 21300000, guid: 82b5b6f996979204fa5a1017b5e1ce60, type: 3}
 --- !u!1 &2099328197347994310
 GameObject:
   m_ObjectHideFlags: 0
@@ -323,7 +346,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &4106607355775514305
 Transform:
   m_ObjectHideFlags: 0

@@ -15,6 +15,7 @@ GameObject:
   - component: {fileID: 1830716079412913766}
   - component: {fileID: 1798089781929234135}
   - component: {fileID: 2234665136217097738}
+  - component: {fileID: 4267290315130084670}
   m_Layer: 6
   m_Name: Bishop
   m_TagString: Untagged
@@ -216,7 +217,33 @@ MonoBehaviour:
     serializedVersion: 2
     m_Bits: 64
   animator: {fileID: 8181634155171235856}
+  heartDisplay: {fileID: 4267290315130084670}
+  heartsRoot: {fileID: 4839837030620412201}
+  heartSlots:
+  - {fileID: 6556328151791921498}
+  - {fileID: 1416328103697592573}
+  - {fileID: 4434061589542302746}
   destroyDelayAfterDeath: 0.5
+--- !u!114 &4267290315130084670
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1228558132822369691}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: aa6eeab85f83fae42872c558540ec92d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::EnemyHeartDisplay
+  heartsRoot: {fileID: 4839837030620412201}
+  heartSlots:
+  - {fileID: 6556328151791921498}
+  - {fileID: 1416328103697592573}
+  - {fileID: 4434061589542302746}
+  depletionOrder: 0
+  fullHeartSprite: {fileID: 21300000, guid: 5c341d93a0822b84491c18f7cc14453d, type: 3}
+  emptyHeartSprite: {fileID: 21300000, guid: 82b5b6f996979204fa5a1017b5e1ce60, type: 3}
 --- !u!1 &1541477452072173159
 GameObject:
   m_ObjectHideFlags: 0
@@ -323,7 +350,7 @@ GameObject:
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
-  m_IsActive: 1
+  m_IsActive: 0
 --- !u!4 &7591507136990453859
 Transform:
   m_ObjectHideFlags: 0
