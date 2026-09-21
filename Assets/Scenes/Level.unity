@@ -134,6 +134,7 @@ GameObject:
   - component: {fileID: 399355}
   - component: {fileID: 399354}
   - component: {fileID: 399353}
+  - component: {fileID: 399359}
   m_Layer: 6
   m_Name: Rook(Clone)
   m_TagString: Untagged
@@ -175,6 +176,8 @@ MonoBehaviour:
     serializedVersion: 2
     m_Bits: 64
   animator: {fileID: 399357}
+  heartsRoot: {fileID: 0}
+  heartSlots: []
   destroyDelayAfterDeath: 0.5
 --- !u!114 &399354
 MonoBehaviour:
@@ -336,6 +339,29 @@ SpriteRenderer:
   m_SpriteTileMode: 0
   m_WasSpriteAssigned: 1
   m_SpriteSortPoint: 1
+--- !u!114 &399359
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 399351}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: aa6eeab85f83fae42872c558540ec92d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::EnemyHeartDisplay
+  heartFullSprite: {fileID: 0}
+  heartEmptySprite: {fileID: 0}
+  heartsOffset: {x: 0, y: 0.8, z: 0}
+  heartSpacing: 0.35
+  heartsRoot: {fileID: 0}
+  heartRenderers: []
+  enemyBase: {fileID: 0}
+  entityStats: {fileID: 0}
+  maxHealth: 1
+  currentHealth: 1
+  isDead: 0
 --- !u!1 &10049745
 GameObject:
   m_ObjectHideFlags: 0
@@ -22333,6 +22359,7 @@ GameObject:
   - component: {fileID: 33881159}
   - component: {fileID: 33881158}
   - component: {fileID: 33881157}
+  - component: {fileID: 33881163}
   m_Layer: 6
   m_Name: Pawn(Clone)
   m_TagString: Untagged
@@ -22374,6 +22401,8 @@ MonoBehaviour:
     serializedVersion: 2
     m_Bits: 64
   animator: {fileID: 33881161}
+  heartsRoot: {fileID: 0}
+  heartSlots: []
   destroyDelayAfterDeath: 0.5
 --- !u!114 &33881158
 MonoBehaviour:
@@ -22535,6 +22564,29 @@ SpriteRenderer:
   m_SpriteTileMode: 0
   m_WasSpriteAssigned: 1
   m_SpriteSortPoint: 1
+--- !u!114 &33881163
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 33881155}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: aa6eeab85f83fae42872c558540ec92d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::EnemyHeartDisplay
+  heartFullSprite: {fileID: 0}
+  heartEmptySprite: {fileID: 0}
+  heartsOffset: {x: 0, y: 0.8, z: 0}
+  heartSpacing: 0.35
+  heartsRoot: {fileID: 0}
+  heartRenderers: []
+  enemyBase: {fileID: 0}
+  entityStats: {fileID: 0}
+  maxHealth: 1
+  currentHealth: 1
+  isDead: 0
 --- !u!1 &45355463
 GameObject:
   m_ObjectHideFlags: 0
@@ -22567,10 +22619,10 @@ RectTransform:
   m_Children: []
   m_Father: {fileID: 1438736321}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0, y: 0}
-  m_AnchorMax: {x: 0, y: 0}
-  m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 0, y: 0}
+  m_AnchorMin: {x: 0, y: 1}
+  m_AnchorMax: {x: 0, y: 1}
+  m_AnchoredPosition: {x: 12.5, y: -40}
+  m_SizeDelta: {x: 25, y: 20}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &45355465
 MonoBehaviour:
@@ -22998,6 +23050,7 @@ GameObject:
   - component: {fileID: 56301269}
   - component: {fileID: 56301268}
   - component: {fileID: 56301267}
+  - component: {fileID: 56301273}
   m_Layer: 6
   m_Name: Pawn(Clone)
   m_TagString: Untagged
@@ -23039,6 +23092,8 @@ MonoBehaviour:
     serializedVersion: 2
     m_Bits: 64
   animator: {fileID: 56301271}
+  heartsRoot: {fileID: 0}
+  heartSlots: []
   destroyDelayAfterDeath: 0.5
 --- !u!114 &56301268
 MonoBehaviour:
@@ -23200,6 +23255,29 @@ SpriteRenderer:
   m_SpriteTileMode: 0
   m_WasSpriteAssigned: 1
   m_SpriteSortPoint: 1
+--- !u!114 &56301273
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 56301265}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: aa6eeab85f83fae42872c558540ec92d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::EnemyHeartDisplay
+  heartFullSprite: {fileID: 0}
+  heartEmptySprite: {fileID: 0}
+  heartsOffset: {x: 0, y: 0.8, z: 0}
+  heartSpacing: 0.35
+  heartsRoot: {fileID: 0}
+  heartRenderers: []
+  enemyBase: {fileID: 0}
+  entityStats: {fileID: 0}
+  maxHealth: 1
+  currentHealth: 1
+  isDead: 0
 --- !u!1 &61350822
 GameObject:
   m_ObjectHideFlags: 0
@@ -23584,9 +23662,9 @@ RectTransform:
   - {fileID: 1544491729}
   m_Father: {fileID: 553404158}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0, y: 0}
-  m_AnchorMax: {x: 0, y: 0}
-  m_AnchoredPosition: {x: 0, y: 0}
+  m_AnchorMin: {x: 0, y: 1}
+  m_AnchorMax: {x: 0, y: 1}
+  m_AnchoredPosition: {x: 88, y: -24}
   m_SizeDelta: {x: 13, y: 12}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &123771095
@@ -24099,6 +24177,7 @@ GameObject:
   - component: {fileID: 169280211}
   - component: {fileID: 169280210}
   - component: {fileID: 169280209}
+  - component: {fileID: 169280215}
   m_Layer: 6
   m_Name: Knight(Clone)
   m_TagString: Untagged
@@ -24141,6 +24220,8 @@ MonoBehaviour:
     serializedVersion: 2
     m_Bits: 64
   animator: {fileID: 169280213}
+  heartsRoot: {fileID: 0}
+  heartSlots: []
   destroyDelayAfterDeath: 0.5
 --- !u!114 &169280210
 MonoBehaviour:
@@ -24302,6 +24383,29 @@ SpriteRenderer:
   m_SpriteTileMode: 0
   m_WasSpriteAssigned: 1
   m_SpriteSortPoint: 1
+--- !u!114 &169280215
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 169280207}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: aa6eeab85f83fae42872c558540ec92d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::EnemyHeartDisplay
+  heartFullSprite: {fileID: 0}
+  heartEmptySprite: {fileID: 0}
+  heartsOffset: {x: 0, y: 0.8, z: 0}
+  heartSpacing: 0.35
+  heartsRoot: {fileID: 0}
+  heartRenderers: []
+  enemyBase: {fileID: 0}
+  entityStats: {fileID: 0}
+  maxHealth: 1
+  currentHealth: 1
+  isDead: 0
 --- !u!1 &172554432
 GameObject:
   m_ObjectHideFlags: 0
@@ -25353,6 +25457,7 @@ GameObject:
   - component: {fileID: 227868260}
   - component: {fileID: 227868259}
   - component: {fileID: 227868258}
+  - component: {fileID: 227868264}
   m_Layer: 6
   m_Name: Pawn(Clone)
   m_TagString: Untagged
@@ -25394,6 +25499,8 @@ MonoBehaviour:
     serializedVersion: 2
     m_Bits: 64
   animator: {fileID: 227868262}
+  heartsRoot: {fileID: 0}
+  heartSlots: []
   destroyDelayAfterDeath: 0.5
 --- !u!114 &227868259
 MonoBehaviour:
@@ -25555,6 +25662,29 @@ SpriteRenderer:
   m_SpriteTileMode: 0
   m_WasSpriteAssigned: 1
   m_SpriteSortPoint: 1
+--- !u!114 &227868264
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 227868256}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: aa6eeab85f83fae42872c558540ec92d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::EnemyHeartDisplay
+  heartFullSprite: {fileID: 0}
+  heartEmptySprite: {fileID: 0}
+  heartsOffset: {x: 0, y: 0.8, z: 0}
+  heartSpacing: 0.35
+  heartsRoot: {fileID: 0}
+  heartRenderers: []
+  enemyBase: {fileID: 0}
+  entityStats: {fileID: 0}
+  maxHealth: 1
+  currentHealth: 1
+  isDead: 0
 --- !u!224 &237128699 stripped
 RectTransform:
   m_CorrespondingSourceObject: {fileID: 8570041562810107852, guid: 338d1070f796a364ca237649776707f8, type: 3}
@@ -25985,6 +26115,7 @@ GameObject:
   - component: {fileID: 266367626}
   - component: {fileID: 266367625}
   - component: {fileID: 266367624}
+  - component: {fileID: 266367630}
   m_Layer: 6
   m_Name: Pawn(Clone)
   m_TagString: Untagged
@@ -26026,6 +26157,8 @@ MonoBehaviour:
     serializedVersion: 2
     m_Bits: 64
   animator: {fileID: 266367628}
+  heartsRoot: {fileID: 0}
+  heartSlots: []
   destroyDelayAfterDeath: 0.5
 --- !u!114 &266367625
 MonoBehaviour:
@@ -26187,6 +26320,29 @@ SpriteRenderer:
   m_SpriteTileMode: 0
   m_WasSpriteAssigned: 1
   m_SpriteSortPoint: 1
+--- !u!114 &266367630
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 266367622}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: aa6eeab85f83fae42872c558540ec92d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::EnemyHeartDisplay
+  heartFullSprite: {fileID: 0}
+  heartEmptySprite: {fileID: 0}
+  heartsOffset: {x: 0, y: 0.8, z: 0}
+  heartSpacing: 0.35
+  heartsRoot: {fileID: 0}
+  heartRenderers: []
+  enemyBase: {fileID: 0}
+  entityStats: {fileID: 0}
+  maxHealth: 1
+  currentHealth: 1
+  isDead: 0
 --- !u!1 &273858269
 GameObject:
   m_ObjectHideFlags: 0
@@ -26870,10 +27026,10 @@ RectTransform:
   m_Children: []
   m_Father: {fileID: 1438736321}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0, y: 0}
-  m_AnchorMax: {x: 0, y: 0}
-  m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 0, y: 0}
+  m_AnchorMin: {x: 0, y: 1}
+  m_AnchorMax: {x: 0, y: 1}
+  m_AnchoredPosition: {x: 117.5, y: -40}
+  m_SizeDelta: {x: 25, y: 20}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &306116517
 MonoBehaviour:
@@ -27094,6 +27250,7 @@ GameObject:
   - component: {fileID: 349897452}
   - component: {fileID: 349897451}
   - component: {fileID: 349897450}
+  - component: {fileID: 349897456}
   m_Layer: 6
   m_Name: Knight(Clone)
   m_TagString: Untagged
@@ -27136,6 +27293,8 @@ MonoBehaviour:
     serializedVersion: 2
     m_Bits: 64
   animator: {fileID: 349897454}
+  heartsRoot: {fileID: 0}
+  heartSlots: []
   destroyDelayAfterDeath: 0.5
 --- !u!114 &349897451
 MonoBehaviour:
@@ -27297,6 +27456,29 @@ SpriteRenderer:
   m_SpriteTileMode: 0
   m_WasSpriteAssigned: 1
   m_SpriteSortPoint: 1
+--- !u!114 &349897456
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 349897448}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: aa6eeab85f83fae42872c558540ec92d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::EnemyHeartDisplay
+  heartFullSprite: {fileID: 0}
+  heartEmptySprite: {fileID: 0}
+  heartsOffset: {x: 0, y: 0.8, z: 0}
+  heartSpacing: 0.35
+  heartsRoot: {fileID: 0}
+  heartRenderers: []
+  enemyBase: {fileID: 0}
+  entityStats: {fileID: 0}
+  maxHealth: 1
+  currentHealth: 1
+  isDead: 0
 --- !u!1 &350553332
 GameObject:
   m_ObjectHideFlags: 0
@@ -27508,6 +27690,7 @@ GameObject:
   - component: {fileID: 357973391}
   - component: {fileID: 357973390}
   - component: {fileID: 357973389}
+  - component: {fileID: 357973395}
   m_Layer: 6
   m_Name: Bishop(Clone)
   m_TagString: Untagged
@@ -27549,6 +27732,8 @@ MonoBehaviour:
     serializedVersion: 2
     m_Bits: 64
   animator: {fileID: 357973393}
+  heartsRoot: {fileID: 0}
+  heartSlots: []
   destroyDelayAfterDeath: 0.5
 --- !u!114 &357973390
 MonoBehaviour:
@@ -27710,6 +27895,29 @@ SpriteRenderer:
   m_SpriteTileMode: 0
   m_WasSpriteAssigned: 1
   m_SpriteSortPoint: 1
+--- !u!114 &357973395
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 357973387}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: aa6eeab85f83fae42872c558540ec92d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::EnemyHeartDisplay
+  heartFullSprite: {fileID: 0}
+  heartEmptySprite: {fileID: 0}
+  heartsOffset: {x: 0, y: 0.8, z: 0}
+  heartSpacing: 0.35
+  heartsRoot: {fileID: 0}
+  heartRenderers: []
+  enemyBase: {fileID: 0}
+  entityStats: {fileID: 0}
+  maxHealth: 1
+  currentHealth: 1
+  isDead: 0
 --- !u!1 &358615955
 GameObject:
   m_ObjectHideFlags: 0
@@ -27742,10 +27950,10 @@ RectTransform:
   m_Children: []
   m_Father: {fileID: 1438736321}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0, y: 0}
-  m_AnchorMax: {x: 0, y: 0}
-  m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 0, y: 0}
+  m_AnchorMin: {x: 0, y: 1}
+  m_AnchorMax: {x: 0, y: 1}
+  m_AnchoredPosition: {x: 12.5, y: -70}
+  m_SizeDelta: {x: 25, y: 20}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &358615957
 MonoBehaviour:
@@ -27925,6 +28133,7 @@ GameObject:
   - component: {fileID: 366395041}
   - component: {fileID: 366395040}
   - component: {fileID: 366395039}
+  - component: {fileID: 366395045}
   m_Layer: 6
   m_Name: Rook(Clone)
   m_TagString: Untagged
@@ -27966,6 +28175,8 @@ MonoBehaviour:
     serializedVersion: 2
     m_Bits: 64
   animator: {fileID: 366395043}
+  heartsRoot: {fileID: 0}
+  heartSlots: []
   destroyDelayAfterDeath: 0.5
 --- !u!114 &366395040
 MonoBehaviour:
@@ -28127,6 +28338,29 @@ SpriteRenderer:
   m_SpriteTileMode: 0
   m_WasSpriteAssigned: 1
   m_SpriteSortPoint: 1
+--- !u!114 &366395045
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 366395037}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: aa6eeab85f83fae42872c558540ec92d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::EnemyHeartDisplay
+  heartFullSprite: {fileID: 0}
+  heartEmptySprite: {fileID: 0}
+  heartsOffset: {x: 0, y: 0.8, z: 0}
+  heartSpacing: 0.35
+  heartsRoot: {fileID: 0}
+  heartRenderers: []
+  enemyBase: {fileID: 0}
+  entityStats: {fileID: 0}
+  maxHealth: 1
+  currentHealth: 1
+  isDead: 0
 --- !u!1 &366458469
 GameObject:
   m_ObjectHideFlags: 0
@@ -28267,6 +28501,7 @@ GameObject:
   - component: {fileID: 377228273}
   - component: {fileID: 377228272}
   - component: {fileID: 377228271}
+  - component: {fileID: 377228277}
   m_Layer: 6
   m_Name: Pawn(Clone)
   m_TagString: Untagged
@@ -28308,6 +28543,8 @@ MonoBehaviour:
     serializedVersion: 2
     m_Bits: 64
   animator: {fileID: 377228275}
+  heartsRoot: {fileID: 0}
+  heartSlots: []
   destroyDelayAfterDeath: 0.5
 --- !u!114 &377228272
 MonoBehaviour:
@@ -28469,6 +28706,29 @@ SpriteRenderer:
   m_SpriteTileMode: 0
   m_WasSpriteAssigned: 1
   m_SpriteSortPoint: 1
+--- !u!114 &377228277
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 377228269}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: aa6eeab85f83fae42872c558540ec92d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::EnemyHeartDisplay
+  heartFullSprite: {fileID: 0}
+  heartEmptySprite: {fileID: 0}
+  heartsOffset: {x: 0, y: 0.8, z: 0}
+  heartSpacing: 0.35
+  heartsRoot: {fileID: 0}
+  heartRenderers: []
+  enemyBase: {fileID: 0}
+  entityStats: {fileID: 0}
+  maxHealth: 1
+  currentHealth: 1
+  isDead: 0
 --- !u!1 &383417580
 GameObject:
   m_ObjectHideFlags: 0
@@ -28962,6 +29222,7 @@ GameObject:
   - component: {fileID: 417534298}
   - component: {fileID: 417534297}
   - component: {fileID: 417534296}
+  - component: {fileID: 417534302}
   m_Layer: 6
   m_Name: Rook(Clone)
   m_TagString: Untagged
@@ -29003,6 +29264,8 @@ MonoBehaviour:
     serializedVersion: 2
     m_Bits: 64
   animator: {fileID: 417534300}
+  heartsRoot: {fileID: 0}
+  heartSlots: []
   destroyDelayAfterDeath: 0.5
 --- !u!114 &417534297
 MonoBehaviour:
@@ -29164,6 +29427,29 @@ SpriteRenderer:
   m_SpriteTileMode: 0
   m_WasSpriteAssigned: 1
   m_SpriteSortPoint: 1
+--- !u!114 &417534302
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 417534294}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: aa6eeab85f83fae42872c558540ec92d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::EnemyHeartDisplay
+  heartFullSprite: {fileID: 0}
+  heartEmptySprite: {fileID: 0}
+  heartsOffset: {x: 0, y: 0.8, z: 0}
+  heartSpacing: 0.35
+  heartsRoot: {fileID: 0}
+  heartRenderers: []
+  enemyBase: {fileID: 0}
+  entityStats: {fileID: 0}
+  maxHealth: 1
+  currentHealth: 1
+  isDead: 0
 --- !u!1 &417820643
 GameObject:
   m_ObjectHideFlags: 0
@@ -29254,6 +29540,7 @@ GameObject:
   - component: {fileID: 421472084}
   - component: {fileID: 421472083}
   - component: {fileID: 421472082}
+  - component: {fileID: 421472088}
   m_Layer: 6
   m_Name: Knight(Clone)
   m_TagString: Untagged
@@ -29296,6 +29583,8 @@ MonoBehaviour:
     serializedVersion: 2
     m_Bits: 64
   animator: {fileID: 421472086}
+  heartsRoot: {fileID: 0}
+  heartSlots: []
   destroyDelayAfterDeath: 0.5
 --- !u!114 &421472083
 MonoBehaviour:
@@ -29457,6 +29746,29 @@ SpriteRenderer:
   m_SpriteTileMode: 0
   m_WasSpriteAssigned: 1
   m_SpriteSortPoint: 1
+--- !u!114 &421472088
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 421472080}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: aa6eeab85f83fae42872c558540ec92d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::EnemyHeartDisplay
+  heartFullSprite: {fileID: 0}
+  heartEmptySprite: {fileID: 0}
+  heartsOffset: {x: 0, y: 0.8, z: 0}
+  heartSpacing: 0.35
+  heartsRoot: {fileID: 0}
+  heartRenderers: []
+  enemyBase: {fileID: 0}
+  entityStats: {fileID: 0}
+  maxHealth: 1
+  currentHealth: 1
+  isDead: 0
 --- !u!1 &427057764
 GameObject:
   m_ObjectHideFlags: 0
@@ -29686,6 +29998,7 @@ GameObject:
   - component: {fileID: 447692486}
   - component: {fileID: 447692485}
   - component: {fileID: 447692484}
+  - component: {fileID: 447692490}
   m_Layer: 6
   m_Name: Pawn(Clone)
   m_TagString: Untagged
@@ -29727,6 +30040,8 @@ MonoBehaviour:
     serializedVersion: 2
     m_Bits: 64
   animator: {fileID: 447692488}
+  heartsRoot: {fileID: 0}
+  heartSlots: []
   destroyDelayAfterDeath: 0.5
 --- !u!114 &447692485
 MonoBehaviour:
@@ -29888,6 +30203,29 @@ SpriteRenderer:
   m_SpriteTileMode: 0
   m_WasSpriteAssigned: 1
   m_SpriteSortPoint: 1
+--- !u!114 &447692490
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 447692482}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: aa6eeab85f83fae42872c558540ec92d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::EnemyHeartDisplay
+  heartFullSprite: {fileID: 0}
+  heartEmptySprite: {fileID: 0}
+  heartsOffset: {x: 0, y: 0.8, z: 0}
+  heartSpacing: 0.35
+  heartsRoot: {fileID: 0}
+  heartRenderers: []
+  enemyBase: {fileID: 0}
+  entityStats: {fileID: 0}
+  maxHealth: 1
+  currentHealth: 1
+  isDead: 0
 --- !u!1 &450706234
 GameObject:
   m_ObjectHideFlags: 0
@@ -30183,6 +30521,7 @@ GameObject:
   - component: {fileID: 453930429}
   - component: {fileID: 453930428}
   - component: {fileID: 453930427}
+  - component: {fileID: 453930433}
   m_Layer: 6
   m_Name: Pawn(Clone)
   m_TagString: Untagged
@@ -30224,6 +30563,8 @@ MonoBehaviour:
     serializedVersion: 2
     m_Bits: 64
   animator: {fileID: 453930431}
+  heartsRoot: {fileID: 0}
+  heartSlots: []
   destroyDelayAfterDeath: 0.5
 --- !u!114 &453930428
 MonoBehaviour:
@@ -30385,6 +30726,29 @@ SpriteRenderer:
   m_SpriteTileMode: 0
   m_WasSpriteAssigned: 1
   m_SpriteSortPoint: 1
+--- !u!114 &453930433
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 453930425}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: aa6eeab85f83fae42872c558540ec92d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::EnemyHeartDisplay
+  heartFullSprite: {fileID: 0}
+  heartEmptySprite: {fileID: 0}
+  heartsOffset: {x: 0, y: 0.8, z: 0}
+  heartSpacing: 0.35
+  heartsRoot: {fileID: 0}
+  heartRenderers: []
+  enemyBase: {fileID: 0}
+  entityStats: {fileID: 0}
+  maxHealth: 1
+  currentHealth: 1
+  isDead: 0
 --- !u!1 &456100508
 GameObject:
   m_ObjectHideFlags: 0
@@ -30400,6 +30764,7 @@ GameObject:
   - component: {fileID: 456100512}
   - component: {fileID: 456100511}
   - component: {fileID: 456100510}
+  - component: {fileID: 456100516}
   m_Layer: 6
   m_Name: Bishop(Clone)
   m_TagString: Untagged
@@ -30441,6 +30806,8 @@ MonoBehaviour:
     serializedVersion: 2
     m_Bits: 64
   animator: {fileID: 456100514}
+  heartsRoot: {fileID: 0}
+  heartSlots: []
   destroyDelayAfterDeath: 0.5
 --- !u!114 &456100511
 MonoBehaviour:
@@ -30602,6 +30969,29 @@ SpriteRenderer:
   m_SpriteTileMode: 0
   m_WasSpriteAssigned: 1
   m_SpriteSortPoint: 1
+--- !u!114 &456100516
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 456100508}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: aa6eeab85f83fae42872c558540ec92d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::EnemyHeartDisplay
+  heartFullSprite: {fileID: 0}
+  heartEmptySprite: {fileID: 0}
+  heartsOffset: {x: 0, y: 0.8, z: 0}
+  heartSpacing: 0.35
+  heartsRoot: {fileID: 0}
+  heartRenderers: []
+  enemyBase: {fileID: 0}
+  entityStats: {fileID: 0}
+  maxHealth: 1
+  currentHealth: 1
+  isDead: 0
 --- !u!1 &466340839
 GameObject:
   m_ObjectHideFlags: 0
@@ -30740,6 +31130,7 @@ GameObject:
   - component: {fileID: 480008818}
   - component: {fileID: 480008817}
   - component: {fileID: 480008816}
+  - component: {fileID: 480008822}
   m_Layer: 6
   m_Name: Pawn(Clone)
   m_TagString: Untagged
@@ -30781,6 +31172,8 @@ MonoBehaviour:
     serializedVersion: 2
     m_Bits: 64
   animator: {fileID: 480008820}
+  heartsRoot: {fileID: 0}
+  heartSlots: []
   destroyDelayAfterDeath: 0.5
 --- !u!114 &480008817
 MonoBehaviour:
@@ -30942,6 +31335,29 @@ SpriteRenderer:
   m_SpriteTileMode: 0
   m_WasSpriteAssigned: 1
   m_SpriteSortPoint: 1
+--- !u!114 &480008822
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 480008814}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: aa6eeab85f83fae42872c558540ec92d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::EnemyHeartDisplay
+  heartFullSprite: {fileID: 0}
+  heartEmptySprite: {fileID: 0}
+  heartsOffset: {x: 0, y: 0.8, z: 0}
+  heartSpacing: 0.35
+  heartsRoot: {fileID: 0}
+  heartRenderers: []
+  enemyBase: {fileID: 0}
+  entityStats: {fileID: 0}
+  maxHealth: 1
+  currentHealth: 1
+  isDead: 0
 --- !u!1 &482998267
 GameObject:
   m_ObjectHideFlags: 0
@@ -31226,6 +31642,7 @@ GameObject:
   - component: {fileID: 486490483}
   - component: {fileID: 486490482}
   - component: {fileID: 486490481}
+  - component: {fileID: 486490487}
   m_Layer: 6
   m_Name: Knight(Clone)
   m_TagString: Untagged
@@ -31268,6 +31685,8 @@ MonoBehaviour:
     serializedVersion: 2
     m_Bits: 64
   animator: {fileID: 486490485}
+  heartsRoot: {fileID: 0}
+  heartSlots: []
   destroyDelayAfterDeath: 0.5
 --- !u!114 &486490482
 MonoBehaviour:
@@ -31429,6 +31848,29 @@ SpriteRenderer:
   m_SpriteTileMode: 0
   m_WasSpriteAssigned: 1
   m_SpriteSortPoint: 1
+--- !u!114 &486490487
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 486490479}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: aa6eeab85f83fae42872c558540ec92d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::EnemyHeartDisplay
+  heartFullSprite: {fileID: 0}
+  heartEmptySprite: {fileID: 0}
+  heartsOffset: {x: 0, y: 0.8, z: 0}
+  heartSpacing: 0.35
+  heartsRoot: {fileID: 0}
+  heartRenderers: []
+  enemyBase: {fileID: 0}
+  entityStats: {fileID: 0}
+  maxHealth: 1
+  currentHealth: 1
+  isDead: 0
 --- !u!1 &487196625
 GameObject:
   m_ObjectHideFlags: 0
@@ -31829,7 +32271,7 @@ Camera:
   far clip plane: 1000
   field of view: 34
   orthographic: 1
-  orthographic size: 5.625
+  orthographic size: 16.875
   m_Depth: -1
   m_CullingMask:
     serializedVersion: 2
@@ -32068,6 +32510,7 @@ GameObject:
   - component: {fileID: 528394674}
   - component: {fileID: 528394673}
   - component: {fileID: 528394672}
+  - component: {fileID: 528394678}
   m_Layer: 6
   m_Name: Pawn(Clone)
   m_TagString: Untagged
@@ -32109,6 +32552,8 @@ MonoBehaviour:
     serializedVersion: 2
     m_Bits: 64
   animator: {fileID: 528394676}
+  heartsRoot: {fileID: 0}
+  heartSlots: []
   destroyDelayAfterDeath: 0.5
 --- !u!114 &528394673
 MonoBehaviour:
@@ -32270,6 +32715,29 @@ SpriteRenderer:
   m_SpriteTileMode: 0
   m_WasSpriteAssigned: 1
   m_SpriteSortPoint: 1
+--- !u!114 &528394678
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 528394670}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: aa6eeab85f83fae42872c558540ec92d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::EnemyHeartDisplay
+  heartFullSprite: {fileID: 0}
+  heartEmptySprite: {fileID: 0}
+  heartsOffset: {x: 0, y: 0.8, z: 0}
+  heartSpacing: 0.35
+  heartsRoot: {fileID: 0}
+  heartRenderers: []
+  enemyBase: {fileID: 0}
+  entityStats: {fileID: 0}
+  maxHealth: 1
+  currentHealth: 1
+  isDead: 0
 --- !u!1 &534745043
 GameObject:
   m_ObjectHideFlags: 0
@@ -32917,10 +33385,10 @@ RectTransform:
   m_Children: []
   m_Father: {fileID: 1438736321}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0, y: 0}
-  m_AnchorMax: {x: 0, y: 0}
-  m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 0, y: 0}
+  m_AnchorMin: {x: 0, y: 1}
+  m_AnchorMax: {x: 0, y: 1}
+  m_AnchoredPosition: {x: 47.5, y: -10}
+  m_SizeDelta: {x: 25, y: 20}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &551846877
 MonoBehaviour:
@@ -33848,6 +34316,7 @@ GameObject:
   - component: {fileID: 592029592}
   - component: {fileID: 592029591}
   - component: {fileID: 592029590}
+  - component: {fileID: 592029596}
   m_Layer: 6
   m_Name: Pawn(Clone)
   m_TagString: Untagged
@@ -33889,6 +34358,8 @@ MonoBehaviour:
     serializedVersion: 2
     m_Bits: 64
   animator: {fileID: 592029594}
+  heartsRoot: {fileID: 0}
+  heartSlots: []
   destroyDelayAfterDeath: 0.5
 --- !u!114 &592029591
 MonoBehaviour:
@@ -34050,6 +34521,29 @@ SpriteRenderer:
   m_SpriteTileMode: 0
   m_WasSpriteAssigned: 1
   m_SpriteSortPoint: 1
+--- !u!114 &592029596
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 592029588}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: aa6eeab85f83fae42872c558540ec92d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::EnemyHeartDisplay
+  heartFullSprite: {fileID: 0}
+  heartEmptySprite: {fileID: 0}
+  heartsOffset: {x: 0, y: 0.8, z: 0}
+  heartSpacing: 0.35
+  heartsRoot: {fileID: 0}
+  heartRenderers: []
+  enemyBase: {fileID: 0}
+  entityStats: {fileID: 0}
+  maxHealth: 1
+  currentHealth: 1
+  isDead: 0
 --- !u!1 &598081972
 GameObject:
   m_ObjectHideFlags: 0
@@ -34156,6 +34650,7 @@ GameObject:
   - component: {fileID: 604519355}
   - component: {fileID: 604519354}
   - component: {fileID: 604519353}
+  - component: {fileID: 604519359}
   m_Layer: 6
   m_Name: Rook(Clone)
   m_TagString: Untagged
@@ -34197,6 +34692,8 @@ MonoBehaviour:
     serializedVersion: 2
     m_Bits: 64
   animator: {fileID: 604519357}
+  heartsRoot: {fileID: 0}
+  heartSlots: []
   destroyDelayAfterDeath: 0.5
 --- !u!114 &604519354
 MonoBehaviour:
@@ -34358,6 +34855,29 @@ SpriteRenderer:
   m_SpriteTileMode: 0
   m_WasSpriteAssigned: 1
   m_SpriteSortPoint: 1
+--- !u!114 &604519359
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 604519351}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: aa6eeab85f83fae42872c558540ec92d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::EnemyHeartDisplay
+  heartFullSprite: {fileID: 0}
+  heartEmptySprite: {fileID: 0}
+  heartsOffset: {x: 0, y: 0.8, z: 0}
+  heartSpacing: 0.35
+  heartsRoot: {fileID: 0}
+  heartRenderers: []
+  enemyBase: {fileID: 0}
+  entityStats: {fileID: 0}
+  maxHealth: 1
+  currentHealth: 1
+  isDead: 0
 --- !u!1 &607161085
 GameObject:
   m_ObjectHideFlags: 0
@@ -34789,10 +35309,10 @@ RectTransform:
   m_Children: []
   m_Father: {fileID: 1438736321}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0, y: 0}
-  m_AnchorMax: {x: 0, y: 0}
-  m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 0, y: 0}
+  m_AnchorMin: {x: 0, y: 1}
+  m_AnchorMax: {x: 0, y: 1}
+  m_AnchoredPosition: {x: 117.5, y: -70}
+  m_SizeDelta: {x: 25, y: 20}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &614321720
 MonoBehaviour:
@@ -35038,6 +35558,7 @@ GameObject:
   - component: {fileID: 633207344}
   - component: {fileID: 633207343}
   - component: {fileID: 633207342}
+  - component: {fileID: 633207348}
   m_Layer: 6
   m_Name: Bishop(Clone)
   m_TagString: Untagged
@@ -35079,6 +35600,8 @@ MonoBehaviour:
     serializedVersion: 2
     m_Bits: 64
   animator: {fileID: 633207346}
+  heartsRoot: {fileID: 0}
+  heartSlots: []
   destroyDelayAfterDeath: 0.5
 --- !u!114 &633207343
 MonoBehaviour:
@@ -35240,6 +35763,29 @@ SpriteRenderer:
   m_SpriteTileMode: 0
   m_WasSpriteAssigned: 1
   m_SpriteSortPoint: 1
+--- !u!114 &633207348
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 633207340}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: aa6eeab85f83fae42872c558540ec92d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::EnemyHeartDisplay
+  heartFullSprite: {fileID: 0}
+  heartEmptySprite: {fileID: 0}
+  heartsOffset: {x: 0, y: 0.8, z: 0}
+  heartSpacing: 0.35
+  heartsRoot: {fileID: 0}
+  heartRenderers: []
+  enemyBase: {fileID: 0}
+  entityStats: {fileID: 0}
+  maxHealth: 1
+  currentHealth: 1
+  isDead: 0
 --- !u!1 &641224383
 GameObject:
   m_ObjectHideFlags: 0
@@ -35255,6 +35801,7 @@ GameObject:
   - component: {fileID: 641224387}
   - component: {fileID: 641224386}
   - component: {fileID: 641224385}
+  - component: {fileID: 641224391}
   m_Layer: 6
   m_Name: Knight(Clone)
   m_TagString: Untagged
@@ -35297,6 +35844,8 @@ MonoBehaviour:
     serializedVersion: 2
     m_Bits: 64
   animator: {fileID: 641224389}
+  heartsRoot: {fileID: 0}
+  heartSlots: []
   destroyDelayAfterDeath: 0.5
 --- !u!114 &641224386
 MonoBehaviour:
@@ -35458,6 +36007,29 @@ SpriteRenderer:
   m_SpriteTileMode: 0
   m_WasSpriteAssigned: 1
   m_SpriteSortPoint: 1
+--- !u!114 &641224391
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 641224383}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: aa6eeab85f83fae42872c558540ec92d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::EnemyHeartDisplay
+  heartFullSprite: {fileID: 0}
+  heartEmptySprite: {fileID: 0}
+  heartsOffset: {x: 0, y: 0.8, z: 0}
+  heartSpacing: 0.35
+  heartsRoot: {fileID: 0}
+  heartRenderers: []
+  enemyBase: {fileID: 0}
+  entityStats: {fileID: 0}
+  maxHealth: 1
+  currentHealth: 1
+  isDead: 0
 --- !u!1 &644602094
 GameObject:
   m_ObjectHideFlags: 0
@@ -36383,6 +36955,7 @@ GameObject:
   - component: {fileID: 687449856}
   - component: {fileID: 687449855}
   - component: {fileID: 687449854}
+  - component: {fileID: 687449860}
   m_Layer: 6
   m_Name: Knight(Clone)
   m_TagString: Untagged
@@ -36425,6 +36998,8 @@ MonoBehaviour:
     serializedVersion: 2
     m_Bits: 64
   animator: {fileID: 687449858}
+  heartsRoot: {fileID: 0}
+  heartSlots: []
   destroyDelayAfterDeath: 0.5
 --- !u!114 &687449855
 MonoBehaviour:
@@ -36586,6 +37161,29 @@ SpriteRenderer:
   m_SpriteTileMode: 0
   m_WasSpriteAssigned: 1
   m_SpriteSortPoint: 1
+--- !u!114 &687449860
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 687449852}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: aa6eeab85f83fae42872c558540ec92d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::EnemyHeartDisplay
+  heartFullSprite: {fileID: 0}
+  heartEmptySprite: {fileID: 0}
+  heartsOffset: {x: 0, y: 0.8, z: 0}
+  heartSpacing: 0.35
+  heartsRoot: {fileID: 0}
+  heartRenderers: []
+  enemyBase: {fileID: 0}
+  entityStats: {fileID: 0}
+  maxHealth: 1
+  currentHealth: 1
+  isDead: 0
 --- !u!1 &703361325
 GameObject:
   m_ObjectHideFlags: 0
@@ -37118,6 +37716,7 @@ MonoBehaviour:
   fixedBossRoomSize: {x: 18, y: 16}
   fixedChestRoomSize: {x: 12, y: 12}
   generalRoomDensity: 0.23
+  spawnSettings: {fileID: 11400000, guid: f0dd76de0e04ea84b9970267ee6618e2, type: 2}
   doorSpawner:
     entranceDoorTile: {fileID: 11400000, guid: 21c6cc2adb2833242bd45987ff13f878, type: 2}
     exitDoorTile: {fileID: 11400000, guid: 2e63fd968a031664096990d274e06b99, type: 2}
@@ -38164,6 +38763,7 @@ GameObject:
   - component: {fileID: 794947273}
   - component: {fileID: 794947272}
   - component: {fileID: 794947271}
+  - component: {fileID: 794947277}
   m_Layer: 6
   m_Name: Bishop(Clone)
   m_TagString: Untagged
@@ -38205,6 +38805,8 @@ MonoBehaviour:
     serializedVersion: 2
     m_Bits: 64
   animator: {fileID: 794947275}
+  heartsRoot: {fileID: 0}
+  heartSlots: []
   destroyDelayAfterDeath: 0.5
 --- !u!114 &794947272
 MonoBehaviour:
@@ -38366,6 +38968,29 @@ SpriteRenderer:
   m_SpriteTileMode: 0
   m_WasSpriteAssigned: 1
   m_SpriteSortPoint: 1
+--- !u!114 &794947277
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 794947269}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: aa6eeab85f83fae42872c558540ec92d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::EnemyHeartDisplay
+  heartFullSprite: {fileID: 0}
+  heartEmptySprite: {fileID: 0}
+  heartsOffset: {x: 0, y: 0.8, z: 0}
+  heartSpacing: 0.35
+  heartsRoot: {fileID: 0}
+  heartRenderers: []
+  enemyBase: {fileID: 0}
+  entityStats: {fileID: 0}
+  maxHealth: 1
+  currentHealth: 1
+  isDead: 0
 --- !u!1 &800961458
 GameObject:
   m_ObjectHideFlags: 0
@@ -38490,9 +39115,9 @@ RectTransform:
   - {fileID: 1400395053}
   m_Father: {fileID: 553404158}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0, y: 0}
-  m_AnchorMax: {x: 0, y: 0}
-  m_AnchoredPosition: {x: 0, y: 0}
+  m_AnchorMin: {x: 0, y: 1}
+  m_AnchorMax: {x: 0, y: 1}
+  m_AnchoredPosition: {x: 150, y: -24}
   m_SizeDelta: {x: 13, y: 12}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &825947508
@@ -38663,6 +39288,7 @@ GameObject:
   - component: {fileID: 843715468}
   - component: {fileID: 843715467}
   - component: {fileID: 843715466}
+  - component: {fileID: 843715472}
   m_Layer: 6
   m_Name: Bishop(Clone)
   m_TagString: Untagged
@@ -38704,6 +39330,8 @@ MonoBehaviour:
     serializedVersion: 2
     m_Bits: 64
   animator: {fileID: 843715470}
+  heartsRoot: {fileID: 0}
+  heartSlots: []
   destroyDelayAfterDeath: 0.5
 --- !u!114 &843715467
 MonoBehaviour:
@@ -38865,6 +39493,29 @@ SpriteRenderer:
   m_SpriteTileMode: 0
   m_WasSpriteAssigned: 1
   m_SpriteSortPoint: 1
+--- !u!114 &843715472
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 843715464}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: aa6eeab85f83fae42872c558540ec92d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::EnemyHeartDisplay
+  heartFullSprite: {fileID: 0}
+  heartEmptySprite: {fileID: 0}
+  heartsOffset: {x: 0, y: 0.8, z: 0}
+  heartSpacing: 0.35
+  heartsRoot: {fileID: 0}
+  heartRenderers: []
+  enemyBase: {fileID: 0}
+  entityStats: {fileID: 0}
+  maxHealth: 1
+  currentHealth: 1
+  isDead: 0
 --- !u!1 &847714599
 GameObject:
   m_ObjectHideFlags: 0
@@ -38897,10 +39548,10 @@ RectTransform:
   m_Children: []
   m_Father: {fileID: 1438736321}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0, y: 0}
-  m_AnchorMax: {x: 0, y: 0}
-  m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 0, y: 0}
+  m_AnchorMin: {x: 0, y: 1}
+  m_AnchorMax: {x: 0, y: 1}
+  m_AnchoredPosition: {x: 12.5, y: -10}
+  m_SizeDelta: {x: 25, y: 20}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &847714601
 MonoBehaviour:
@@ -39346,6 +39997,7 @@ GameObject:
   - component: {fileID: 886956672}
   - component: {fileID: 886956671}
   - component: {fileID: 886956670}
+  - component: {fileID: 886956676}
   m_Layer: 6
   m_Name: Bishop(Clone)
   m_TagString: Untagged
@@ -39387,6 +40039,8 @@ MonoBehaviour:
     serializedVersion: 2
     m_Bits: 64
   animator: {fileID: 886956674}
+  heartsRoot: {fileID: 0}
+  heartSlots: []
   destroyDelayAfterDeath: 0.5
 --- !u!114 &886956671
 MonoBehaviour:
@@ -39548,6 +40202,29 @@ SpriteRenderer:
   m_SpriteTileMode: 0
   m_WasSpriteAssigned: 1
   m_SpriteSortPoint: 1
+--- !u!114 &886956676
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 886956668}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: aa6eeab85f83fae42872c558540ec92d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::EnemyHeartDisplay
+  heartFullSprite: {fileID: 0}
+  heartEmptySprite: {fileID: 0}
+  heartsOffset: {x: 0, y: 0.8, z: 0}
+  heartSpacing: 0.35
+  heartsRoot: {fileID: 0}
+  heartRenderers: []
+  enemyBase: {fileID: 0}
+  entityStats: {fileID: 0}
+  maxHealth: 1
+  currentHealth: 1
+  isDead: 0
 --- !u!1 &890735638
 GameObject:
   m_ObjectHideFlags: 0
@@ -68944,6 +69621,7 @@ GameObject:
   - component: {fileID: 903141067}
   - component: {fileID: 903141066}
   - component: {fileID: 903141065}
+  - component: {fileID: 903141071}
   m_Layer: 6
   m_Name: Bishop(Clone)
   m_TagString: Untagged
@@ -68985,6 +69663,8 @@ MonoBehaviour:
     serializedVersion: 2
     m_Bits: 64
   animator: {fileID: 903141069}
+  heartsRoot: {fileID: 0}
+  heartSlots: []
   destroyDelayAfterDeath: 0.5
 --- !u!114 &903141066
 MonoBehaviour:
@@ -69146,6 +69826,29 @@ SpriteRenderer:
   m_SpriteTileMode: 0
   m_WasSpriteAssigned: 1
   m_SpriteSortPoint: 1
+--- !u!114 &903141071
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 903141063}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: aa6eeab85f83fae42872c558540ec92d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::EnemyHeartDisplay
+  heartFullSprite: {fileID: 0}
+  heartEmptySprite: {fileID: 0}
+  heartsOffset: {x: 0, y: 0.8, z: 0}
+  heartSpacing: 0.35
+  heartsRoot: {fileID: 0}
+  heartRenderers: []
+  enemyBase: {fileID: 0}
+  entityStats: {fileID: 0}
+  maxHealth: 1
+  currentHealth: 1
+  isDead: 0
 --- !u!1 &912279165
 GameObject:
   m_ObjectHideFlags: 0
@@ -69228,10 +69931,10 @@ RectTransform:
   m_Children: []
   m_Father: {fileID: 1438736321}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0, y: 0}
-  m_AnchorMax: {x: 0, y: 0}
-  m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 0, y: 0}
+  m_AnchorMin: {x: 0, y: 1}
+  m_AnchorMax: {x: 0, y: 1}
+  m_AnchoredPosition: {x: 82.5, y: -70}
+  m_SizeDelta: {x: 25, y: 20}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &913146741
 MonoBehaviour:
@@ -69361,6 +70064,7 @@ GameObject:
   - component: {fileID: 928555374}
   - component: {fileID: 928555373}
   - component: {fileID: 928555372}
+  - component: {fileID: 928555378}
   m_Layer: 6
   m_Name: Pawn(Clone)
   m_TagString: Untagged
@@ -69402,6 +70106,8 @@ MonoBehaviour:
     serializedVersion: 2
     m_Bits: 64
   animator: {fileID: 928555376}
+  heartsRoot: {fileID: 0}
+  heartSlots: []
   destroyDelayAfterDeath: 0.5
 --- !u!114 &928555373
 MonoBehaviour:
@@ -69563,6 +70269,29 @@ SpriteRenderer:
   m_SpriteTileMode: 0
   m_WasSpriteAssigned: 1
   m_SpriteSortPoint: 1
+--- !u!114 &928555378
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 928555370}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: aa6eeab85f83fae42872c558540ec92d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::EnemyHeartDisplay
+  heartFullSprite: {fileID: 0}
+  heartEmptySprite: {fileID: 0}
+  heartsOffset: {x: 0, y: 0.8, z: 0}
+  heartSpacing: 0.35
+  heartsRoot: {fileID: 0}
+  heartRenderers: []
+  enemyBase: {fileID: 0}
+  entityStats: {fileID: 0}
+  maxHealth: 1
+  currentHealth: 1
+  isDead: 0
 --- !u!1 &936679912
 GameObject:
   m_ObjectHideFlags: 0
@@ -70174,6 +70903,7 @@ GameObject:
   - component: {fileID: 1010197891}
   - component: {fileID: 1010197890}
   - component: {fileID: 1010197889}
+  - component: {fileID: 1010197895}
   m_Layer: 6
   m_Name: Bishop(Clone)
   m_TagString: Untagged
@@ -70215,6 +70945,8 @@ MonoBehaviour:
     serializedVersion: 2
     m_Bits: 64
   animator: {fileID: 1010197893}
+  heartsRoot: {fileID: 0}
+  heartSlots: []
   destroyDelayAfterDeath: 0.5
 --- !u!114 &1010197890
 MonoBehaviour:
@@ -70376,6 +71108,29 @@ SpriteRenderer:
   m_SpriteTileMode: 0
   m_WasSpriteAssigned: 1
   m_SpriteSortPoint: 1
+--- !u!114 &1010197895
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1010197887}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: aa6eeab85f83fae42872c558540ec92d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::EnemyHeartDisplay
+  heartFullSprite: {fileID: 0}
+  heartEmptySprite: {fileID: 0}
+  heartsOffset: {x: 0, y: 0.8, z: 0}
+  heartSpacing: 0.35
+  heartsRoot: {fileID: 0}
+  heartRenderers: []
+  enemyBase: {fileID: 0}
+  entityStats: {fileID: 0}
+  maxHealth: 1
+  currentHealth: 1
+  isDead: 0
 --- !u!1 &1012209055
 GameObject:
   m_ObjectHideFlags: 0
@@ -70408,10 +71163,10 @@ RectTransform:
   m_Children: []
   m_Father: {fileID: 1438736321}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0, y: 0}
-  m_AnchorMax: {x: 0, y: 0}
-  m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 0, y: 0}
+  m_AnchorMin: {x: 0, y: 1}
+  m_AnchorMax: {x: 0, y: 1}
+  m_AnchoredPosition: {x: 82.5, y: -10}
+  m_SizeDelta: {x: 25, y: 20}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1012209057
 MonoBehaviour:
@@ -71209,6 +71964,7 @@ GameObject:
   - component: {fileID: 1075056554}
   - component: {fileID: 1075056553}
   - component: {fileID: 1075056552}
+  - component: {fileID: 1075056558}
   m_Layer: 6
   m_Name: Pawn(Clone)
   m_TagString: Untagged
@@ -71250,6 +72006,8 @@ MonoBehaviour:
     serializedVersion: 2
     m_Bits: 64
   animator: {fileID: 1075056556}
+  heartsRoot: {fileID: 0}
+  heartSlots: []
   destroyDelayAfterDeath: 0.5
 --- !u!114 &1075056553
 MonoBehaviour:
@@ -71411,6 +72169,29 @@ SpriteRenderer:
   m_SpriteTileMode: 0
   m_WasSpriteAssigned: 1
   m_SpriteSortPoint: 1
+--- !u!114 &1075056558
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1075056550}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: aa6eeab85f83fae42872c558540ec92d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::EnemyHeartDisplay
+  heartFullSprite: {fileID: 0}
+  heartEmptySprite: {fileID: 0}
+  heartsOffset: {x: 0, y: 0.8, z: 0}
+  heartSpacing: 0.35
+  heartsRoot: {fileID: 0}
+  heartRenderers: []
+  enemyBase: {fileID: 0}
+  entityStats: {fileID: 0}
+  maxHealth: 1
+  currentHealth: 1
+  isDead: 0
 --- !u!1 &1079847921
 GameObject:
   m_ObjectHideFlags: 0
@@ -71644,6 +72425,7 @@ GameObject:
   - component: {fileID: 1101696586}
   - component: {fileID: 1101696585}
   - component: {fileID: 1101696584}
+  - component: {fileID: 1101696590}
   m_Layer: 6
   m_Name: Knight(Clone)
   m_TagString: Untagged
@@ -71686,6 +72468,8 @@ MonoBehaviour:
     serializedVersion: 2
     m_Bits: 64
   animator: {fileID: 1101696588}
+  heartsRoot: {fileID: 0}
+  heartSlots: []
   destroyDelayAfterDeath: 0.5
 --- !u!114 &1101696585
 MonoBehaviour:
@@ -71847,6 +72631,29 @@ SpriteRenderer:
   m_SpriteTileMode: 0
   m_WasSpriteAssigned: 1
   m_SpriteSortPoint: 1
+--- !u!114 &1101696590
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1101696582}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: aa6eeab85f83fae42872c558540ec92d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::EnemyHeartDisplay
+  heartFullSprite: {fileID: 0}
+  heartEmptySprite: {fileID: 0}
+  heartsOffset: {x: 0, y: 0.8, z: 0}
+  heartSpacing: 0.35
+  heartsRoot: {fileID: 0}
+  heartRenderers: []
+  enemyBase: {fileID: 0}
+  entityStats: {fileID: 0}
+  maxHealth: 1
+  currentHealth: 1
+  isDead: 0
 --- !u!1 &1102859061
 GameObject:
   m_ObjectHideFlags: 0
@@ -72723,6 +73530,7 @@ GameObject:
   - component: {fileID: 1166177990}
   - component: {fileID: 1166177989}
   - component: {fileID: 1166177988}
+  - component: {fileID: 1166177994}
   m_Layer: 6
   m_Name: Pawn(Clone)
   m_TagString: Untagged
@@ -72764,6 +73572,8 @@ MonoBehaviour:
     serializedVersion: 2
     m_Bits: 64
   animator: {fileID: 1166177992}
+  heartsRoot: {fileID: 0}
+  heartSlots: []
   destroyDelayAfterDeath: 0.5
 --- !u!114 &1166177989
 MonoBehaviour:
@@ -72925,6 +73735,29 @@ SpriteRenderer:
   m_SpriteTileMode: 0
   m_WasSpriteAssigned: 1
   m_SpriteSortPoint: 1
+--- !u!114 &1166177994
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1166177986}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: aa6eeab85f83fae42872c558540ec92d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::EnemyHeartDisplay
+  heartFullSprite: {fileID: 0}
+  heartEmptySprite: {fileID: 0}
+  heartsOffset: {x: 0, y: 0.8, z: 0}
+  heartSpacing: 0.35
+  heartsRoot: {fileID: 0}
+  heartRenderers: []
+  enemyBase: {fileID: 0}
+  entityStats: {fileID: 0}
+  maxHealth: 1
+  currentHealth: 1
+  isDead: 0
 --- !u!1 &1167777165
 GameObject:
   m_ObjectHideFlags: 0
@@ -73426,9 +74259,9 @@ RectTransform:
   - {fileID: 661369007}
   m_Father: {fileID: 553404158}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0, y: 0}
-  m_AnchorMax: {x: 0, y: 0}
-  m_AnchoredPosition: {x: 0, y: 0}
+  m_AnchorMin: {x: 0, y: 1}
+  m_AnchorMax: {x: 0, y: 1}
+  m_AnchoredPosition: {x: 212, y: -24}
   m_SizeDelta: {x: 13, y: 12}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &1200966062
@@ -73454,6 +74287,7 @@ GameObject:
   - component: {fileID: 1201680530}
   - component: {fileID: 1201680529}
   - component: {fileID: 1201680528}
+  - component: {fileID: 1201680534}
   m_Layer: 6
   m_Name: Knight(Clone)
   m_TagString: Untagged
@@ -73496,6 +74330,8 @@ MonoBehaviour:
     serializedVersion: 2
     m_Bits: 64
   animator: {fileID: 1201680532}
+  heartsRoot: {fileID: 0}
+  heartSlots: []
   destroyDelayAfterDeath: 0.5
 --- !u!114 &1201680529
 MonoBehaviour:
@@ -73657,6 +74493,29 @@ SpriteRenderer:
   m_SpriteTileMode: 0
   m_WasSpriteAssigned: 1
   m_SpriteSortPoint: 1
+--- !u!114 &1201680534
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1201680526}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: aa6eeab85f83fae42872c558540ec92d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::EnemyHeartDisplay
+  heartFullSprite: {fileID: 0}
+  heartEmptySprite: {fileID: 0}
+  heartsOffset: {x: 0, y: 0.8, z: 0}
+  heartSpacing: 0.35
+  heartsRoot: {fileID: 0}
+  heartRenderers: []
+  enemyBase: {fileID: 0}
+  entityStats: {fileID: 0}
+  maxHealth: 1
+  currentHealth: 1
+  isDead: 0
 --- !u!1 &1205402732
 GameObject:
   m_ObjectHideFlags: 0
@@ -73900,6 +74759,7 @@ GameObject:
   - component: {fileID: 1222947297}
   - component: {fileID: 1222947296}
   - component: {fileID: 1222947295}
+  - component: {fileID: 1222947301}
   m_Layer: 6
   m_Name: Pawn(Clone)
   m_TagString: Untagged
@@ -73941,6 +74801,8 @@ MonoBehaviour:
     serializedVersion: 2
     m_Bits: 64
   animator: {fileID: 1222947299}
+  heartsRoot: {fileID: 0}
+  heartSlots: []
   destroyDelayAfterDeath: 0.5
 --- !u!114 &1222947296
 MonoBehaviour:
@@ -74102,6 +74964,29 @@ SpriteRenderer:
   m_SpriteTileMode: 0
   m_WasSpriteAssigned: 1
   m_SpriteSortPoint: 1
+--- !u!114 &1222947301
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1222947293}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: aa6eeab85f83fae42872c558540ec92d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::EnemyHeartDisplay
+  heartFullSprite: {fileID: 0}
+  heartEmptySprite: {fileID: 0}
+  heartsOffset: {x: 0, y: 0.8, z: 0}
+  heartSpacing: 0.35
+  heartsRoot: {fileID: 0}
+  heartRenderers: []
+  enemyBase: {fileID: 0}
+  entityStats: {fileID: 0}
+  maxHealth: 1
+  currentHealth: 1
+  isDead: 0
 --- !u!1 &1225328330
 GameObject:
   m_ObjectHideFlags: 0
@@ -74629,6 +75514,7 @@ GameObject:
   - component: {fileID: 1259693333}
   - component: {fileID: 1259693332}
   - component: {fileID: 1259693331}
+  - component: {fileID: 1259693337}
   m_Layer: 6
   m_Name: Knight(Clone)
   m_TagString: Untagged
@@ -74671,6 +75557,8 @@ MonoBehaviour:
     serializedVersion: 2
     m_Bits: 64
   animator: {fileID: 1259693335}
+  heartsRoot: {fileID: 0}
+  heartSlots: []
   destroyDelayAfterDeath: 0.5
 --- !u!114 &1259693332
 MonoBehaviour:
@@ -74832,6 +75720,29 @@ SpriteRenderer:
   m_SpriteTileMode: 0
   m_WasSpriteAssigned: 1
   m_SpriteSortPoint: 1
+--- !u!114 &1259693337
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1259693329}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: aa6eeab85f83fae42872c558540ec92d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::EnemyHeartDisplay
+  heartFullSprite: {fileID: 0}
+  heartEmptySprite: {fileID: 0}
+  heartsOffset: {x: 0, y: 0.8, z: 0}
+  heartSpacing: 0.35
+  heartsRoot: {fileID: 0}
+  heartRenderers: []
+  enemyBase: {fileID: 0}
+  entityStats: {fileID: 0}
+  maxHealth: 1
+  currentHealth: 1
+  isDead: 0
 --- !u!1 &1260871822
 GameObject:
   m_ObjectHideFlags: 0
@@ -74847,6 +75758,7 @@ GameObject:
   - component: {fileID: 1260871826}
   - component: {fileID: 1260871825}
   - component: {fileID: 1260871824}
+  - component: {fileID: 1260871830}
   m_Layer: 6
   m_Name: Knight(Clone)
   m_TagString: Untagged
@@ -74889,6 +75801,8 @@ MonoBehaviour:
     serializedVersion: 2
     m_Bits: 64
   animator: {fileID: 1260871828}
+  heartsRoot: {fileID: 0}
+  heartSlots: []
   destroyDelayAfterDeath: 0.5
 --- !u!114 &1260871825
 MonoBehaviour:
@@ -75050,6 +75964,29 @@ SpriteRenderer:
   m_SpriteTileMode: 0
   m_WasSpriteAssigned: 1
   m_SpriteSortPoint: 1
+--- !u!114 &1260871830
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1260871822}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: aa6eeab85f83fae42872c558540ec92d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::EnemyHeartDisplay
+  heartFullSprite: {fileID: 0}
+  heartEmptySprite: {fileID: 0}
+  heartsOffset: {x: 0, y: 0.8, z: 0}
+  heartSpacing: 0.35
+  heartsRoot: {fileID: 0}
+  heartRenderers: []
+  enemyBase: {fileID: 0}
+  entityStats: {fileID: 0}
+  maxHealth: 1
+  currentHealth: 1
+  isDead: 0
 --- !u!1 &1265321449
 GameObject:
   m_ObjectHideFlags: 0
@@ -75140,6 +76077,7 @@ GameObject:
   - component: {fileID: 1268007373}
   - component: {fileID: 1268007372}
   - component: {fileID: 1268007371}
+  - component: {fileID: 1268007377}
   m_Layer: 6
   m_Name: Pawn(Clone)
   m_TagString: Untagged
@@ -75181,6 +76119,8 @@ MonoBehaviour:
     serializedVersion: 2
     m_Bits: 64
   animator: {fileID: 1268007375}
+  heartsRoot: {fileID: 0}
+  heartSlots: []
   destroyDelayAfterDeath: 0.5
 --- !u!114 &1268007372
 MonoBehaviour:
@@ -75342,6 +76282,29 @@ SpriteRenderer:
   m_SpriteTileMode: 0
   m_WasSpriteAssigned: 1
   m_SpriteSortPoint: 1
+--- !u!114 &1268007377
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1268007369}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: aa6eeab85f83fae42872c558540ec92d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::EnemyHeartDisplay
+  heartFullSprite: {fileID: 0}
+  heartEmptySprite: {fileID: 0}
+  heartsOffset: {x: 0, y: 0.8, z: 0}
+  heartSpacing: 0.35
+  heartsRoot: {fileID: 0}
+  heartRenderers: []
+  enemyBase: {fileID: 0}
+  entityStats: {fileID: 0}
+  maxHealth: 1
+  currentHealth: 1
+  isDead: 0
 --- !u!1 &1272609892
 GameObject:
   m_ObjectHideFlags: 0
@@ -78526,6 +79489,7 @@ GameObject:
   - component: {fileID: 1331038009}
   - component: {fileID: 1331038008}
   - component: {fileID: 1331038007}
+  - component: {fileID: 1331038013}
   m_Layer: 6
   m_Name: Knight(Clone)
   m_TagString: Untagged
@@ -78568,6 +79532,8 @@ MonoBehaviour:
     serializedVersion: 2
     m_Bits: 64
   animator: {fileID: 1331038011}
+  heartsRoot: {fileID: 0}
+  heartSlots: []
   destroyDelayAfterDeath: 0.5
 --- !u!114 &1331038008
 MonoBehaviour:
@@ -78729,6 +79695,29 @@ SpriteRenderer:
   m_SpriteTileMode: 0
   m_WasSpriteAssigned: 1
   m_SpriteSortPoint: 1
+--- !u!114 &1331038013
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1331038005}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: aa6eeab85f83fae42872c558540ec92d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::EnemyHeartDisplay
+  heartFullSprite: {fileID: 0}
+  heartEmptySprite: {fileID: 0}
+  heartsOffset: {x: 0, y: 0.8, z: 0}
+  heartSpacing: 0.35
+  heartsRoot: {fileID: 0}
+  heartRenderers: []
+  enemyBase: {fileID: 0}
+  entityStats: {fileID: 0}
+  maxHealth: 1
+  currentHealth: 1
+  isDead: 0
 --- !u!1 &1336112529
 GameObject:
   m_ObjectHideFlags: 0
@@ -79076,6 +80065,7 @@ GameObject:
   - component: {fileID: 1345575179}
   - component: {fileID: 1345575178}
   - component: {fileID: 1345575177}
+  - component: {fileID: 1345575183}
   m_Layer: 6
   m_Name: Pawn(Clone)
   m_TagString: Untagged
@@ -79117,6 +80107,8 @@ MonoBehaviour:
     serializedVersion: 2
     m_Bits: 64
   animator: {fileID: 1345575181}
+  heartsRoot: {fileID: 0}
+  heartSlots: []
   destroyDelayAfterDeath: 0.5
 --- !u!114 &1345575178
 MonoBehaviour:
@@ -79278,6 +80270,29 @@ SpriteRenderer:
   m_SpriteTileMode: 0
   m_WasSpriteAssigned: 1
   m_SpriteSortPoint: 1
+--- !u!114 &1345575183
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1345575175}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: aa6eeab85f83fae42872c558540ec92d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::EnemyHeartDisplay
+  heartFullSprite: {fileID: 0}
+  heartEmptySprite: {fileID: 0}
+  heartsOffset: {x: 0, y: 0.8, z: 0}
+  heartSpacing: 0.35
+  heartsRoot: {fileID: 0}
+  heartRenderers: []
+  enemyBase: {fileID: 0}
+  entityStats: {fileID: 0}
+  maxHealth: 1
+  currentHealth: 1
+  isDead: 0
 --- !u!1 &1345922779
 GameObject:
   m_ObjectHideFlags: 0
@@ -79611,6 +80626,7 @@ GameObject:
   - component: {fileID: 1393644496}
   - component: {fileID: 1393644495}
   - component: {fileID: 1393644494}
+  - component: {fileID: 1393644500}
   m_Layer: 6
   m_Name: Pawn(Clone)
   m_TagString: Untagged
@@ -79652,6 +80668,8 @@ MonoBehaviour:
     serializedVersion: 2
     m_Bits: 64
   animator: {fileID: 1393644498}
+  heartsRoot: {fileID: 0}
+  heartSlots: []
   destroyDelayAfterDeath: 0.5
 --- !u!114 &1393644495
 MonoBehaviour:
@@ -79813,6 +80831,29 @@ SpriteRenderer:
   m_SpriteTileMode: 0
   m_WasSpriteAssigned: 1
   m_SpriteSortPoint: 1
+--- !u!114 &1393644500
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1393644492}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: aa6eeab85f83fae42872c558540ec92d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::EnemyHeartDisplay
+  heartFullSprite: {fileID: 0}
+  heartEmptySprite: {fileID: 0}
+  heartsOffset: {x: 0, y: 0.8, z: 0}
+  heartSpacing: 0.35
+  heartsRoot: {fileID: 0}
+  heartRenderers: []
+  enemyBase: {fileID: 0}
+  entityStats: {fileID: 0}
+  maxHealth: 1
+  currentHealth: 1
+  isDead: 0
 --- !u!1 &1400395052
 GameObject:
   m_ObjectHideFlags: 0
@@ -79994,6 +81035,7 @@ GameObject:
   - component: {fileID: 1411469739}
   - component: {fileID: 1411469738}
   - component: {fileID: 1411469737}
+  - component: {fileID: 1411469743}
   m_Layer: 6
   m_Name: Rook(Clone)
   m_TagString: Untagged
@@ -80035,6 +81077,8 @@ MonoBehaviour:
     serializedVersion: 2
     m_Bits: 64
   animator: {fileID: 1411469741}
+  heartsRoot: {fileID: 0}
+  heartSlots: []
   destroyDelayAfterDeath: 0.5
 --- !u!114 &1411469738
 MonoBehaviour:
@@ -80196,6 +81240,29 @@ SpriteRenderer:
   m_SpriteTileMode: 0
   m_WasSpriteAssigned: 1
   m_SpriteSortPoint: 1
+--- !u!114 &1411469743
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1411469735}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: aa6eeab85f83fae42872c558540ec92d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::EnemyHeartDisplay
+  heartFullSprite: {fileID: 0}
+  heartEmptySprite: {fileID: 0}
+  heartsOffset: {x: 0, y: 0.8, z: 0}
+  heartSpacing: 0.35
+  heartsRoot: {fileID: 0}
+  heartRenderers: []
+  enemyBase: {fileID: 0}
+  entityStats: {fileID: 0}
+  maxHealth: 1
+  currentHealth: 1
+  isDead: 0
 --- !u!1 &1412020290
 GameObject:
   m_ObjectHideFlags: 0
@@ -80846,6 +81913,7 @@ GameObject:
   - component: {fileID: 1457420794}
   - component: {fileID: 1457420793}
   - component: {fileID: 1457420792}
+  - component: {fileID: 1457420798}
   m_Layer: 6
   m_Name: Bishop(Clone)
   m_TagString: Untagged
@@ -80887,6 +81955,8 @@ MonoBehaviour:
     serializedVersion: 2
     m_Bits: 64
   animator: {fileID: 1457420796}
+  heartsRoot: {fileID: 0}
+  heartSlots: []
   destroyDelayAfterDeath: 0.5
 --- !u!114 &1457420793
 MonoBehaviour:
@@ -81048,6 +82118,29 @@ SpriteRenderer:
   m_SpriteTileMode: 0
   m_WasSpriteAssigned: 1
   m_SpriteSortPoint: 1
+--- !u!114 &1457420798
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1457420790}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: aa6eeab85f83fae42872c558540ec92d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::EnemyHeartDisplay
+  heartFullSprite: {fileID: 0}
+  heartEmptySprite: {fileID: 0}
+  heartsOffset: {x: 0, y: 0.8, z: 0}
+  heartSpacing: 0.35
+  heartsRoot: {fileID: 0}
+  heartRenderers: []
+  enemyBase: {fileID: 0}
+  entityStats: {fileID: 0}
+  maxHealth: 1
+  currentHealth: 1
+  isDead: 0
 --- !u!1 &1460180430
 GameObject:
   m_ObjectHideFlags: 0
@@ -81218,6 +82311,7 @@ GameObject:
   - component: {fileID: 1462482960}
   - component: {fileID: 1462482959}
   - component: {fileID: 1462482958}
+  - component: {fileID: 1462482964}
   m_Layer: 6
   m_Name: Bishop(Clone)
   m_TagString: Untagged
@@ -81259,6 +82353,8 @@ MonoBehaviour:
     serializedVersion: 2
     m_Bits: 64
   animator: {fileID: 1462482962}
+  heartsRoot: {fileID: 0}
+  heartSlots: []
   destroyDelayAfterDeath: 0.5
 --- !u!114 &1462482959
 MonoBehaviour:
@@ -81420,6 +82516,29 @@ SpriteRenderer:
   m_SpriteTileMode: 0
   m_WasSpriteAssigned: 1
   m_SpriteSortPoint: 1
+--- !u!114 &1462482964
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1462482956}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: aa6eeab85f83fae42872c558540ec92d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::EnemyHeartDisplay
+  heartFullSprite: {fileID: 0}
+  heartEmptySprite: {fileID: 0}
+  heartsOffset: {x: 0, y: 0.8, z: 0}
+  heartSpacing: 0.35
+  heartsRoot: {fileID: 0}
+  heartRenderers: []
+  enemyBase: {fileID: 0}
+  entityStats: {fileID: 0}
+  maxHealth: 1
+  currentHealth: 1
+  isDead: 0
 --- !u!1 &1463915694
 GameObject:
   m_ObjectHideFlags: 0
@@ -81650,10 +82769,10 @@ RectTransform:
   m_Children: []
   m_Father: {fileID: 1438736321}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0, y: 0}
-  m_AnchorMax: {x: 0, y: 0}
-  m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 0, y: 0}
+  m_AnchorMin: {x: 0, y: 1}
+  m_AnchorMax: {x: 0, y: 1}
+  m_AnchoredPosition: {x: 82.5, y: -40}
+  m_SizeDelta: {x: 25, y: 20}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1477998510
 MonoBehaviour:
@@ -81816,10 +82935,10 @@ RectTransform:
   m_Children: []
   m_Father: {fileID: 1438736321}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0, y: 0}
-  m_AnchorMax: {x: 0, y: 0}
-  m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 0, y: 0}
+  m_AnchorMin: {x: 0, y: 1}
+  m_AnchorMax: {x: 0, y: 1}
+  m_AnchoredPosition: {x: 117.5, y: -10}
+  m_SizeDelta: {x: 25, y: 20}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1504928487
 MonoBehaviour:
@@ -82408,6 +83527,7 @@ GameObject:
   - component: {fileID: 1582764730}
   - component: {fileID: 1582764729}
   - component: {fileID: 1582764728}
+  - component: {fileID: 1582764734}
   m_Layer: 6
   m_Name: Rook(Clone)
   m_TagString: Untagged
@@ -82449,6 +83569,8 @@ MonoBehaviour:
     serializedVersion: 2
     m_Bits: 64
   animator: {fileID: 1582764732}
+  heartsRoot: {fileID: 0}
+  heartSlots: []
   destroyDelayAfterDeath: 0.5
 --- !u!114 &1582764729
 MonoBehaviour:
@@ -82610,6 +83732,29 @@ SpriteRenderer:
   m_SpriteTileMode: 0
   m_WasSpriteAssigned: 1
   m_SpriteSortPoint: 1
+--- !u!114 &1582764734
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1582764726}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: aa6eeab85f83fae42872c558540ec92d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::EnemyHeartDisplay
+  heartFullSprite: {fileID: 0}
+  heartEmptySprite: {fileID: 0}
+  heartsOffset: {x: 0, y: 0.8, z: 0}
+  heartSpacing: 0.35
+  heartsRoot: {fileID: 0}
+  heartRenderers: []
+  enemyBase: {fileID: 0}
+  entityStats: {fileID: 0}
+  maxHealth: 1
+  currentHealth: 1
+  isDead: 0
 --- !u!1 &1587914027
 GameObject:
   m_ObjectHideFlags: 0
@@ -82733,10 +83878,10 @@ RectTransform:
   m_Children: []
   m_Father: {fileID: 1438736321}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0, y: 0}
-  m_AnchorMax: {x: 0, y: 0}
-  m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 0, y: 0}
+  m_AnchorMin: {x: 0, y: 1}
+  m_AnchorMax: {x: 0, y: 1}
+  m_AnchoredPosition: {x: 47.5, y: -40}
+  m_SizeDelta: {x: 25, y: 20}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1590269713
 MonoBehaviour:
@@ -84351,6 +85496,7 @@ GameObject:
   - component: {fileID: 1711859745}
   - component: {fileID: 1711859744}
   - component: {fileID: 1711859743}
+  - component: {fileID: 1711859749}
   m_Layer: 6
   m_Name: Bishop(Clone)
   m_TagString: Untagged
@@ -84392,6 +85538,8 @@ MonoBehaviour:
     serializedVersion: 2
     m_Bits: 64
   animator: {fileID: 1711859747}
+  heartsRoot: {fileID: 0}
+  heartSlots: []
   destroyDelayAfterDeath: 0.5
 --- !u!114 &1711859744
 MonoBehaviour:
@@ -84553,6 +85701,29 @@ SpriteRenderer:
   m_SpriteTileMode: 0
   m_WasSpriteAssigned: 1
   m_SpriteSortPoint: 1
+--- !u!114 &1711859749
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1711859741}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: aa6eeab85f83fae42872c558540ec92d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::EnemyHeartDisplay
+  heartFullSprite: {fileID: 0}
+  heartEmptySprite: {fileID: 0}
+  heartsOffset: {x: 0, y: 0.8, z: 0}
+  heartSpacing: 0.35
+  heartsRoot: {fileID: 0}
+  heartRenderers: []
+  enemyBase: {fileID: 0}
+  entityStats: {fileID: 0}
+  maxHealth: 1
+  currentHealth: 1
+  isDead: 0
 --- !u!1 &1720630961
 GameObject:
   m_ObjectHideFlags: 0
@@ -85008,10 +86179,10 @@ RectTransform:
   m_Children: []
   m_Father: {fileID: 1438736321}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0, y: 0}
-  m_AnchorMax: {x: 0, y: 0}
-  m_AnchoredPosition: {x: 0, y: 0}
-  m_SizeDelta: {x: 0, y: 0}
+  m_AnchorMin: {x: 0, y: 1}
+  m_AnchorMax: {x: 0, y: 1}
+  m_AnchoredPosition: {x: 47.5, y: -70}
+  m_SizeDelta: {x: 25, y: 20}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!114 &1751541581
 MonoBehaviour:
@@ -85066,6 +86237,7 @@ GameObject:
   - component: {fileID: 1761369161}
   - component: {fileID: 1761369160}
   - component: {fileID: 1761369159}
+  - component: {fileID: 1761369165}
   m_Layer: 6
   m_Name: Bishop(Clone)
   m_TagString: Untagged
@@ -85107,6 +86279,8 @@ MonoBehaviour:
     serializedVersion: 2
     m_Bits: 64
   animator: {fileID: 1761369163}
+  heartsRoot: {fileID: 0}
+  heartSlots: []
   destroyDelayAfterDeath: 0.5
 --- !u!114 &1761369160
 MonoBehaviour:
@@ -85268,6 +86442,29 @@ SpriteRenderer:
   m_SpriteTileMode: 0
   m_WasSpriteAssigned: 1
   m_SpriteSortPoint: 1
+--- !u!114 &1761369165
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1761369157}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: aa6eeab85f83fae42872c558540ec92d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::EnemyHeartDisplay
+  heartFullSprite: {fileID: 0}
+  heartEmptySprite: {fileID: 0}
+  heartsOffset: {x: 0, y: 0.8, z: 0}
+  heartSpacing: 0.35
+  heartsRoot: {fileID: 0}
+  heartRenderers: []
+  enemyBase: {fileID: 0}
+  entityStats: {fileID: 0}
+  maxHealth: 1
+  currentHealth: 1
+  isDead: 0
 --- !u!1 &1767846959
 GameObject:
   m_ObjectHideFlags: 0
@@ -122395,9 +123592,9 @@ RectTransform:
   - {fileID: 1637317679}
   m_Father: {fileID: 553404158}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
-  m_AnchorMin: {x: 0, y: 0}
-  m_AnchorMax: {x: 0, y: 0}
-  m_AnchoredPosition: {x: 0, y: 0}
+  m_AnchorMin: {x: 0, y: 1}
+  m_AnchorMax: {x: 0, y: 1}
+  m_AnchoredPosition: {x: 26, y: -24}
   m_SizeDelta: {x: 13, y: 12}
   m_Pivot: {x: 0.5, y: 0.5}
 --- !u!222 &1815704043
@@ -122644,6 +123841,7 @@ GameObject:
   - component: {fileID: 1851646355}
   - component: {fileID: 1851646354}
   - component: {fileID: 1851646353}
+  - component: {fileID: 1851646359}
   m_Layer: 6
   m_Name: Bishop(Clone)
   m_TagString: Untagged
@@ -122685,6 +123883,8 @@ MonoBehaviour:
     serializedVersion: 2
     m_Bits: 64
   animator: {fileID: 1851646357}
+  heartsRoot: {fileID: 0}
+  heartSlots: []
   destroyDelayAfterDeath: 0.5
 --- !u!114 &1851646354
 MonoBehaviour:
@@ -122846,6 +124046,29 @@ SpriteRenderer:
   m_SpriteTileMode: 0
   m_WasSpriteAssigned: 1
   m_SpriteSortPoint: 1
+--- !u!114 &1851646359
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1851646351}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: aa6eeab85f83fae42872c558540ec92d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::EnemyHeartDisplay
+  heartFullSprite: {fileID: 0}
+  heartEmptySprite: {fileID: 0}
+  heartsOffset: {x: 0, y: 0.8, z: 0}
+  heartSpacing: 0.35
+  heartsRoot: {fileID: 0}
+  heartRenderers: []
+  enemyBase: {fileID: 0}
+  entityStats: {fileID: 0}
+  maxHealth: 1
+  currentHealth: 1
+  isDead: 0
 --- !u!1 &1854802814
 GameObject:
   m_ObjectHideFlags: 0
@@ -123653,6 +124876,7 @@ GameObject:
   - component: {fileID: 1901060832}
   - component: {fileID: 1901060831}
   - component: {fileID: 1901060830}
+  - component: {fileID: 1901060836}
   m_Layer: 6
   m_Name: Bishop(Clone)
   m_TagString: Untagged
@@ -123694,6 +124918,8 @@ MonoBehaviour:
     serializedVersion: 2
     m_Bits: 64
   animator: {fileID: 1901060834}
+  heartsRoot: {fileID: 0}
+  heartSlots: []
   destroyDelayAfterDeath: 0.5
 --- !u!114 &1901060831
 MonoBehaviour:
@@ -123855,6 +125081,29 @@ SpriteRenderer:
   m_SpriteTileMode: 0
   m_WasSpriteAssigned: 1
   m_SpriteSortPoint: 1
+--- !u!114 &1901060836
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1901060828}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: aa6eeab85f83fae42872c558540ec92d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::EnemyHeartDisplay
+  heartFullSprite: {fileID: 0}
+  heartEmptySprite: {fileID: 0}
+  heartsOffset: {x: 0, y: 0.8, z: 0}
+  heartSpacing: 0.35
+  heartsRoot: {fileID: 0}
+  heartRenderers: []
+  enemyBase: {fileID: 0}
+  entityStats: {fileID: 0}
+  maxHealth: 1
+  currentHealth: 1
+  isDead: 0
 --- !u!1 &1911469981
 GameObject:
   m_ObjectHideFlags: 0
@@ -123906,6 +125155,7 @@ GameObject:
   - component: {fileID: 1922771128}
   - component: {fileID: 1922771127}
   - component: {fileID: 1922771126}
+  - component: {fileID: 1922771132}
   m_Layer: 6
   m_Name: Bishop(Clone)
   m_TagString: Untagged
@@ -123947,6 +125197,8 @@ MonoBehaviour:
     serializedVersion: 2
     m_Bits: 64
   animator: {fileID: 1922771130}
+  heartsRoot: {fileID: 0}
+  heartSlots: []
   destroyDelayAfterDeath: 0.5
 --- !u!114 &1922771127
 MonoBehaviour:
@@ -124108,6 +125360,29 @@ SpriteRenderer:
   m_SpriteTileMode: 0
   m_WasSpriteAssigned: 1
   m_SpriteSortPoint: 1
+--- !u!114 &1922771132
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 1922771124}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: aa6eeab85f83fae42872c558540ec92d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::EnemyHeartDisplay
+  heartFullSprite: {fileID: 0}
+  heartEmptySprite: {fileID: 0}
+  heartsOffset: {x: 0, y: 0.8, z: 0}
+  heartSpacing: 0.35
+  heartsRoot: {fileID: 0}
+  heartRenderers: []
+  enemyBase: {fileID: 0}
+  entityStats: {fileID: 0}
+  maxHealth: 1
+  currentHealth: 1
+  isDead: 0
 --- !u!1 &1923050565
 GameObject:
   m_ObjectHideFlags: 0
@@ -140523,6 +141798,7 @@ GameObject:
   - component: {fileID: 2007490493}
   - component: {fileID: 2007490492}
   - component: {fileID: 2007490491}
+  - component: {fileID: 2007490497}
   m_Layer: 6
   m_Name: Pawn(Clone)
   m_TagString: Untagged
@@ -140564,6 +141840,8 @@ MonoBehaviour:
     serializedVersion: 2
     m_Bits: 64
   animator: {fileID: 2007490495}
+  heartsRoot: {fileID: 0}
+  heartSlots: []
   destroyDelayAfterDeath: 0.5
 --- !u!114 &2007490492
 MonoBehaviour:
@@ -140725,6 +142003,29 @@ SpriteRenderer:
   m_SpriteTileMode: 0
   m_WasSpriteAssigned: 1
   m_SpriteSortPoint: 1
+--- !u!114 &2007490497
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2007490489}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: aa6eeab85f83fae42872c558540ec92d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::EnemyHeartDisplay
+  heartFullSprite: {fileID: 0}
+  heartEmptySprite: {fileID: 0}
+  heartsOffset: {x: 0, y: 0.8, z: 0}
+  heartSpacing: 0.35
+  heartsRoot: {fileID: 0}
+  heartRenderers: []
+  enemyBase: {fileID: 0}
+  entityStats: {fileID: 0}
+  maxHealth: 1
+  currentHealth: 1
+  isDead: 0
 --- !u!1 &2022699763
 GameObject:
   m_ObjectHideFlags: 0
@@ -140740,6 +142041,7 @@ GameObject:
   - component: {fileID: 2022699767}
   - component: {fileID: 2022699766}
   - component: {fileID: 2022699765}
+  - component: {fileID: 2022699771}
   m_Layer: 6
   m_Name: Bishop(Clone)
   m_TagString: Untagged
@@ -140781,6 +142083,8 @@ MonoBehaviour:
     serializedVersion: 2
     m_Bits: 64
   animator: {fileID: 2022699769}
+  heartsRoot: {fileID: 0}
+  heartSlots: []
   destroyDelayAfterDeath: 0.5
 --- !u!114 &2022699766
 MonoBehaviour:
@@ -140942,6 +142246,29 @@ SpriteRenderer:
   m_SpriteTileMode: 0
   m_WasSpriteAssigned: 1
   m_SpriteSortPoint: 1
+--- !u!114 &2022699771
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2022699763}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: aa6eeab85f83fae42872c558540ec92d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::EnemyHeartDisplay
+  heartFullSprite: {fileID: 0}
+  heartEmptySprite: {fileID: 0}
+  heartsOffset: {x: 0, y: 0.8, z: 0}
+  heartSpacing: 0.35
+  heartsRoot: {fileID: 0}
+  heartRenderers: []
+  enemyBase: {fileID: 0}
+  entityStats: {fileID: 0}
+  maxHealth: 1
+  currentHealth: 1
+  isDead: 0
 --- !u!1 &2022899663
 GameObject:
   m_ObjectHideFlags: 0
@@ -141571,6 +142898,7 @@ GameObject:
   - component: {fileID: 2044646797}
   - component: {fileID: 2044646796}
   - component: {fileID: 2044646795}
+  - component: {fileID: 2044646801}
   m_Layer: 6
   m_Name: Pawn(Clone)
   m_TagString: Untagged
@@ -141612,6 +142940,8 @@ MonoBehaviour:
     serializedVersion: 2
     m_Bits: 64
   animator: {fileID: 2044646799}
+  heartsRoot: {fileID: 0}
+  heartSlots: []
   destroyDelayAfterDeath: 0.5
 --- !u!114 &2044646796
 MonoBehaviour:
@@ -141773,6 +143103,29 @@ SpriteRenderer:
   m_SpriteTileMode: 0
   m_WasSpriteAssigned: 1
   m_SpriteSortPoint: 1
+--- !u!114 &2044646801
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2044646793}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: aa6eeab85f83fae42872c558540ec92d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::EnemyHeartDisplay
+  heartFullSprite: {fileID: 0}
+  heartEmptySprite: {fileID: 0}
+  heartsOffset: {x: 0, y: 0.8, z: 0}
+  heartSpacing: 0.35
+  heartsRoot: {fileID: 0}
+  heartRenderers: []
+  enemyBase: {fileID: 0}
+  entityStats: {fileID: 0}
+  maxHealth: 1
+  currentHealth: 1
+  isDead: 0
 --- !u!1 &2047189917
 GameObject:
   m_ObjectHideFlags: 0
@@ -142204,6 +143557,7 @@ GameObject:
   - component: {fileID: 2092073105}
   - component: {fileID: 2092073104}
   - component: {fileID: 2092073103}
+  - component: {fileID: 2092073109}
   m_Layer: 6
   m_Name: Bishop(Clone)
   m_TagString: Untagged
@@ -142245,6 +143599,8 @@ MonoBehaviour:
     serializedVersion: 2
     m_Bits: 64
   animator: {fileID: 2092073107}
+  heartsRoot: {fileID: 0}
+  heartSlots: []
   destroyDelayAfterDeath: 0.5
 --- !u!114 &2092073104
 MonoBehaviour:
@@ -142406,6 +143762,29 @@ SpriteRenderer:
   m_SpriteTileMode: 0
   m_WasSpriteAssigned: 1
   m_SpriteSortPoint: 1
+--- !u!114 &2092073109
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 2092073101}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: aa6eeab85f83fae42872c558540ec92d, type: 3}
+  m_Name: 
+  m_EditorClassIdentifier: Assembly-CSharp::EnemyHeartDisplay
+  heartFullSprite: {fileID: 0}
+  heartEmptySprite: {fileID: 0}
+  heartsOffset: {x: 0, y: 0.8, z: 0}
+  heartSpacing: 0.35
+  heartsRoot: {fileID: 0}
+  heartRenderers: []
+  enemyBase: {fileID: 0}
+  entityStats: {fileID: 0}
+  maxHealth: 1
+  currentHealth: 1
+  isDead: 0
 --- !u!1 &2092578163
 GameObject:
   m_ObjectHideFlags: 0

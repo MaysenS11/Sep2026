@@ -16,19 +16,25 @@ public class AttackPatternData : ScriptableObject
         targetOffsets = offsets;
     }
 
-    public List<Vector2Int> GetAffectedTiles(Vector2Int origin, Vector2 facingDir)
+    public void GetAffectedTiles(Vector2Int origin, Vector2 facingDir, List<Vector2Int> results)
     {
-        List<Vector2Int> tiles = new List<Vector2Int>();
-        if (targetOffsets == null || targetOffsets.Length == 0) return tiles;
+        if (results == null) return;
+        results.Clear();
+        if (targetOffsets == null || targetOffsets.Length == 0) return;
 
         Vector2Int cardinal = GetCardinalDirection(facingDir);
 
         for (int i = 0; i < targetOffsets.Length; i++)
         {
             Vector2Int rotated = RotateOffset(targetOffsets[i], cardinal);
-            tiles.Add(origin + rotated);
+            results.Add(origin + rotated);
         }
+    }
 
+    public List<Vector2Int> GetAffectedTiles(Vector2Int origin, Vector2 facingDir)
+    {
+        List<Vector2Int> tiles = new List<Vector2Int>();
+        GetAffectedTiles(origin, facingDir, tiles);
         return tiles;
     }
 

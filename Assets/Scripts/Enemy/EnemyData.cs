@@ -49,6 +49,10 @@ public class EnemyData : ScriptableObject
     [Header("Audio")]
     [SerializeField] private EventReference attackSound;
 
+    [Header("Heart Visuals")]
+    [SerializeField] private Sprite heartFullSprite;
+    [SerializeField] private Sprite heartEmptySprite;
+
     public string EnemyName => enemyName;
     public GameObject Prefab => prefab;
     public int MaxHealth => maxHealth;
@@ -64,4 +68,6 @@ public class EnemyData : ScriptableObject
     public int MovePriority => movePriority;
     public float PopulationPercentage => populationPercentage;
     public EventReference AttackSound => attackSound;
+    public Sprite HeartFullSprite => heartFullSprite;
+    public Sprite HeartEmptySprite => heartEmptySprite;
 }

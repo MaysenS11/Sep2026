@@ -8,6 +8,8 @@ public class UIManager : MonoBehaviour
     [Header("Runtime Counter")]
     [SerializeField] private TMP_Text timerText;
     private float elapsedTime;
+    private int lastDisplayedSecond = -1;
+    private readonly char[] timerBuffer = new char[8];
 
     [Header("Player Equipment")]
     [SerializeField] private Image maskDisplayImage;
@@ -99,11 +101,26 @@ public class UIManager : MonoBehaviour
     private void Update()
     {
         elapsedTime += Time.deltaTime;
-        System.TimeSpan t = System.TimeSpan.FromSeconds(elapsedTime);
+        int totalSeconds = (int)elapsedTime;
+        if (totalSeconds == lastDisplayedSecond) return;
+        lastDisplayedSecond = totalSeconds;
+
         if (timerText != null)
         {
-            timerText.text = string.Format("{0:D2}:{1:D2}:{2:D2}:{3:D2}", 
-                t.Hours, t.Minutes, t.Seconds, t.Milliseconds / 10);
+            int hours = totalSeconds / 3600;
+            int minutes = (totalSeconds % 3600) / 60;
+            int seconds = totalSeconds % 60;
+
+            timerBuffer[0] = (char)('0' + (hours / 10) % 10);
+            timerBuffer[1] = (char)('0' + hours % 10);
+            timerBuffer[2] = ':';
+            timerBuffer[3] = (char)('0' + (minutes / 10) % 10);
+            timerBuffer[4] = (char)('0' + minutes % 10);
+            timerBuffer[5] = ':';
+            timerBuffer[6] = (char)('0' + (seconds / 10) % 10);
+            timerBuffer[7] = (char)('0' + seconds % 10);
+
+            timerText.SetCharArray(timerBuffer, 0, 8);
         }
     }
 

@@ -8,6 +8,7 @@ public class AttackTileHighlighter : MonoBehaviour
     [SerializeField] private int initialPoolSize = 8;
 
     private readonly List<GameObject> indicatorPool = new List<GameObject>();
+    private readonly List<Vector2Int> targetTilesBuffer = new List<Vector2Int>(16);
     private PlayerMovement playerMovement;
 
     private void Awake()
@@ -106,8 +107,8 @@ public class AttackTileHighlighter : MonoBehaviour
             return;
         }
 
-        List<Vector2Int> targetTiles = pattern.GetAffectedTiles(origin, facingDir);
-        int neededCount = targetTiles.Count;
+        pattern.GetAffectedTiles(origin, facingDir, targetTilesBuffer);
+        int neededCount = targetTilesBuffer.Count;
 
         while (indicatorPool.Count < neededCount)
         {
@@ -118,7 +119,7 @@ public class AttackTileHighlighter : MonoBehaviour
         {
             if (i < neededCount)
             {
-                Vector3 worldPos = TileReservationSystem.GetTileCenterWorld(targetTiles[i], transform.position.z);
+                Vector3 worldPos = TileReservationSystem.GetTileCenterWorld(targetTilesBuffer[i], transform.position.z);
                 indicatorPool[i].transform.position = worldPos;
                 indicatorPool[i].SetActive(true);
             }

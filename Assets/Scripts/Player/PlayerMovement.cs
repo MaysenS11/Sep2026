@@ -48,6 +48,8 @@ public class PlayerMovement : MonoBehaviour
     private Vector2 lastDirection = Vector2.down;
     private PlayerStats playerStats;
     private readonly Collider2D[] hitBuffer = new Collider2D[16];
+    private readonly HashSet<IDamageable> damagedEntitiesBuffer = new HashSet<IDamageable>();
+    private readonly List<Vector2Int> attackTilesBuffer = new List<Vector2Int>(16);
 
     public Vector2 LastDirection => lastDirection;
     public event System.Action<Vector2Int, Vector2, AttackPatternData> OnAttackTargetingChanged;
@@ -144,6 +146,7 @@ public class PlayerMovement : MonoBehaviour
             animator.SetTrigger(dieTrigger);
         }
 
+        NotifyTargetingChanged();
         StartCoroutine(HandlePlayerDeathSequence());
     }
 
@@ -412,23 +415,23 @@ public class PlayerMovement : MonoBehaviour
 
     private void ExecuteAttack(AttackPatternData pattern, int damage)
     {
-        HashSet<IDamageable> damagedEntities = new HashSet<IDamageable>();
+        damagedEntitiesBuffer.Clear();
         Vector2Int currentGrid = TileReservationSystem.WorldToGridTile(transform.position);
 
         if (pattern != null)
         {
-            List<Vector2Int> targetTiles = pattern.GetAffectedTiles(currentGrid, lastDirection);
-            for (int i = 0; i < targetTiles.Count; i++)
+            pattern.GetAffectedTiles(currentGrid, lastDirection, attackTilesBuffer);
+            for (int i = 0; i < attackTilesBuffer.Count; i++)
             {
-                Vector3 targetWorld = TileReservationSystem.GetTileCenterWorld(targetTiles[i], transform.position.z);
-                DamageAtTile(targetWorld, damage, damagedEntities);
+                Vector3 targetWorld = TileReservationSystem.GetTileCenterWorld(attackTilesBuffer[i], transform.position.z);
+                DamageAtTile(targetWorld, damage, damagedEntitiesBuffer);
             }
         }
         else
         {
             Vector2Int cardinal = AttackPatternData.GetCardinalDirection(lastDirection);
             Vector3 targetWorld = TileReservationSystem.GetTileCenterWorld(currentGrid + cardinal, transform.position.z);
-            DamageAtTile(targetWorld, damage, damagedEntities);
+            DamageAtTile(targetWorld, damage, damagedEntitiesBuffer);
         }
     }
 
@@ -438,6 +441,25 @@ public class PlayerMovement : MonoBehaviour
         AttackPatternData pattern = playerStats != null ? playerStats.CurrentAttackPattern : null;
         Vector2Int currentGrid = TileReservationSystem.WorldToGridTile(transform.position);
         OnAttackTargetingChanged?.Invoke(currentGrid, lastDirection, pattern);
+
+        HashSet<Vector2Int> affectedTiles = new HashSet<Vector2Int>();
+        if (playerStats == null || !playerStats.IsDead)
+        {
+            if (pattern != null)
+            {
+                pattern.GetAffectedTiles(currentGrid, lastDirection, attackTilesBuffer);
+                for (int i = 0; i < attackTilesBuffer.Count; i++)
+                {
+                    affectedTiles.Add(attackTilesBuffer[i]);
+                }
+            }
+            else
+            {
+                affectedTiles.Add(currentGrid + AttackPatternData.GetCardinalDirection(lastDirection));
+            }
+        }
+
+        EventBus<AttackTargetingChangedEvent>.Raise(new AttackTargetingChangedEvent(affectedTiles));
     }
 
     public void SelectAttackPattern(int index)

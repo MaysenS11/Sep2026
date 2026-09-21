@@ -120,6 +120,24 @@ namespace Dungeon.Spawning
             }
         }
 
+        private float GetConfiguredWeight(EnemyData enemyData)
+        {
+            if (enemyData == null) return 1f;
+            switch (enemyData.MovementPattern)
+            {
+                case EnemyMovementPattern.SingleMove:
+                    return pawnWeight;
+                case EnemyMovementPattern.KnightMove:
+                    return knightWeight;
+                case EnemyMovementPattern.RookMove:
+                    return rookWeight;
+                case EnemyMovementPattern.BishopMove:
+                    return bishopWeight;
+                default:
+                    return 1f;
+            }
+        }
+
         private float GetConfiguredWeight(string enemyName)
         {
             if (string.IsNullOrEmpty(enemyName)) return 1f;
@@ -151,7 +169,7 @@ namespace Dungeon.Spawning
 
                 if (prefab.TryGetComponent<EnemyBase>(out var enemy) && enemy.Data != null)
                 {
-                    float configuredWeight = GetConfiguredWeight(enemy.Data.EnemyName);
+                    float configuredWeight = GetConfiguredWeight(enemy.Data);
                     float popPct = enemy.Data.PopulationPercentage * configuredWeight;
                     if (popPct <= 0f) continue;
 

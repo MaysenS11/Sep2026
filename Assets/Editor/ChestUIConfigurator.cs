@@ -7,6 +7,18 @@ namespace Chest.Editor
 {
     public static class ChestUIConfigurator
     {
+        private static T FindAsset<T>(string filter, string defaultPath) where T : UnityEngine.Object
+        {
+            string[] guids = AssetDatabase.FindAssets(filter);
+            if (guids != null && guids.Length > 0)
+            {
+                string path = AssetDatabase.GUIDToAssetPath(guids[0]);
+                T asset = AssetDatabase.LoadAssetAtPath<T>(path);
+                if (asset != null) return asset;
+            }
+            return AssetDatabase.LoadAssetAtPath<T>(defaultPath);
+        }
+
         [MenuItem("Tools/Chest UI/Configure Chest UI and Stats")]
         public static void Configure()
         {
@@ -35,7 +47,7 @@ namespace Chest.Editor
             }
 
             // 3. Make sure Card placeholders have visible sprites in editor
-            var statCardDb = AssetDatabase.LoadAssetAtPath<StatCardDatabase>("Assets/ScriptableObjects/StatCards/StatCardDatabase.asset");
+            var statCardDb = FindAsset<StatCardDatabase>("t:StatCardDatabase", "Assets/ScriptableObjects/StatCards/StatCardDatabase.asset");
             Sprite defaultSprite = null;
             if (statCardDb != null)
             {
@@ -99,9 +111,9 @@ namespace Chest.Editor
             vlg.childForceExpandWidth = true;
             vlg.childForceExpandHeight = false;
 
-            var fontAsset = AssetDatabase.LoadAssetAtPath<TMP_FontAsset>("Assets/TextMesh Pro/Font/Jacquard12-Regular SDF.asset");
-            Sprite unlockedPip = AssetDatabase.LoadAssetAtPath<Sprite>("Assets/Sprites/Menu/Map_Curr.png");
-            Sprite lockedPip = AssetDatabase.LoadAssetAtPath<Sprite>("Assets/Sprites/Menu/Map_Norm.png");
+            var fontAsset = FindAsset<TMP_FontAsset>("Jacquard12-Regular SDF t:TMP_FontAsset", "Assets/TextMesh Pro/Font/Jacquard12-Regular SDF.asset");
+            Sprite unlockedPip = FindAsset<Sprite>("Map_Curr t:Sprite", "Assets/Sprites/Menu/Map_Curr.png");
+            Sprite lockedPip = FindAsset<Sprite>("Map_Norm t:Sprite", "Assets/Sprites/Menu/Map_Norm.png");
 
             var statDisplay = statsPanelGo.GetComponent<ChestStatDisplayUI>();
             if (statDisplay == null) statDisplay = statsPanelGo.AddComponent<ChestStatDisplayUI>();

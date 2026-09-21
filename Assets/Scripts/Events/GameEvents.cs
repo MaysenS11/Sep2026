@@ -56,6 +56,16 @@ public readonly struct EnemyTurnCompletedEvent : IEvent
 {
 }
 
+public readonly struct AttackTargetingChangedEvent : IEvent
+{
+    public readonly HashSet<Vector2Int> AffectedTiles;
+
+    public AttackTargetingChangedEvent(HashSet<Vector2Int> affectedTiles)
+    {
+        AffectedTiles = affectedTiles;
+    }
+}
+
 public readonly struct EntityDamagedEvent : IEvent
 {
     public readonly GameObject Target;

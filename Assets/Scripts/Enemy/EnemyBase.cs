@@ -22,6 +22,10 @@ public abstract class EnemyBase : MonoBehaviour
     [SerializeField] protected LayerMask blockingLayers;
     [SerializeField] protected Animator animator;
 
+    [Header("Hearts Display")]
+    [SerializeField] protected GameObject heartsRoot;
+    [SerializeField] protected SpriteRenderer[] heartSlots;
+
     protected EventReference moveSound;
     protected EventReference hitSound;
 
@@ -74,6 +78,11 @@ public abstract class EnemyBase : MonoBehaviour
         {
             stats.Initialize(enemyData);
         }
+        if (heartsRoot != null)
+        {
+            heartsRoot.SetActive(false);
+        }
+        UpdateHeartVisuals(stats != null ? stats.CurrentHealth : (enemyData != null ? enemyData.MaxHealth : 0));
     }
 
     protected virtual void Start()
@@ -113,6 +122,7 @@ public abstract class EnemyBase : MonoBehaviour
         EventBus<EntityDiedEvent>.Subscribe(OnEntityDied);
         EventBus<SharedAudioConfiguredEvent>.Subscribe(OnSharedAudioConfigured);
         EventBus<RoomEnteredEvent>.Subscribe(OnRoomEntered);
+        EventBus<AttackTargetingChangedEvent>.Subscribe(OnAttackTargetingChanged);
     }
 
     protected virtual void OnDisable()
@@ -122,6 +132,7 @@ public abstract class EnemyBase : MonoBehaviour
         EventBus<EntityDiedEvent>.Unsubscribe(OnEntityDied);
         EventBus<SharedAudioConfiguredEvent>.Unsubscribe(OnSharedAudioConfigured);
         EventBus<RoomEnteredEvent>.Unsubscribe(OnRoomEntered);
+        EventBus<AttackTargetingChangedEvent>.Unsubscribe(OnAttackTargetingChanged);
         EventBus<EnemyPathDebugClearedEvent>.Raise(new EnemyPathDebugClearedEvent(this));
     }
 
@@ -184,6 +195,34 @@ public abstract class EnemyBase : MonoBehaviour
         {
             animator.SetTrigger(damageHash);
         }
+
+        UpdateHeartVisuals(evt.RemainingHealth);
+    }
+
+    protected virtual void OnAttackTargetingChanged(AttackTargetingChangedEvent evt)
+    {
+        if (hasDied)
+        {
+            if (heartsRoot != null) heartsRoot.SetActive(false);
+            return;
+        }
+
+        bool inRange = evt.AffectedTiles != null && evt.AffectedTiles.Contains(GetGridPosition());
+        if (heartsRoot != null)
+        {
+            heartsRoot.SetActive(inRange);
+        }
+    }
+
+    public virtual void UpdateHeartVisuals(int remainingHealth)
+    {
+        if (heartSlots == null || enemyData == null) return;
+
+        for (int i = 0; i < heartSlots.Length; i++)
+        {
+            if (heartSlots[i] == null) continue;
+            heartSlots[i].sprite = (i < remainingHealth) ? enemyData.HeartFullSprite : enemyData.HeartEmptySprite;
+        }
     }
 
     protected virtual void OnEntityDied(EntityDiedEvent evt)
@@ -191,8 +230,14 @@ public abstract class EnemyBase : MonoBehaviour
         if (hasDied || evt.Entity != gameObject) return;
         hasDied = true;
 
+        if (heartsRoot != null)
+        {
+            heartsRoot.SetActive(false);
+        }
+
         EventBus<EntityDamagedEvent>.Unsubscribe(OnEntityDamaged);
         EventBus<EntityDiedEvent>.Unsubscribe(OnEntityDied);
+        EventBus<AttackTargetingChangedEvent>.Unsubscribe(OnAttackTargetingChanged);
         EventBus<EnemyPathDebugClearedEvent>.Raise(new EnemyPathDebugClearedEvent(this));
         EventBus<EnemyUnregisteredEvent>.Raise(new EnemyUnregisteredEvent(this));
 
@@ -215,6 +260,7 @@ public abstract class EnemyBase : MonoBehaviour
         enemyData = data;
         if (stats == null) stats = GetComponent<EntityStats>();
         stats.Initialize(data);
+        UpdateHeartVisuals(stats != null ? stats.CurrentHealth : data.MaxHealth);
     }
 
     public abstract MoveIntent PlanMove(Transform playerTransform);

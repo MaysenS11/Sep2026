@@ -61,11 +61,13 @@ namespace Dungeon
         [SerializeField] private float generalRoomDensity = 0.2f;
 
         [Header("Spawners")]
+        [SerializeField] private GameSpawnSettings spawnSettings;
         [SerializeField] private DoorSpawner doorSpawner = new DoorSpawner();
         [SerializeField] private EnemySpawner enemySpawner = new EnemySpawner();
         [SerializeField] private PropSpawner propSpawner = new PropSpawner();
         [SerializeField] private ChestSpawner chestSpawner = new ChestSpawner();
 
+        public GameSpawnSettings SpawnSettings { get => spawnSettings; set => spawnSettings = value; }
         public EnemySpawner EnemySpawner => enemySpawner;
         public DoorSpawner DoorSpawner => doorSpawner;
         public PropSpawner PropSpawner => propSpawner;
@@ -130,9 +132,9 @@ namespace Dungeon
                 );
             }
 
-            if (GameSpawnSettings.SettingsModifiedSinceLastDungeon)
+            if (spawnSettings != null && spawnSettings.SettingsModifiedSinceLastDungeon)
             {
-                GameSpawnSettings.SettingsModifiedSinceLastDungeon = false;
+                spawnSettings.SettingsModifiedSinceLastDungeon = false;
                 GenerateAndBuildDungeon();
             }
             else if (generatedRooms != null && generatedRooms.Count > 0)

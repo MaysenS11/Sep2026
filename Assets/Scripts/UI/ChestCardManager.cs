@@ -30,6 +30,7 @@ namespace Chest
         private readonly List<ChestCardUI> selectedCards = new List<ChestCardUI>();
         private int maxPicks = 1;
         private CanvasGroup canvasGroup;
+        private PlayerStats cachedPlayerStats;
 
         private void Awake()
         {
@@ -81,8 +82,12 @@ namespace Chest
 
         public void OpenReward(bool isChestRoom, Vector3 chestWorldPos)
         {
-            PlayerStats stats = FindFirstObjectByType<PlayerStats>();
-            if (stats == null || cardDatabase == null || cardPrefab == null)
+            if (cachedPlayerStats == null)
+            {
+                cachedPlayerStats = FindAnyObjectByType<PlayerStats>();
+            }
+
+            if (cachedPlayerStats == null || cardDatabase == null || cardPrefab == null)
             {
                 return;
             }
@@ -101,7 +106,7 @@ namespace Chest
                 statDisplayUI.Refresh();
             }
 
-            List<CardRewardItem> cards = CardGenerator.GenerateCards(stats, cardDatabase);
+            List<CardRewardItem> cards = CardGenerator.GenerateCards(cachedPlayerStats, cardDatabase);
             if (cards.Count == 0) return;
 
             for (int i = 0; i < cards.Count; i++)
@@ -168,16 +173,20 @@ namespace Chest
 
         private void ApplyReward(CardRewardItem item)
         {
-            PlayerStats stats = FindFirstObjectByType<PlayerStats>();
-            if (stats != null)
+            if (cachedPlayerStats == null)
+            {
+                cachedPlayerStats = FindAnyObjectByType<PlayerStats>();
+            }
+
+            if (cachedPlayerStats != null)
             {
                 if (item.IsHeal)
                 {
-                    stats.ResetHealth();
+                    cachedPlayerStats.ResetHealth();
                 }
                 else
                 {
-                    stats.UpgradeStat(item.StatType);
+                    cachedPlayerStats.UpgradeStat(item.StatType);
                 }
             }
         }

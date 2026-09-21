@@ -4,6 +4,18 @@ using UnityEngine;
 
 public static class CharacterAssetCreator
 {
+    private static T FindAsset<T>(string filter, string defaultPath) where T : UnityEngine.Object
+    {
+        string[] guids = AssetDatabase.FindAssets(filter);
+        if (guids != null && guids.Length > 0)
+        {
+            string path = AssetDatabase.GUIDToAssetPath(guids[0]);
+            T asset = AssetDatabase.LoadAssetAtPath<T>(path);
+            if (asset != null) return asset;
+        }
+        return AssetDatabase.LoadAssetAtPath<T>(defaultPath);
+    }
+
     [MenuItem("Tools/Inspect Slots")]
     public static void InspectSlots()
     {
@@ -76,6 +88,11 @@ public static class CharacterAssetCreator
 
         // 2. Configure CatSlot.prefab
         string prefabPath = "Assets/Prefab/UI/CatSlot.prefab";
+        string[] slotGuids = AssetDatabase.FindAssets("CatSlot t:Prefab");
+        if (slotGuids != null && slotGuids.Length > 0)
+        {
+            prefabPath = AssetDatabase.GUIDToAssetPath(slotGuids[0]);
+        }
         var prefabRoot = PrefabUtility.LoadPrefabContents(prefabPath);
         if (prefabRoot != null)
         {
@@ -142,23 +159,29 @@ public static class CharacterAssetCreator
     public static void SetupMaskWhiteOverlays()
     {
         // 1. Map character assets to white mask sprite paths
-        var mappings = new (string assetPath, string whiteSpritePath)[]
+        var mappings = new (string filter, string defaultPath, string whiteFilter, string defaultWhitePath)[]
         {
-            ("Assets/ScriptableObjects/Characters/Cat_Char.asset", "Assets/Sprites/Player/Masks/Mask_CatWhite.png"),
-            ("Assets/ScriptableObjects/Characters/Rat_Char.asset", "Assets/Sprites/Player/Masks/Mask_RatWhite.png"),
-            ("Assets/ScriptableObjects/Characters/Raven_Char.asset", "Assets/Sprites/Player/Masks/Mask_RabeWhite.png"),
-            ("Assets/ScriptableObjects/Characters/Moose_Char.asset", "Assets/Sprites/Player/Masks/Mask_HirschWhite.png"),
+            ("Cat_Char t:CharacterDefinition", "Assets/ScriptableObjects/PlayerCharacters/Cat_Char.asset", "Mask_CatWhite t:Sprite", "Assets/Sprites/Player/Masks/Mask_CatWhite.png"),
+            ("Rat_Char t:CharacterDefinition", "Assets/ScriptableObjects/PlayerCharacters/Rat_Char.asset", "Mask_RatWhite t:Sprite", "Assets/Sprites/Player/Masks/Mask_RatWhite.png"),
+            ("Raven_Char t:CharacterDefinition", "Assets/ScriptableObjects/PlayerCharacters/Raven_Char.asset", "Mask_RabeWhite t:Sprite", "Assets/Sprites/Player/Masks/Mask_RabeWhite.png"),
+            ("Moose_Char t:CharacterDefinition", "Assets/ScriptableObjects/PlayerCharacters/Moose_Char.asset", "Mask_HirschWhite t:Sprite", "Assets/Sprites/Player/Masks/Mask_HirschWhite.png"),
         };
 
-        foreach (var (assetPath, whiteSpritePath) in mappings)
+        foreach (var (filter, defaultPath, whiteFilter, defaultWhitePath) in mappings)
         {
-            var charDef = AssetDatabase.LoadAssetAtPath<CharacterDefinition>(assetPath);
+            var charDef = FindAsset<CharacterDefinition>(filter, defaultPath);
             if (charDef != null)
             {
-                var sprite = AssetDatabase.LoadAssetAtPath<Sprite>(whiteSpritePath);
+                var sprite = FindAsset<Sprite>(whiteFilter, defaultWhitePath);
                 if (sprite == null)
                 {
-                    var allAssets = AssetDatabase.LoadAllAssetsAtPath(whiteSpritePath);
+                    string spritePath = defaultWhitePath;
+                    string[] sGuids = AssetDatabase.FindAssets(whiteFilter);
+                    if (sGuids != null && sGuids.Length > 0)
+                    {
+                        spritePath = AssetDatabase.GUIDToAssetPath(sGuids[0]);
+                    }
+                    var allAssets = AssetDatabase.LoadAllAssetsAtPath(spritePath);
                     foreach (var a in allAssets)
                     {
                         if (a is Sprite s)
@@ -321,7 +344,7 @@ public static class CharacterAssetCreator
         var wheelController = wheelPanelObj.GetComponent<CharacterWheelController>();
         if (wheelController == null) wheelController = wheelPanelObj.AddComponent<CharacterWheelController>();
 
-        var inputAsset = AssetDatabase.LoadAssetAtPath<UnityEngine.InputSystem.InputActionAsset>("Assets/InputSystem_Actions.inputactions");
+        var inputAsset = FindAsset<UnityEngine.InputSystem.InputActionAsset>("t:InputActionAsset", "Assets/InputSystem_Actions.inputactions");
 
         var soWheel = new SerializedObject(wheelController);
         var slotsProp = soWheel.FindProperty("slots");

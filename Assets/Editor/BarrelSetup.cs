@@ -7,16 +7,28 @@ namespace Setup
 {
     public static class BarrelSetup
     {
+        private static T FindAsset<T>(string filter, string defaultPath) where T : UnityEngine.Object
+        {
+            string[] guids = AssetDatabase.FindAssets(filter);
+            if (guids != null && guids.Length > 0)
+            {
+                string path = AssetDatabase.GUIDToAssetPath(guids[0]);
+                T asset = AssetDatabase.LoadAssetAtPath<T>(path);
+                if (asset != null) return asset;
+            }
+            return AssetDatabase.LoadAssetAtPath<T>(defaultPath);
+        }
+
         [MenuItem("Tools/Setup Barrel Prefab and Config")]
         public static void Configure()
         {
-            string prefabPath = "Assets/Prefab/Barrel.prefab";
-            GameObject prefab = AssetDatabase.LoadAssetAtPath<GameObject>(prefabPath);
+            GameObject prefab = FindAsset<GameObject>("Barrel t:Prefab", "Assets/Prefab/Barrel.prefab");
             if (prefab == null)
             {
-                Debug.LogError("Barrel prefab not found at " + prefabPath);
+                Debug.LogError("Barrel prefab not found");
                 return;
             }
+            string prefabPath = AssetDatabase.GetAssetPath(prefab);
 
             GameObject instance = PrefabUtility.InstantiatePrefab(prefab) as GameObject;
 
@@ -29,8 +41,7 @@ namespace Setup
             DestructibleProp destructible = instance.GetComponent<DestructibleProp>();
             if (destructible == null) destructible = instance.AddComponent<DestructibleProp>();
 
-            string dataPath = "Assets/ScriptableObjects/BarrelSpawnData.asset";
-            PropSpawnData spawnData = AssetDatabase.LoadAssetAtPath<PropSpawnData>(dataPath);
+            PropSpawnData spawnData = FindAsset<PropSpawnData>("BarrelSpawnData t:PropSpawnData", "Assets/ScriptableObjects/BarrelSpawnData.asset");
             if (spawnData != null)
             {
                 SerializedObject destSo = new SerializedObject(destructible);
@@ -46,7 +57,7 @@ namespace Setup
             if (!AssetDatabase.IsValidFolder("Assets/Data")) AssetDatabase.CreateFolder("Assets", "Data");
             if (!AssetDatabase.IsValidFolder("Assets/Data/Props")) AssetDatabase.CreateFolder("Assets/Data", "Props");
 
-            dataPath = "Assets/ScriptableObjects/BarrelSpawnData.asset";
+            string dataPath = "Assets/ScriptableObjects/BarrelSpawnData.asset";
             spawnData = AssetDatabase.LoadAssetAtPath<PropSpawnData>(dataPath);
             if (spawnData == null)
             {
@@ -92,9 +103,9 @@ namespace Setup
                 return;
             }
 
-            GameObject front = AssetDatabase.LoadAssetAtPath<GameObject>("Assets/Prefab/ChestFront.prefab");
-            GameObject left = AssetDatabase.LoadAssetAtPath<GameObject>("Assets/Prefab/ChestLeft.prefab");
-            GameObject right = AssetDatabase.LoadAssetAtPath<GameObject>("Assets/Prefab/ChestRight.prefab");
+            GameObject front = FindAsset<GameObject>("ChestFront t:Prefab", "Assets/Prefab/ChestFront.prefab");
+            GameObject left = FindAsset<GameObject>("ChestLeft t:Prefab", "Assets/Prefab/ChestLeft.prefab");
+            GameObject right = FindAsset<GameObject>("ChestRight t:Prefab", "Assets/Prefab/ChestRight.prefab");
 
             SerializedObject so = new SerializedObject(dm);
             SerializedProperty chestSpawnerProp = so.FindProperty("chestSpawner");

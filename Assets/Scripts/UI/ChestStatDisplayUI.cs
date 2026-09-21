@@ -25,14 +25,23 @@ namespace Chest
         [Header("Stat Rows")]
         [SerializeField] private StatRow[] rows;
 
+        private PlayerStats cachedPlayerStats;
+
         private void OnEnable()
         {
+            if (cachedPlayerStats == null)
+            {
+                cachedPlayerStats = UnityEngine.Object.FindAnyObjectByType<PlayerStats>(FindObjectsInactive.Include);
+            }
             Refresh();
         }
 
         public void Refresh()
         {
-            PlayerStats stats = UnityEngine.Object.FindAnyObjectByType<PlayerStats>(FindObjectsInactive.Include);
+            if (cachedPlayerStats == null)
+            {
+                cachedPlayerStats = UnityEngine.Object.FindAnyObjectByType<PlayerStats>(FindObjectsInactive.Include);
+            }
             if (rows == null) return;
 
             foreach (var row in rows)
@@ -43,7 +52,7 @@ namespace Chest
                     row.labelText.text = row.label;
                 }
 
-                int tier = stats != null ? stats.GetUpgradeTier(row.statType) : 0;
+                int tier = cachedPlayerStats != null ? cachedPlayerStats.GetUpgradeTier(row.statType) : 0;
                 UpdateRowPips(row, tier);
             }
         }
