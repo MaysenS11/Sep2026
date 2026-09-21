@@ -15,10 +15,10 @@ MonoBehaviour:
   Path: FMOD/Desktop/Master.strings.bank
   Name: Master.strings
   StudioPath: bank:/Master.strings
-  lastModified: 639250850947918479
+  lastModified: 639255928861480501
   FileSizes:
   - Name: 
-    Value: 1832
+    Value: 1924
   Exists: 1
 --- !u!114 &-8200343375964216599
 MonoBehaviour:
@@ -299,13 +299,15 @@ MonoBehaviour:
   - {fileID: -3413551254989423727}
   - {fileID: -4217956782417936516}
   - {fileID: 4888584469813155280}
+  - {fileID: 6531771711048277327}
+  - {fileID: 8753085657527339560}
   EditorParameters: []
   MasterBanks:
   - {fileID: 8994020168354651884}
   StringsBanks:
   - {fileID: -8272736750473392735}
   cacheVersion: 131860
-  cacheTime: 639251813214362028
+  cacheTime: 639255928861480501
   SerializableEventsDict:
   - key: event:/Music_CanonInDForTwoRenaissanceHarps
     index: 0
@@ -347,6 +349,10 @@ MonoBehaviour:
     index: 18
   - key: event:/SFX_Enemy_Destroy
     index: 19
+  - key: event:/SFX_Pickup_Key
+    index: 20
+  - key: event:/SFX_Lock_Open
+    index: 21
 --- !u!114 &467271844919501811
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -482,6 +488,33 @@ MonoBehaviour:
   MinDistance: 1
   MaxDistance: 20
   Length: 435
+--- !u!114 &6531771711048277327
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ceb653cd98e289a4e8697a1af55201f2, type: 3}
+  m_Name: event:/SFX_Pickup_Key
+  m_EditorClassIdentifier: FMODUnityEditor::FMODUnity.EditorEventRef
+  Path: event:/SFX_Pickup_Key
+  Guid:
+    Data1: 1278753644
+    Data2: 1081829415
+    Data3: -402322285
+    Data4: 221756239
+  Banks:
+  - {fileID: 8994020168354651884}
+  IsStream: 0
+  Is3D: 0
+  IsOneShot: 1
+  Parameters: []
+  MinDistance: 1
+  MaxDistance: 20
+  Length: 403
 --- !u!114 &7777637249014849769
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -617,6 +650,33 @@ MonoBehaviour:
   MinDistance: 1
   MaxDistance: 20
   Length: 36
+--- !u!114 &8753085657527339560
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ceb653cd98e289a4e8697a1af55201f2, type: 3}
+  m_Name: event:/SFX_Lock_Open
+  m_EditorClassIdentifier: FMODUnityEditor::FMODUnity.EditorEventRef
+  Path: event:/SFX_Lock_Open
+  Guid:
+    Data1: 697287923
+    Data2: 1110814164
+    Data3: 2107904935
+    Data4: 1241838051
+  Banks:
+  - {fileID: 8994020168354651884}
+  IsStream: 0
+  Is3D: 0
+  IsOneShot: 1
+  Parameters: []
+  MinDistance: 1
+  MaxDistance: 20
+  Length: 938
 --- !u!114 &8994020168354651884
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -632,7 +692,7 @@ MonoBehaviour:
   Path: FMOD/Desktop/Master.bank
   Name: Master
   StudioPath: bank:/Master
-  lastModified: 639251813214362028
+  lastModified: 639255928861468023
   FileSizes: []
   Exists: 1
 --- !u!114 &9137320103529174229

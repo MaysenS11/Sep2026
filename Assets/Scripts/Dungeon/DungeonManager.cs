@@ -64,10 +64,12 @@ namespace Dungeon
         [SerializeField] private DoorSpawner doorSpawner = new DoorSpawner();
         [SerializeField] private EnemySpawner enemySpawner = new EnemySpawner();
         [SerializeField] private PropSpawner propSpawner = new PropSpawner();
+        [SerializeField] private ChestSpawner chestSpawner = new ChestSpawner();
 
         public EnemySpawner EnemySpawner => enemySpawner;
         public DoorSpawner DoorSpawner => doorSpawner;
         public PropSpawner PropSpawner => propSpawner;
+        public ChestSpawner ChestSpawner => chestSpawner;
         public float GeneralRoomDensity
         {
             get => generalRoomDensity;
@@ -180,6 +182,7 @@ namespace Dungeon
             _spawners.Add(doorSpawner);
             _spawners.Add(enemySpawner);
             _spawners.Add(propSpawner);
+            _spawners.Add(chestSpawner);
         }
 
         public void RegisterSpawner(IDungeonSpawner spawner)
@@ -298,6 +301,8 @@ namespace Dungeon
             enemySpawner.RoomDensity = savedEnemyDensity * generalRoomDensity;
             propSpawner.PropDensity = savedPropDensity * generalRoomDensity;
 
+            chestSpawner.PrepareDungeonChestPlan(GeneratedRooms);
+
             for (int r = 0; r < GeneratedRooms.Count; r++)
             {
                 GameManager.RoomData room = GeneratedRooms[r];
@@ -321,6 +326,7 @@ namespace Dungeon
             if (debugTilemap != null) debugTilemap.ClearAllTiles();
             if (objectTilemap != null) objectTilemap.ClearAllTiles();
 
+            RegisterDefaultSpawners();
             for (int s = 0; s < _spawners.Count; s++)
             {
                 _spawners[s].ClearSpawnedContent();

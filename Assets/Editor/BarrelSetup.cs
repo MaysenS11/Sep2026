@@ -82,6 +82,34 @@ namespace Setup
             Debug.Log("Successfully setup Barrel prefab and PropSpawnData asset.");
         }
 
+        [MenuItem("Tools/Setup Chest Prefabs on DungeonManager")]
+        public static void SetupChestPrefabs()
+        {
+            DungeonManager dm = Object.FindAnyObjectByType<DungeonManager>();
+            if (dm == null)
+            {
+                Debug.LogError("No DungeonManager found in current scene!");
+                return;
+            }
+
+            GameObject front = AssetDatabase.LoadAssetAtPath<GameObject>("Assets/Prefab/ChestFront.prefab");
+            GameObject left = AssetDatabase.LoadAssetAtPath<GameObject>("Assets/Prefab/ChestLeft.prefab");
+            GameObject right = AssetDatabase.LoadAssetAtPath<GameObject>("Assets/Prefab/ChestRight.prefab");
+
+            SerializedObject so = new SerializedObject(dm);
+            SerializedProperty chestSpawnerProp = so.FindProperty("chestSpawner");
+            if (chestSpawnerProp != null)
+            {
+                chestSpawnerProp.FindPropertyRelative("chestFrontPrefab").objectReferenceValue = front;
+                chestSpawnerProp.FindPropertyRelative("chestLeftPrefab").objectReferenceValue = left;
+                chestSpawnerProp.FindPropertyRelative("chestRightPrefab").objectReferenceValue = right;
+                so.ApplyModifiedProperties();
+                EditorUtility.SetDirty(dm);
+                UnityEditor.SceneManagement.EditorSceneManager.MarkSceneDirty(dm.gameObject.scene);
+                Debug.Log("Successfully assigned ChestFront, ChestLeft, and ChestRight prefabs to DungeonManager.");
+            }
+        }
+
         [MenuItem("Tools/Generate Dungeon Test")]
         public static void GenerateDungeonTest()
         {

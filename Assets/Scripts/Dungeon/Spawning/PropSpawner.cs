@@ -11,9 +11,6 @@ namespace Dungeon.Spawning
     [System.Serializable]
     public class PropSpawner : IDungeonSpawner
     {
-        [Header("Chest Prefabs")]
-        [SerializeField] private GameObject normalChestPrefab;
-
         [Header("Prop Spawn Settings")]
         [Range(0f, 1f)]
         [SerializeField] private float propDensity = 0.5f;
@@ -53,16 +50,6 @@ namespace Dungeon.Spawning
             Transform parentContainer)
         {
             if (floorTilemap == null) return;
-
-            if (room.Type == RoomType.Chest && normalChestPrefab != null)
-            {
-                Vector2Int chestTile = room.CenterTile;
-                Vector3 worldPos = floorTilemap.GetCellCenterWorld(new Vector3Int(chestTile.x, chestTile.y, 0));
-                GameObject chest = Object.Instantiate(normalChestPrefab, worldPos, Quaternion.identity, parentContainer);
-                _spawnedProps.Add(chest);
-                tileQuery.MarkOccupied(chestTile);
-                RegisterUndoInEditor(chest, "Chest");
-            }
 
             if (barrelSpawnData != null)
             {

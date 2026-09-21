@@ -202,6 +202,11 @@ public class PlayerMovement : MonoBehaviour
             SelectAttackPattern(2);
         }
 
+        if (Keyboard.current != null && Keyboard.current[Key.E].wasPressedThisFrame)
+        {
+            TriggerInteract();
+        }
+
         HandleMovement();
     }
 
@@ -439,8 +444,35 @@ public class PlayerMovement : MonoBehaviour
 
     private void OnInteractPerformed(InputAction.CallbackContext context)
     {
+        TriggerInteract();
+    }
+
+    private void TriggerInteract()
+    {
+        Debug.Log("interact pressed");
         if (isMoving || (ScreenFadeTransition.Instance != null && ScreenFadeTransition.Instance.IsTransitioning)) return;
         animator.SetTrigger(interactTrigger);
+
+        Vector2Int facingDir = new Vector2Int(Mathf.RoundToInt(lastDirection.x), Mathf.RoundToInt(lastDirection.y));
+        if (facingDir == Vector2Int.zero) facingDir = Vector2Int.down;
+
+        Vector2Int currentGrid = TileReservationSystem.WorldToGridTile(transform.position);
+        Vector2Int targetGrid = currentGrid + facingDir;
+        Vector3 targetPos = TileReservationSystem.GetTileCenterWorld(targetGrid, transform.position.z);
+
+        Collider2D[] results = Physics2D.OverlapBoxAll(targetPos, new Vector2(tileSize * 0.8f, tileSize * 0.8f), 0f);
+        for (int i = 0; i < results.Length; i++)
+        {
+            if (results[i] != null && results[i].TryGetComponent<Dungeon.Chest>(out var chest))
+            {
+                Debug.Log("chest in range");
+                if (chest.TryOpen())
+                {
+                    Debug.Log("chest opening");
+                }
+                break;
+            }
+        }
     }
 
     private void OnMenuPerformed(InputAction.CallbackContext context)
