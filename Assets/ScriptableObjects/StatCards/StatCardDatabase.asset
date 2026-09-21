@@ -1,0 +1,24 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b24ccb64191009249a3ca7221d685891, type: 3}
+  m_Name: StatCardDatabase
+  m_EditorClassIdentifier: Assembly-CSharp::Chest.StatCardDatabase
+  statCards:
+  - statType: 1
+    cardSprite: {fileID: -1431578346, guid: 61bef70e13def5d43a4133a5b3d53ebd, type: 3}
+  - statType: 2
+    cardSprite: {fileID: -1349854501, guid: 61bef70e13def5d43a4133a5b3d53ebd, type: 3}
+  - statType: 0
+    cardSprite: {fileID: 544490610, guid: 61bef70e13def5d43a4133a5b3d53ebd, type: 3}
+  - statType: 3
+    cardSprite: {fileID: 343100027, guid: 61bef70e13def5d43a4133a5b3d53ebd, type: 3}
+  healCardSprite: {fileID: -129707243, guid: 61bef70e13def5d43a4133a5b3d53ebd, type: 3}

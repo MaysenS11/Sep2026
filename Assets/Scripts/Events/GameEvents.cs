@@ -278,4 +278,30 @@ public readonly struct RequestSharedAudioEvent : IEvent
 {
 }
 
+public readonly struct ChestOpenedEvent : IEvent
+{
+    public readonly Vector3 ChestPosition;
+    public readonly bool IsChestRoom;
 
+    public ChestOpenedEvent(Vector3 chestPosition, bool isChestRoom)
+    {
+        ChestPosition = chestPosition;
+        IsChestRoom = isChestRoom;
+    }
+}
+
+public readonly struct StatUpgradeAppliedEvent : IEvent
+{
+    public readonly Chest.StatType StatType;
+    public readonly int NewTier;
+
+    public StatUpgradeAppliedEvent(Chest.StatType statType, int newTier)
+    {
+        StatType = statType;
+        NewTier = newTier;
+    }
+}
+
+public readonly struct ChestRewardClosedEvent : IEvent
+{
+}

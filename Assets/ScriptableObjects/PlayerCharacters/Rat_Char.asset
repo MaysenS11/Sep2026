@@ -10,24 +10,24 @@ MonoBehaviour:
   m_Enabled: 1
   m_EditorHideFlags: 0
   m_Script: {fileID: 11500000, guid: a3a8592d7203c064eb76fe8bf24160bf, type: 3}
-  m_Name: Moose_Char
+  m_Name: Rat_Char
   m_EditorClassIdentifier: Assembly-CSharp::CharacterDefinition
-  characterId: 3
-  characterName: Moose
-  maskSprite: {fileID: 8317746133298473329, guid: f74c336a284f34d4ebbab66aa3319b49, type: 3}
-  maskWhiteSprite: {fileID: -6231125204268114922, guid: 4169f33d87b0c7d41ba2f33647cf8e38, type: 3}
+  characterId: 1
+  characterName: Rat
+  maskSprite: {fileID: 1731565737718653159, guid: b2b36ba3a06c4804d95e779e24917f51, type: 3}
+  maskWhiteSprite: {fileID: -2525392422077248750, guid: 353b6209ec0a0874d8a4632ddecafa9f, type: 3}
   fullBodySprite: {fileID: -4183879650981696548, guid: c3e3a3c11d31edd41bd68f5868d06206, type: 3}
   startHealth: 16
   lockedByDefault: 1
   lockedTint: {r: 0.25, g: 0.25, b: 0.25, a: 1}
   attackDegenSound:
     Guid:
-      Data1: 0
-      Data2: 0
-      Data3: 0
-      Data4: 0
-    Path: 
+      Data1: -1813573033
+      Data2: 1155356579
+      Data3: 1215495095
+      Data4: 52795855
+    Path: event:/SFX_Character_Degen_Attack
   attackPatterns:
-  - {fileID: 11400000, guid: 27bc7f7bde32c334990d081901fe40ae, type: 2}
-  - {fileID: 11400000, guid: fed295beec14ccb4a80cee8cb4ef7d48, type: 2}
-  - {fileID: 11400000, guid: 4ac34d7c44925d546a88c9d0435a2c29, type: 2}
+  - {fileID: 11400000, guid: 40cfd3d6b1ee0f74389eb72ae4193464, type: 2}
+  - {fileID: 11400000, guid: b9aa07d734bf40248924a17a920b529c, type: 2}
+  - {fileID: 11400000, guid: bb31b97853785224fbe1dc8d448eaaa7, type: 2}

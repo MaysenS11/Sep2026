@@ -451,7 +451,7 @@ public class PlayerMovement : MonoBehaviour
     {
         Debug.Log("interact pressed");
         if (isMoving || (ScreenFadeTransition.Instance != null && ScreenFadeTransition.Instance.IsTransitioning)) return;
-        animator.SetTrigger(interactTrigger);
+        //animator.SetTrigger(interactTrigger);
 
         Vector2Int facingDir = new Vector2Int(Mathf.RoundToInt(lastDirection.x), Mathf.RoundToInt(lastDirection.y));
         if (facingDir == Vector2Int.zero) facingDir = Vector2Int.down;
@@ -463,9 +463,18 @@ public class PlayerMovement : MonoBehaviour
         Collider2D[] results = Physics2D.OverlapBoxAll(targetPos, new Vector2(tileSize * 0.8f, tileSize * 0.8f), 0f);
         for (int i = 0; i < results.Length; i++)
         {
-            if (results[i] != null && results[i].TryGetComponent<Dungeon.Chest>(out var chest))
+            if (results[i] == null) continue;
+
+            if (results[i].TryGetComponent<IInteractable>(out var interactable))
             {
-                Debug.Log("chest in range");
+                if (interactable.CanInteract)
+                {
+                    interactable.Interact(gameObject);
+                    break;
+                }
+            }
+            else if (results[i].TryGetComponent<Dungeon.Chest>(out var chest))
+            {
                 if (chest.TryOpen())
                 {
                     Debug.Log("chest opening");
