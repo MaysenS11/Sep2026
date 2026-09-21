@@ -18,7 +18,7 @@ MonoBehaviour:
   maskWhiteSprite: {fileID: -6255308247645376799, guid: 53c73cecd591b8947961aa84a637b848, type: 3}
   fullBodySprite: {fileID: -4183879650981696548, guid: c3e3a3c11d31edd41bd68f5868d06206, type: 3}
   startHealth: 16
-  lockedByDefault: 1
+  lockedByDefault: 0
   lockedTint: {r: 0.25, g: 0.25, b: 0.25, a: 1}
   attackDegenSound:
     Guid:

@@ -1,10 +1,10 @@
 fileFormatVersion: 2
-guid: c22c0f02a97ae5547bb258cfb651eb2b
+guid: 5c341d93a0822b84491c18f7cc14453d
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: -4990277673935106851
-    second: PlayerPositionIndicator_0
+      213: 3934695794350062357
+    second: Healthbar_NPCFull_0
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -46,7 +46,7 @@ TextureImporter:
   nPOTScale: 0
   lightmap: 0
   compressionQuality: 50
-  spriteMode: 2
+  spriteMode: 1
   spriteExtrude: 1
   spriteMeshType: 1
   alignment: 0
@@ -100,13 +100,13 @@ TextureImporter:
     serializedVersion: 2
     sprites:
     - serializedVersion: 2
-      name: PlayerPositionIndicator_0
+      name: Healthbar_NPCFull_0
       rect:
         serializedVersion: 2
         x: 0
         y: 0
-        width: 32
-        height: 32
+        width: 4
+        height: 7
       alignment: 0
       pivot: {x: 0, y: 0}
       border: {x: 0, y: 0, z: 0, w: 0}
@@ -115,8 +115,8 @@ TextureImporter:
       physicsShape: []
       tessellationDetail: -1
       bones: []
-      spriteID: ddc098a25e8febab0800000000000000
-      internalID: -4990277673935106851
+      spriteID: 51b75716af8da9630800000000000000
+      internalID: 3934695794350062357
       vertices: []
       indices: 
       edges: []
@@ -125,7 +125,7 @@ TextureImporter:
     customData: 
     physicsShape: []
     bones: []
-    spriteID: 
+    spriteID: 5e97eb03825dee720800000000000000
     internalID: 0
     vertices: []
     indices: 
@@ -135,7 +135,7 @@ TextureImporter:
     spriteCustomMetadata:
       entries: []
     nameFileIdTable:
-      PlayerPositionIndicator_0: -4990277673935106851
+      Healthbar_NPCFull_0: 3934695794350062357
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

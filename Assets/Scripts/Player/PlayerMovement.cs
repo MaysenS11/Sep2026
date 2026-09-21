@@ -88,6 +88,9 @@ public class PlayerMovement : MonoBehaviour
         EventBus<SharedAudioConfiguredEvent>.Subscribe(OnSharedAudioConfigured);
         attackAction.performed += OnAttackPerformed;
         interactAction.performed += OnInteractPerformed;
+        if (pattern1Action != null) pattern1Action.performed += OnPattern1Performed;
+        if (pattern2Action != null) pattern2Action.performed += OnPattern2Performed;
+        if (pattern3Action != null) pattern3Action.performed += OnPattern3Performed;
         if (menuAction != null)
         {
             menuAction.performed += OnMenuPerformed;
@@ -98,6 +101,9 @@ public class PlayerMovement : MonoBehaviour
     {
         attackAction.performed -= OnAttackPerformed;
         interactAction.performed -= OnInteractPerformed;
+        if (pattern1Action != null) pattern1Action.performed -= OnPattern1Performed;
+        if (pattern2Action != null) pattern2Action.performed -= OnPattern2Performed;
+        if (pattern3Action != null) pattern3Action.performed -= OnPattern3Performed;
         if (menuAction != null)
         {
             menuAction.performed -= OnMenuPerformed;
@@ -210,16 +216,43 @@ public class PlayerMovement : MonoBehaviour
         HandleMovement();
     }
 
+    private void OnPattern1Performed(InputAction.CallbackContext context)
+    {
+        SelectAttackPattern(0);
+    }
+
+    private void OnPattern2Performed(InputAction.CallbackContext context)
+    {
+        SelectAttackPattern(1);
+    }
+
+    private void OnPattern3Performed(InputAction.CallbackContext context)
+    {
+        SelectAttackPattern(2);
+    }
+
     private void Start()
     {
+        if (CharacterSelectData.SelectedCharacter != null)
+        {
+            characterDefinition = CharacterSelectData.SelectedCharacter;
+        }
+
         if (playerStats == null) playerStats = GetComponent<PlayerStats>();
 
         if (characterDefinition != null && playerStats != null)
         {
+            playerStats.SetCharacterDefinition(characterDefinition);
             AttackPatternData initialPattern = characterDefinition.GetAttackPattern(0);
             if (initialPattern != null)
             {
                 playerStats.SetAttackPattern(initialPattern, 0);
+            }
+
+            UIManager uiManager = Object.FindAnyObjectByType<UIManager>();
+            if (uiManager != null && characterDefinition.MaskSprite != null)
+            {
+                uiManager.SetMaskSprite(characterDefinition.MaskSprite);
             }
         }
 

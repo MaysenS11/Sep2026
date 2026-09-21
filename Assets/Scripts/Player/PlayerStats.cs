@@ -124,6 +124,17 @@ public class PlayerStats : MonoBehaviour, IDamageable
         }
     }
 
+    public void SetCharacterDefinition(CharacterDefinition definition)
+    {
+        characterDefinition = definition;
+        if (definition != null && definition.StartHealth > 0)
+        {
+            maxHealth = definition.StartHealth;
+            currentHealth = maxHealth;
+            EventBus<PlayerHealthChangedEvent>.Raise(new PlayerHealthChangedEvent(currentHealth, maxHealth));
+        }
+    }
+
     public void SetAttackPattern(AttackPatternData pattern, int index = 0)
     {
         currentAttackPattern = pattern;

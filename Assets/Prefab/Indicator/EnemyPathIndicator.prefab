@@ -11,7 +11,7 @@ GameObject:
   - component: {fileID: 2564208366322320834}
   - component: {fileID: 7822163288255108721}
   m_Layer: 0
-  m_Name: AttackPositionIndicator
+  m_Name: EnemyPathIndicator
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -81,7 +81,7 @@ SpriteRenderer:
   m_SortingLayer: 0
   m_SortingOrder: 5
   m_MaskInteraction: 0
-  m_Sprite: {fileID: 2255117275804457734, guid: 044e31c98ab71bc46a6b4636b3681bba, type: 3}
+  m_Sprite: {fileID: 21300000, guid: aec8ff442816fed4c8d67df6693bd99e, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0

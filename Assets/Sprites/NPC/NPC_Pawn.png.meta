@@ -1,10 +1,10 @@
 fileFormatVersion: 2
-guid: 76d1ee9b513d3a74bb5ab3a046f2ea7c
+guid: 1c8c2138cb904424b83cc32425c362b9
 TextureImporter:
   internalIDToNameTable:
   - first:
-      213: -3962246455862633825
-    second: NPC_Pawn_0
+      213: -8770817865304829560
+    second: NPC_Pawn 1_0
   externalObjects: {}
   serializedVersion: 13
   mipmaps:
@@ -49,8 +49,8 @@ TextureImporter:
   spriteMode: 2
   spriteExtrude: 1
   spriteMeshType: 1
-  alignment: 0
-  spritePivot: {x: 0.5, y: 0.5}
+  alignment: 9
+  spritePivot: {x: 0.5, y: 0.3}
   spritePixelsToUnits: 32
   spriteBorder: {x: 0, y: 0, z: 0, w: 0}
   spriteGenerateFallbackPhysicsShape: 1
@@ -103,20 +103,20 @@ TextureImporter:
       name: NPC_Pawn_0
       rect:
         serializedVersion: 2
-        x: 2
-        y: 7
-        width: 28
-        height: 64
+        x: 3
+        y: 11
+        width: 26
+        height: 53
       alignment: 9
       pivot: {x: 0.5, y: 0.15}
       border: {x: 0, y: 0, z: 0, w: 0}
       customData: 
       outline: []
       physicsShape: []
-      tessellationDetail: -1
+      tessellationDetail: 0
       bones: []
-      spriteID: f9ad1cd57d54309c0800000000000000
-      internalID: -3962246455862633825
+      spriteID: 0509f65d5901a31499af3c82749b6dc5
+      internalID: 1690433471
       vertices: []
       indices: 
       edges: []
@@ -125,17 +125,19 @@ TextureImporter:
     customData: 
     physicsShape: []
     bones: []
-    spriteID: 4ceeabd07c7a29c4797ef55d9598ed51
-    internalID: 0
+    spriteID: 5e97eb03825dee720800000000000000
+    internalID: 1537655665
     vertices: []
     indices: 
     edges: []
     weights: []
     secondaryTextures: []
     spriteCustomMetadata:
-      entries: []
+      entries:
+      - key: SpriteEditor.SliceSettings
+        value: '{"sliceOnImport":false,"gridCellCount":{"x":1.0,"y":1.0},"gridSpriteSize":{"x":64.0,"y":64.0},"gridSpriteOffset":{"x":0.0,"y":0.0},"gridSpritePadding":{"x":0.0,"y":0.0},"pivot":{"x":0.5,"y":0.5},"pivotPixels":{"x":0.0,"y":0.0},"autoSlicingMethod":0,"spriteAlignment":0,"pivotUnitMode":0,"slicingType":0,"keepEmptyRects":false,"isAlternate":false}'
     nameFileIdTable:
-      NPC_Pawn_0: -3962246455862633825
+      NPC_Pawn_0: 1690433471
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

@@ -19,6 +19,7 @@ public class MenuManager : MonoBehaviour
     {
         if (evt.Character != null)
         {
+            CharacterSelectData.SelectedCharacter = evt.Character;
             SceneManager.LoadScene(gameSceneName);
         }
     }
