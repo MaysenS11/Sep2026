@@ -22,6 +22,8 @@ public class PlayerStats : MonoBehaviour, IDamageable
     [SerializeField] private int[] attackDamageValues = new int[3] { 3, 4, 5 };
     [SerializeField] private int[] defenceValues = new int[3] { 0, 1, 2 };
     [SerializeField] private int[] speedValues = new int[3] { 0, 1, 2 };
+    [SerializeField] private int[] rangeValues = new int[3] { 1, 2, 3 };
+    [SerializeField] private int[] healthValues = new int[3] { 1, 2, 3 };
 
     [Header("Current Stats")]
     [SerializeField] private int defence = 0;
@@ -50,6 +52,36 @@ public class PlayerStats : MonoBehaviour, IDamageable
             return tier;
         }
         return 0;
+    }
+
+    public int[] GetTierValues(Chest.StatType statType)
+    {
+        switch (statType)
+        {
+            case Chest.StatType.AttackDamage:
+                return attackDamageValues;
+            case Chest.StatType.Defence:
+                return defenceValues;
+            case Chest.StatType.Speed:
+                return speedValues;
+            case Chest.StatType.AttackRange:
+                return rangeValues;
+            case Chest.StatType.Health:
+                return healthValues;
+            default:
+                return null;
+        }
+    }
+
+    public int GetCurrentStatValue(Chest.StatType statType)
+    {
+        int tier = Mathf.Clamp(GetUpgradeTier(statType), 0, 2);
+        int[] values = GetTierValues(statType);
+        if (values != null && tier < values.Length)
+        {
+            return Mathf.Clamp(values[tier], 1, 5);
+        }
+        return 1;
     }
 
     public void UpgradeStat(Chest.StatType statType)
@@ -90,6 +122,12 @@ public class PlayerStats : MonoBehaviour, IDamageable
                     }
                 }
                 break;
+            case Chest.StatType.Health:
+                if (newTier < healthValues.Length)
+                {
+                    IncreaseMaxHealth(healthValues[newTier] - healthValues[currentTier]);
+                }
+                break;
         }
 
         EventBus<StatUpgradeAppliedEvent>.Raise(new StatUpgradeAppliedEvent(statType, newTier));
@@ -124,15 +162,53 @@ public class PlayerStats : MonoBehaviour, IDamageable
         }
     }
 
+    [Header("Common Player Defaults")]
+    [SerializeField] private int defaultStartHealth = 16;
+    [SerializeField] private Color lockedTint = new Color(0.25f, 0.25f, 0.25f, 1f);
+
+    public Color LockedTint => lockedTint;
+
     public void SetCharacterDefinition(CharacterDefinition definition)
     {
         characterDefinition = definition;
-        if (definition != null && definition.StartHealth > 0)
+        upgradeTiers.Clear();
+        maxHealth = defaultStartHealth;
+        currentHealth = maxHealth;
+
+        if (definition != null)
         {
-            maxHealth = definition.StartHealth;
-            currentHealth = maxHealth;
-            EventBus<PlayerHealthChangedEvent>.Raise(new PlayerHealthChangedEvent(currentHealth, maxHealth));
+            if (definition.AttackTierValues != null && definition.AttackTierValues.Length > 0)
+            {
+                attackDamageValues = (int[])definition.AttackTierValues.Clone();
+                baseAttackDamage = attackDamageValues[0];
+            }
+            if (definition.DefenceTierValues != null && definition.DefenceTierValues.Length > 0)
+            {
+                defenceValues = (int[])definition.DefenceTierValues.Clone();
+                defence = defenceValues[0];
+            }
+            if (definition.SpeedTierValues != null && definition.SpeedTierValues.Length > 0)
+            {
+                speedValues = (int[])definition.SpeedTierValues.Clone();
+                speed = speedValues[0];
+            }
+            if (definition.RangeTierValues != null && definition.RangeTierValues.Length > 0)
+            {
+                rangeValues = (int[])definition.RangeTierValues.Clone();
+            }
+            if (definition.HealthTierValues != null && definition.HealthTierValues.Length > 0)
+            {
+                healthValues = (int[])definition.HealthTierValues.Clone();
+            }
+
+            AttackPatternData initialPattern = definition.GetAttackPattern(0);
+            if (initialPattern != null)
+            {
+                SetAttackPattern(initialPattern, 0);
+            }
         }
+
+        EventBus<PlayerHealthChangedEvent>.Raise(new PlayerHealthChangedEvent(currentHealth, maxHealth));
     }
 
     public void SetAttackPattern(AttackPatternData pattern, int index = 0)

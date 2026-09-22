@@ -25,7 +25,7 @@ public static class CharacterAssetCreator
             var btn = s.GetComponent<UnityEngine.UI.Button>();
             var overlay = s.transform.Find("OverlayMask");
             var slotImg = s.GetComponent<UnityEngine.UI.Image>();
-            Debug.Log($"SLOT {s.name}: definition={(s.CharacterDefinition != null ? s.CharacterDefinition.CharacterName : "null")}, " +
+            Debug.Log($"SLOT {s.name}: definition={(s.CharacterDefinition != null ? s.CharacterDefinition.name : "null")}, " +
                       $"defWhiteSprite={(s.CharacterDefinition != null && s.CharacterDefinition.MaskWhiteSprite != null ? s.CharacterDefinition.MaskWhiteSprite.name : "null")}, " +
                       $"btnTargetGraphic={(btn != null && btn.targetGraphic != null ? btn.targetGraphic.name : "null")}, " +
                       $"slotImgRaycastTarget={(slotImg != null ? slotImg.raycastTarget.ToString() : "null")}, " +
@@ -57,10 +57,7 @@ public static class CharacterAssetCreator
             {
                 var asset = ScriptableObject.CreateInstance<CharacterDefinition>();
                 var so = new SerializedObject(asset);
-                so.FindProperty("characterId").intValue = i;
-                so.FindProperty("characterName").stringValue = $"Character {i}";
                 so.FindProperty("lockedByDefault").boolValue = (i != 0);
-                so.FindProperty("startHealth").intValue = 3;
                 so.ApplyModifiedProperties();
                 AssetDatabase.CreateAsset(asset, path);
             }
@@ -356,6 +353,13 @@ public static class CharacterAssetCreator
         soWheel.FindProperty("fullBodyPreview").objectReferenceValue = previewImage;
         soWheel.FindProperty("radius").floatValue = 180f;
         soWheel.FindProperty("inputActionAsset").objectReferenceValue = inputAsset;
+
+        var statsPanelObj = GameObject.Find("StatsPanel");
+        if (statsPanelObj != null && statsPanelObj.TryGetComponent<StatsDisplayUI>(out var statDisplayComp))
+        {
+            soWheel.FindProperty("statsDisplay").objectReferenceValue = statDisplayComp;
+        }
+
         soWheel.ApplyModifiedProperties();
 
         UnityEditor.SceneManagement.EditorSceneManager.MarkSceneDirty(canvas.scene);

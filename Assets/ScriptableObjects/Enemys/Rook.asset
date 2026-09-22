@@ -14,8 +14,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::EnemyData
   enemyName: Rook
   prefab: {fileID: 1228558132822369691, guid: 094500de68f63f74fa0e16de6b26a05d, type: 3}
-  maxHealth: 10
-  attackDamage: 10
+  maxHealth: 5
+  attackDamage: 5
   stepSpeed: 5
   detectionRange: 15
   movementPattern: 2

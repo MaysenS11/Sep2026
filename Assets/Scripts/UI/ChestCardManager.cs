@@ -15,7 +15,7 @@ namespace Chest
         [SerializeField] private Transform cardContainer;
         [SerializeField] private GameObject panelRoot;
         [SerializeField] private RectTransform[] cardPlaceholders;
-        [SerializeField] private ChestStatDisplayUI statDisplayUI;
+        [SerializeField] private StatsDisplayUI statDisplayUI;
 
         [Header("Reveal Animation")]
         [SerializeField] private float revealDuration = 0.5f;

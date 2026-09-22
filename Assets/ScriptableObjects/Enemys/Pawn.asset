@@ -14,8 +14,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::EnemyData
   enemyName: Pawn
   prefab: {fileID: 1228558132822369691, guid: e787d67c5100aaf418072ed4af238bed, type: 3}
-  maxHealth: 2
-  attackDamage: 2
+  maxHealth: 1
+  attackDamage: 1
   stepSpeed: 5
   detectionRange: 6
   movementPattern: 0

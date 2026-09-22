@@ -14,8 +14,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::EnemyData
   enemyName: Queen
   prefab: {fileID: 1228558132822369691, guid: 5a428a17024c1d4418ec0834fbe6a6c6, type: 3}
-  maxHealth: 14
-  attackDamage: 14
+  maxHealth: 7
+  attackDamage: 7
   stepSpeed: 5
   detectionRange: 20
   movementPattern: 4

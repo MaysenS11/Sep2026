@@ -7,6 +7,9 @@ public class CharacterWheelController : MonoBehaviour
 {
     [SerializeField] private CharacterSlotUI[] slots;
     [SerializeField] private Image fullBodyPreview;
+    [SerializeField] private StatsDisplayUI statsDisplay;
+    [SerializeField] private TMPro.TMP_Text characterNameText;
+    [SerializeField] private Color lockedTint = new Color(0.25f, 0.25f, 0.25f, 1f);
     public enum WheelLayoutMode
     {
         RadialArc,
@@ -40,6 +43,25 @@ public class CharacterWheelController : MonoBehaviour
     private void Awake()
     {
         totalSlots = slots != null ? slots.Length : 0;
+        if (characterNameText == null)
+        {
+            GameObject nameGo = GameObject.Find("CharacterName");
+            if (nameGo != null)
+            {
+                characterNameText = nameGo.GetComponent<TMPro.TMP_Text>();
+            }
+        }
+        if (slots != null)
+        {
+            for (int i = 0; i < slots.Length; i++)
+            {
+                int index = i;
+                if (slots[i] != null && slots[i].SelectButton != null)
+                {
+                    slots[i].SelectButton.onClick.AddListener(() => SelectSlot(index));
+                }
+            }
+        }
         CacheWaypoints();
         SetupInputActions();
     }
@@ -96,6 +118,11 @@ public class CharacterWheelController : MonoBehaviour
         if (wheelPrevAction != null) wheelPrevAction.performed += OnPrevPerformed;
 
         UpdateSlotPositionsImmediate();
+        UpdatePreview();
+    }
+
+    private void Start()
+    {
         UpdatePreview();
     }
 
@@ -164,6 +191,17 @@ public class CharacterWheelController : MonoBehaviour
         spinCoroutine = StartCoroutine(AnimateSlotsToTargets());
         UpdatePreview();
         EventBus<PlayUISoundEvent>.Raise(new PlayUISoundEvent(UISoundType.CircleMenu));
+    }
+
+    public void SelectSlot(int slotIndex)
+    {
+        if (totalSlots == 0 || slotIndex == selectedIndex) return;
+
+        int forwardDiff = (slotIndex - selectedIndex + totalSlots) % totalSlots;
+        int backwardDiff = (selectedIndex - slotIndex + totalSlots) % totalSlots;
+        int diff = forwardDiff <= backwardDiff ? forwardDiff : -backwardDiff;
+
+        RotateWheel(diff);
     }
 
     private Vector2 GetTargetPositionForSlot(int slotIndex)
@@ -301,18 +339,45 @@ public class CharacterWheelController : MonoBehaviour
 
     private void UpdatePreview()
     {
-        if (fullBodyPreview == null || totalSlots == 0) return;
+        if (totalSlots == 0) return;
 
         CharacterSlotUI currentSlot = slots[selectedIndex];
-        if (currentSlot != null && currentSlot.CharacterDefinition != null)
+        CharacterDefinition def = currentSlot != null ? currentSlot.CharacterDefinition : null;
+
+        if (fullBodyPreview != null)
         {
-            fullBodyPreview.sprite = currentSlot.CharacterDefinition.FullBodySprite;
-            fullBodyPreview.enabled = fullBodyPreview.sprite != null;
-            fullBodyPreview.color = currentSlot.IsLocked ? currentSlot.CharacterDefinition.LockedTint : Color.white;
+            if (currentSlot != null && def != null)
+            {
+                fullBodyPreview.sprite = def.FullBodySprite;
+                fullBodyPreview.enabled = fullBodyPreview.sprite != null;
+                fullBodyPreview.color = currentSlot.IsLocked ? lockedTint : Color.white;
+            }
+            else
+            {
+                fullBodyPreview.enabled = false;
+            }
         }
-        else
+
+        if (characterNameText != null)
         {
-            fullBodyPreview.enabled = false;
+            if (def != null)
+            {
+                characterNameText.text = def.CharacterName;
+            }
+            else
+            {
+                characterNameText.text = string.Empty;
+            }
+        }
+
+        if (statsDisplay == null)
+        {
+            statsDisplay = Object.FindAnyObjectByType<StatsDisplayUI>(FindObjectsInactive.Include);
+        }
+
+        if (statsDisplay != null && def != null)
+        {
+            statsDisplay.DisplayCharacter(def);
         }
     }
 }

@@ -5,6 +5,7 @@ namespace Chest
         AttackDamage,
         AttackRange,
         Defence,
-        Speed
+        Speed,
+        Health
     }
 }

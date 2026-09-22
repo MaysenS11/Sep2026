@@ -399,13 +399,13 @@ public class PlayerMovement : MonoBehaviour
 
         if (characterDefinition != null)
         {
-            if (!characterDefinition.AttackDegenSound.IsNull)
+            if (!characterDefinition.AttackSound.IsNull)
             {
-                RuntimeManager.PlayOneShot(characterDefinition.AttackDegenSound);
+                RuntimeManager.PlayOneShot(characterDefinition.AttackSound);
             }
             else
             {
-                Debug.LogWarning($"[PlayerMovement] Attack sound not assigned for character: {characterDefinition.CharacterName}");
+                Debug.LogWarning($"[PlayerMovement] Attack sound not assigned for character: {characterDefinition.name}");
             }
         }
         else

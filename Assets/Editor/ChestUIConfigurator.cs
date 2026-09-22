@@ -112,24 +112,20 @@ namespace Chest.Editor
             vlg.childForceExpandHeight = false;
 
             var fontAsset = FindAsset<TMP_FontAsset>("Jacquard12-Regular SDF t:TMP_FontAsset", "Assets/TextMesh Pro/Font/Jacquard12-Regular SDF.asset");
-            Sprite unlockedPip = FindAsset<Sprite>("Map_Curr t:Sprite", "Assets/Sprites/Menu/Map_Curr.png");
-            Sprite lockedPip = FindAsset<Sprite>("Map_Norm t:Sprite", "Assets/Sprites/Menu/Map_Norm.png");
+            Sprite activePip = FindAsset<Sprite>("Map_Curr t:Sprite", "Assets/Sprites/Menu/Map_Curr.png");
 
-            var statDisplay = statsPanelGo.GetComponent<ChestStatDisplayUI>();
-            if (statDisplay == null) statDisplay = statsPanelGo.AddComponent<ChestStatDisplayUI>();
+            var statDisplay = statsPanelGo.GetComponent<StatsDisplayUI>();
+            if (statDisplay == null) statDisplay = statsPanelGo.AddComponent<StatsDisplayUI>();
 
             SerializedObject displaySo = new SerializedObject(statDisplay);
-            displaySo.FindProperty("unlockedSprite").objectReferenceValue = unlockedPip;
-            displaySo.FindProperty("lockedSprite").objectReferenceValue = lockedPip;
-            displaySo.FindProperty("unlockedColor").colorValue = Color.white;
-            displaySo.FindProperty("lockedColor").colorValue = new Color(0.4f, 0.4f, 0.4f, 0.8f);
 
             var statDefs = new (string label, StatType type)[]
             {
                 ("RANGE", StatType.AttackRange),
                 ("SPEED", StatType.Speed),
-                ("ATTACK", StatType.Defence),
-                ("DAMAGE", StatType.AttackDamage)
+                ("ATTACK", StatType.AttackDamage),
+                ("DEFENCE", StatType.Defence),
+                ("HEALTH", StatType.Health)
             };
 
             var rowsProp = displaySo.FindProperty("rows");
@@ -196,23 +192,22 @@ namespace Chest.Editor
                     pipsGo = pipsT.gameObject;
                 }
                 RectTransform pipsRect = pipsGo.GetComponent<RectTransform>();
-                pipsRect.sizeDelta = new Vector2(90, 30);
+                pipsRect.sizeDelta = new Vector2(120, 30);
                 var pipsHlg = pipsGo.GetComponent<HorizontalLayoutGroup>();
                 pipsHlg.childAlignment = TextAnchor.MiddleRight;
-                pipsHlg.spacing = 8f;
+                pipsHlg.spacing = 6f;
                 pipsHlg.childControlWidth = false;
                 pipsHlg.childControlHeight = false;
 
-                // 3 Pip Images
+                // 5 Pip Images
                 var rowElement = rowsProp.GetArrayElementAtIndex(r);
-                rowElement.FindPropertyRelative("label").stringValue = statDefs[r].label;
                 rowElement.FindPropertyRelative("statType").enumValueIndex = (int)statDefs[r].type;
-                rowElement.FindPropertyRelative("labelText").objectReferenceValue = tmp;
+                rowElement.FindPropertyRelative("activeSprite").objectReferenceValue = activePip;
 
                 var pipsProp = rowElement.FindPropertyRelative("pips");
-                pipsProp.arraySize = 3;
+                pipsProp.arraySize = 5;
 
-                for (int p = 0; p < 3; p++)
+                for (int p = 0; p < 5; p++)
                 {
                     string pipName = $"Pip_{p}";
                     Transform pipT = pipsGo.transform.Find(pipName);
@@ -227,10 +222,10 @@ namespace Chest.Editor
                         pipGo = pipT.gameObject;
                     }
                     RectTransform pipRect = pipGo.GetComponent<RectTransform>();
-                    pipRect.sizeDelta = new Vector2(20, 20);
+                    pipRect.sizeDelta = new Vector2(18, 18);
                     var img = pipGo.GetComponent<Image>();
-                    img.sprite = p == 0 ? unlockedPip : lockedPip;
-                    img.color = p == 0 ? Color.white : new Color(0.4f, 0.4f, 0.4f, 0.8f);
+                    img.sprite = activePip;
+                    img.color = Color.white;
 
                     pipsProp.GetArrayElementAtIndex(p).objectReferenceValue = img;
                 }

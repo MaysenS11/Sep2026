@@ -14,8 +14,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::EnemyData
   enemyName: Bishop
   prefab: {fileID: 1228558132822369691, guid: f1340b7356fa31e49953db71e7ee8b08, type: 3}
-  maxHealth: 6
-  attackDamage: 4
+  maxHealth: 3
+  attackDamage: 2
   stepSpeed: 5
   detectionRange: 8
   movementPattern: 1

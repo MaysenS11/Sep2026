@@ -194,11 +194,11 @@ public readonly struct EnemyUnregisteredEvent : IEvent
 
 public readonly struct CharacterUnlockedEvent : IEvent
 {
-    public readonly int CharacterId;
+    public readonly CharacterDefinition Character;
 
-    public CharacterUnlockedEvent(int characterId)
+    public CharacterUnlockedEvent(CharacterDefinition character)
     {
-        CharacterId = characterId;
+        Character = character;
     }
 }
 

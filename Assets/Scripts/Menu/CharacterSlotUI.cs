@@ -15,6 +15,7 @@ public class CharacterSlotUI : MonoBehaviour, IPointerEnterHandler, IPointerExit
     [SerializeField] private float normalAlpha = 0f;
     [SerializeField] private float fadeDuration = 0.12f;
     [SerializeField] private Color pressedTint = new Color(0.72f, 0.72f, 0.72f);
+    [SerializeField] private Color lockedTint = new Color(0.25f, 0.25f, 0.25f, 1f);
 
     private bool isLocked;
     private bool isHovered;
@@ -23,6 +24,7 @@ public class CharacterSlotUI : MonoBehaviour, IPointerEnterHandler, IPointerExit
 
     public CharacterDefinition CharacterDefinition => characterDefinition;
     public bool IsLocked => isLocked;
+    public Button SelectButton => selectButton;
 
     private void Awake()
     {
@@ -107,7 +109,7 @@ public class CharacterSlotUI : MonoBehaviour, IPointerEnterHandler, IPointerExit
 
         if (isLocked)
         {
-            maskImage.color = characterDefinition.LockedTint;
+            maskImage.color = lockedTint;
         }
         else if (isPressed)
         {
@@ -197,7 +199,7 @@ public class CharacterSlotUI : MonoBehaviour, IPointerEnterHandler, IPointerExit
 
     private void OnCharacterUnlocked(CharacterUnlockedEvent evt)
     {
-        if (characterDefinition != null && evt.CharacterId == characterDefinition.CharacterId)
+        if (characterDefinition != null && evt.Character == characterDefinition)
         {
             Unlock();
         }

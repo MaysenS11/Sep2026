@@ -14,8 +14,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::EnemyData
   enemyName: Knight
   prefab: {fileID: 1228558132822369691, guid: d76ba61e6effa3c4992ea6e9567cbb25, type: 3}
-  maxHealth: 4
-  attackDamage: 6
+  maxHealth: 2
+  attackDamage: 3
   stepSpeed: 5
   detectionRange: 10
   movementPattern: 3
