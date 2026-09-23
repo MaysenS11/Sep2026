@@ -15,7 +15,7 @@ MonoBehaviour:
   characterName: alchemist
   maskSprite: {fileID: 2895694985016441565, guid: 1596fc77dadfb1f4696744dbfb0e271d, type: 3}
   maskWhiteSprite: {fileID: -6255308247645376799, guid: 53c73cecd591b8947961aa84a637b848, type: 3}
-  fullBodySprite: {fileID: -4183879650981696548, guid: c3e3a3c11d31edd41bd68f5868d06206, type: 3}
+  fullBodySprite: {fileID: -7688940963390077039, guid: 8d00dd0b861ce3843b390bed3d500db4, type: 3}
   lockedByDefault: 0
   attackSound:
     Guid:
@@ -24,15 +24,10 @@ MonoBehaviour:
       Data3: -1129874281
       Data4: 1646498558
     Path: event:/SFX_ThrowingFlaskImpact
-  attackMax: 4
   attackTierValues: 020000000300000004000000
-  defenceMax: 3
   defenceTierValues: 010000000200000003000000
-  healthMax: 4
   healthTierValues: 020000000300000004000000
-  rangeMax: 5
-  rangeTierValues: 000000000100000002000000
-  speedMax: 4
+  rangeTierValues: 010000000300000005000000
   speedTierValues: 010000000200000003000000
   attackPatterns:
   - {fileID: 11400000, guid: a412a8bfc7656434eb3ba4a35375feea, type: 2}

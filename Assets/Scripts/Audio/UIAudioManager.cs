@@ -9,19 +9,32 @@ public class UIAudioManager : MonoBehaviour
     [Header("UI Events")]
     [SerializeField] private EventReference clickSound;
     [SerializeField] private EventReference hoverSound;
-    [SerializeField] private EventReference circleMenuSound = default;
+    [SerializeField] private EventReference circleMenuSound;
+    [SerializeField] private EventReference healthCollectSound;
+    [SerializeField] private EventReference keyCollectSound;
+    [SerializeField] private EventReference characterUpgrade;
 
     [Header("Environment Events")]
     [SerializeField] private EventReference openChestSound = default;
     [SerializeField] private EventReference destroyBarrelSound = default;
+    [SerializeField] private EventReference openLockSound = default;
 
     [Header("Shared Entity Sounds")]
     [SerializeField] private EventReference moveSound = default;
     [SerializeField] private EventReference hitSound = default;
+    [SerializeField] private EventReference deathSound = default;
 
     [Header("Shared Player Sounds")]
     [SerializeField] private EventReference lowLifeSound = default;
     [SerializeField] private EventReference stairsSound = default;
+    
+    [Header("Music Events")]
+    [SerializeField] private EventReference bossroomMusic;
+    [SerializeField] private EventReference chestroomMusic;
+    [SerializeField] private EventReference dungeonMusic;
+    [SerializeField] private EventReference winMusic;
+    [SerializeField] private EventReference gameOverMusic;
+    [SerializeField] private EventReference menuMusic;
 
 
     [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]

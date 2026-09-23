@@ -24,15 +24,10 @@ MonoBehaviour:
       Data3: 1215495095
       Data4: 52795855
     Path: event:/SFX_Character_Degen_Attack
-  attackMax: 5
   attackTierValues: 010000000300000005000000
-  defenceMax: 3
   defenceTierValues: 010000000200000003000000
-  healthMax: 5
   healthTierValues: 030000000400000005000000
-  rangeMax: 5
-  rangeTierValues: 000000000100000002000000
-  speedMax: 4
+  rangeTierValues: 010000000200000003000000
   speedTierValues: 010000000300000004000000
   attackPatterns:
   - {fileID: 11400000, guid: fed295beec14ccb4a80cee8cb4ef7d48, type: 2}

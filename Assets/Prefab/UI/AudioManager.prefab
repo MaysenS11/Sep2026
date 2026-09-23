@@ -65,6 +65,27 @@ MonoBehaviour:
       Data3: -1710475585
       Data4: -286214005
     Path: event:/UI_Circle_Menu
+  healthCollectSound:
+    Guid:
+      Data1: 1295985849
+      Data2: 1216794068
+      Data3: 1865326252
+      Data4: 954905244
+    Path: event:/SFX_HealPot
+  keyCollectSound:
+    Guid:
+      Data1: 1278753644
+      Data2: 1081829415
+      Data3: -402322285
+      Data4: 221756239
+    Path: event:/SFX_Pickup_Key
+  characterUpgrade:
+    Guid:
+      Data1: -1465363292
+      Data2: 1123944571
+      Data3: -599920729
+      Data4: -1040304599
+    Path: event:/SFX_Character_Upgrade
   openChestSound:
     Guid:
       Data1: 42543081
@@ -79,6 +100,13 @@ MonoBehaviour:
       Data3: 491654552
       Data4: -71093064
     Path: event:/SFX_Chest_Destroy
+  openLockSound:
+    Guid:
+      Data1: 697287923
+      Data2: 1110814164
+      Data3: 2107904935
+      Data4: 1241838051
+    Path: event:/SFX_Lock_Open
   moveSound:
     Guid:
       Data1: -609212374
@@ -93,6 +121,13 @@ MonoBehaviour:
       Data3: 1811267462
       Data4: -1942081555
     Path: event:/SFX_EnemyHitFeedback
+  deathSound:
+    Guid:
+      Data1: -889776145
+      Data2: 1298496828
+      Data3: 1941989550
+      Data4: 1209244048
+    Path: event:/SFX_Enemy_Destroy
   lowLifeSound:
     Guid:
       Data1: 962069595
@@ -107,3 +142,45 @@ MonoBehaviour:
       Data3: -1686733919
       Data4: 947716615
     Path: event:/SFX_Footsteps_Stairs
+  bossroomMusic:
+    Guid:
+      Data1: 603146760
+      Data2: 1206746565
+      Data3: 2034647177
+      Data4: -138947874
+    Path: event:/Music_BOSSRAUM_SugarPlumDarkMix_Incompetech
+  chestroomMusic:
+    Guid:
+      Data1: 445042246
+      Data2: 1252867308
+      Data3: -1304916563
+      Data4: 1157705086
+    Path: event:/Music_ChestRoom
+  dungeonMusic:
+    Guid:
+      Data1: -836395691
+      Data2: 1163716000
+      Data3: -298909043
+      Data4: 1390042510
+    Path: event:/Music_CanonInDForTwoRenaissanceHarps
+  winMusic:
+    Guid:
+      Data1: 1628886829
+      Data2: 1192595881
+      Data3: 1819397257
+      Data4: 1373681418
+    Path: event:/SFX_WinOverKing
+  gameOverMusic:
+    Guid:
+      Data1: 1875243802
+      Data2: 1341135497
+      Data3: 1905852587
+      Data4: 1135091717
+    Path: event:/SFX_LoosingScreen
+  menuMusic:
+    Guid:
+      Data1: -1514882683
+      Data2: 1210409391
+      Data3: 873755023
+      Data4: -1149243013
+    Path: event:/Music_Menu_StringImpromptuNumber1_Incompetech

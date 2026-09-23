@@ -1,5 +1,59 @@
 %YAML 1.1
 %TAG !u! tag:unity3d.com,2011:
+--- !u!114 &-8684994293018530186
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ceb653cd98e289a4e8697a1af55201f2, type: 3}
+  m_Name: event:/SFX_LoosingScreen
+  m_EditorClassIdentifier: FMODUnityEditor::FMODUnity.EditorEventRef
+  Path: event:/SFX_LoosingScreen
+  Guid:
+    Data1: 1875243802
+    Data2: 1341135497
+    Data3: 1905852587
+    Data4: 1135091717
+  Banks:
+  - {fileID: 8994020168354651884}
+  IsStream: 0
+  Is3D: 0
+  IsOneShot: 1
+  Parameters: []
+  MinDistance: 1
+  MaxDistance: 20
+  Length: 5320
+--- !u!114 &-8531609663020169452
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ceb653cd98e289a4e8697a1af55201f2, type: 3}
+  m_Name: event:/SFX_Character_Halberd_Attack
+  m_EditorClassIdentifier: FMODUnityEditor::FMODUnity.EditorEventRef
+  Path: event:/SFX_Character_Halberd_Attack
+  Guid:
+    Data1: -260947549
+    Data2: 1083155465
+    Data3: -2088794976
+    Data4: 1791107518
+  Banks:
+  - {fileID: 8994020168354651884}
+  IsStream: 0
+  Is3D: 0
+  IsOneShot: 1
+  Parameters: []
+  MinDistance: 1
+  MaxDistance: 20
+  Length: 749
 --- !u!114 &-8272736750473392735
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -15,38 +69,11 @@ MonoBehaviour:
   Path: FMOD/Desktop/Master.strings.bank
   Name: Master.strings
   StudioPath: bank:/Master.strings
-  lastModified: 639255928861480501
+  lastModified: 639257912603501264
   FileSizes:
   - Name: 
-    Value: 1924
+    Value: 2494
   Exists: 1
---- !u!114 &-8200343375964216599
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 0}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: ceb653cd98e289a4e8697a1af55201f2, type: 3}
-  m_Name: event:/SFX_ThrowingFlaskImpact
-  m_EditorClassIdentifier: FMODUnityEditor::FMODUnity.EditorEventRef
-  Path: event:/SFX_ThrowingFlaskImpact
-  Guid:
-    Data1: -486917564
-    Data2: 1157640113
-    Data3: -1129874281
-    Data4: 1646498558
-  Banks:
-  - {fileID: 8994020168354651884}
-  IsStream: 0
-  Is3D: 0
-  IsOneShot: 1
-  Parameters: []
-  MinDistance: 1
-  MaxDistance: 20
-  Length: 750
 --- !u!114 &-7656085967289854956
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -128,6 +155,33 @@ MonoBehaviour:
   MinDistance: 1
   MaxDistance: 20
   Length: 882
+--- !u!114 &-6568239053097860522
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ceb653cd98e289a4e8697a1af55201f2, type: 3}
+  m_Name: event:/SFX_Character_Musket_Attack
+  m_EditorClassIdentifier: FMODUnityEditor::FMODUnity.EditorEventRef
+  Path: event:/SFX_Character_Musket_Attack
+  Guid:
+    Data1: 995892681
+    Data2: 1330659095
+    Data3: 1738958771
+    Data4: 1790912087
+  Banks:
+  - {fileID: 8994020168354651884}
+  IsStream: 0
+  Is3D: 0
+  IsOneShot: 1
+  Parameters: []
+  MinDistance: 1
+  MaxDistance: 20
+  Length: 1132
 --- !u!114 &-6266127237227849991
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -155,6 +209,33 @@ MonoBehaviour:
   MinDistance: 1
   MaxDistance: 20
   Length: 339617
+--- !u!114 &-5841895989860942620
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ceb653cd98e289a4e8697a1af55201f2, type: 3}
+  m_Name: event:/Music_BOSSRAUM_SugarPlumDarkMix_Incompetech
+  m_EditorClassIdentifier: FMODUnityEditor::FMODUnity.EditorEventRef
+  Path: event:/Music_BOSSRAUM_SugarPlumDarkMix_Incompetech
+  Guid:
+    Data1: 603146760
+    Data2: 1206746565
+    Data3: 2034647177
+    Data4: -138947874
+  Banks:
+  - {fileID: 8994020168354651884}
+  IsStream: 1
+  Is3D: 0
+  IsOneShot: 1
+  Parameters: []
+  MinDistance: 1
+  MaxDistance: 20
+  Length: 182928
 --- !u!114 &-4625762085046492903
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -236,6 +317,33 @@ MonoBehaviour:
   MinDistance: 1
   MaxDistance: 20
   Length: 1262
+--- !u!114 &-3726449909158014897
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ceb653cd98e289a4e8697a1af55201f2, type: 3}
+  m_Name: event:/Music_Menu_StringImpromptuNumber1_Incompetech
+  m_EditorClassIdentifier: FMODUnityEditor::FMODUnity.EditorEventRef
+  Path: event:/Music_Menu_StringImpromptuNumber1_Incompetech
+  Guid:
+    Data1: -1514882683
+    Data2: 1210409391
+    Data3: 873755023
+    Data4: -1149243013
+  Banks:
+  - {fileID: 8994020168354651884}
+  IsStream: 1
+  Is3D: 0
+  IsOneShot: 1
+  Parameters: []
+  MinDistance: 1
+  MaxDistance: 20
+  Length: 374112
 --- !u!114 &-3413551254989423727
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -263,6 +371,33 @@ MonoBehaviour:
   MinDistance: 1
   MaxDistance: 20
   Length: 707
+--- !u!114 &-1296436904789257511
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ceb653cd98e289a4e8697a1af55201f2, type: 3}
+  m_Name: event:/SFX_EvilLaugh_King
+  m_EditorClassIdentifier: FMODUnityEditor::FMODUnity.EditorEventRef
+  Path: event:/SFX_EvilLaugh_King
+  Guid:
+    Data1: 278823537
+    Data2: 1312377650
+    Data3: 104105129
+    Data4: 1706972795
+  Banks:
+  - {fileID: 8994020168354651884}
+  IsStream: 0
+  Is3D: 0
+  IsOneShot: 1
+  Parameters: []
+  MinDistance: 1
+  MaxDistance: 20
+  Length: 2042
 --- !u!114 &11400000
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -280,7 +415,6 @@ MonoBehaviour:
   - {fileID: 8994020168354651884}
   EditorEvents:
   - {fileID: -6266127237227849991}
-  - {fileID: -8200343375964216599}
   - {fileID: -7656085967289854956}
   - {fileID: -4498747104001291675}
   - {fileID: -4625762085046492903}
@@ -301,58 +435,119 @@ MonoBehaviour:
   - {fileID: 4888584469813155280}
   - {fileID: 6531771711048277327}
   - {fileID: 8753085657527339560}
+  - {fileID: -5841895989860942620}
+  - {fileID: -8684994293018530186}
+  - {fileID: 4349422245507241245}
+  - {fileID: 1356575805840247945}
+  - {fileID: 95851280561094563}
+  - {fileID: 2808301338207434788}
+  - {fileID: -1296436904789257511}
+  - {fileID: 6253553314287824508}
+  - {fileID: -3726449909158014897}
+  - {fileID: -8531609663020169452}
+  - {fileID: 7443238492093002261}
+  - {fileID: -6568239053097860522}
   EditorParameters: []
   MasterBanks:
   - {fileID: 8994020168354651884}
   StringsBanks:
   - {fileID: -8272736750473392735}
   cacheVersion: 131860
-  cacheTime: 639255928861480501
+  cacheTime: 639257912603501264
   SerializableEventsDict:
   - key: event:/Music_CanonInDForTwoRenaissanceHarps
     index: 0
-  - key: event:/SFX_ThrowingFlaskImpact
-    index: 1
   - key: event:/SFX_EnemyHitFeedback
-    index: 2
+    index: 1
   - key: event:/SFX_Low_Health
-    index: 3
+    index: 2
   - key: event:/Music_CanonInDForTwoRenaissanceHarps 2
-    index: 4
+    index: 3
   - key: event:/SFX_Footsteps_Stairs
-    index: 5
+    index: 4
   - key: event:/SFX_HealPot
-    index: 6
+    index: 5
   - key: event:/SFX_Enemy_Queen_Attack
-    index: 7
+    index: 6
   - key: event:/UI_Hover
-    index: 8
+    index: 7
   - key: event:/SFX_Caracter_Movement
-    index: 9
+    index: 8
   - key: event:/SFX_Character_Degen_Attack
-    index: 10
+    index: 9
   - key: event:/SFX_Enemy_Pawn_Attack
-    index: 11
+    index: 10
   - key: event:/SFX_Chest_Destroy
-    index: 12
+    index: 11
   - key: event:/SFX_Enemy_Rook_Attack
-    index: 13
+    index: 12
   - key: event:/SFX_Enemy_Bishop_Attack
-    index: 14
+    index: 13
   - key: event:/UI_Click
-    index: 15
+    index: 14
   - key: event:/UI_Circle_Menu
-    index: 16
+    index: 15
   - key: event:/SFX_Enemy_Knight_Attack
-    index: 17
+    index: 16
   - key: event:/SFX_Chest_Open
-    index: 18
+    index: 17
   - key: event:/SFX_Enemy_Destroy
-    index: 19
+    index: 18
   - key: event:/SFX_Pickup_Key
-    index: 20
+    index: 19
   - key: event:/SFX_Lock_Open
+    index: 20
+  - key: event:/Music_BOSSRAUM_SugarPlumDarkMix_Incompetech
     index: 21
+  - key: event:/SFX_LoosingScreen
+    index: 22
+  - key: event:/SFX_WinOverKing
+    index: 23
+  - key: event:/SFX_Character_Flask_Attack
+    index: 24
+  - key: event:/Music_ChestRoom
+    index: 25
+  - key: event:/Music_FinalScreen
+    index: 26
+  - key: event:/SFX_EvilLaugh_King
+    index: 27
+  - key: event:/Music_QeenOfSheba_WeLoveIndies
+    index: 28
+  - key: event:/Music_Menu_StringImpromptuNumber1_Incompetech
+    index: 29
+  - key: event:/SFX_Character_Halberd_Attack
+    index: 30
+  - key: event:/SFX_Character_Upgrade
+    index: 31
+  - key: event:/SFX_Character_Musket_Attack
+    index: 32
+--- !u!114 &95851280561094563
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ceb653cd98e289a4e8697a1af55201f2, type: 3}
+  m_Name: event:/Music_ChestRoom
+  m_EditorClassIdentifier: FMODUnityEditor::FMODUnity.EditorEventRef
+  Path: event:/Music_ChestRoom
+  Guid:
+    Data1: 445042246
+    Data2: 1252867308
+    Data3: -1304916563
+    Data4: 1157705086
+  Banks:
+  - {fileID: 8994020168354651884}
+  IsStream: 1
+  Is3D: 0
+  IsOneShot: 1
+  Parameters: []
+  MinDistance: 1
+  MaxDistance: 20
+  Length: 57288
 --- !u!114 &467271844919501811
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -380,6 +575,33 @@ MonoBehaviour:
   MinDistance: 1
   MaxDistance: 20
   Length: 14
+--- !u!114 &1356575805840247945
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ceb653cd98e289a4e8697a1af55201f2, type: 3}
+  m_Name: event:/SFX_Character_Flask_Attack
+  m_EditorClassIdentifier: FMODUnityEditor::FMODUnity.EditorEventRef
+  Path: event:/SFX_Character_Flask_Attack
+  Guid:
+    Data1: -486917564
+    Data2: 1157640113
+    Data3: -1129874281
+    Data4: 1646498558
+  Banks:
+  - {fileID: 8994020168354651884}
+  IsStream: 0
+  Is3D: 0
+  IsOneShot: 1
+  Parameters: []
+  MinDistance: 1
+  MaxDistance: 20
+  Length: 750
 --- !u!114 &1511815313633409912
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -407,6 +629,33 @@ MonoBehaviour:
   MinDistance: 1
   MaxDistance: 20
   Length: 579
+--- !u!114 &2808301338207434788
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ceb653cd98e289a4e8697a1af55201f2, type: 3}
+  m_Name: event:/Music_FinalScreen
+  m_EditorClassIdentifier: FMODUnityEditor::FMODUnity.EditorEventRef
+  Path: event:/Music_FinalScreen
+  Guid:
+    Data1: 775186795
+    Data2: 1341100253
+    Data3: 1694826140
+    Data4: 314222936
+  Banks:
+  - {fileID: 8994020168354651884}
+  IsStream: 1
+  Is3D: 0
+  IsOneShot: 1
+  Parameters: []
+  MinDistance: 1
+  MaxDistance: 20
+  Length: 92088
 --- !u!114 &3100984384723912900
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -461,6 +710,33 @@ MonoBehaviour:
   MinDistance: 1
   MaxDistance: 20
   Length: 607
+--- !u!114 &4349422245507241245
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ceb653cd98e289a4e8697a1af55201f2, type: 3}
+  m_Name: event:/SFX_WinOverKing
+  m_EditorClassIdentifier: FMODUnityEditor::FMODUnity.EditorEventRef
+  Path: event:/SFX_WinOverKing
+  Guid:
+    Data1: 1628886829
+    Data2: 1192595881
+    Data3: 1819397257
+    Data4: 1373681418
+  Banks:
+  - {fileID: 8994020168354651884}
+  IsStream: 0
+  Is3D: 0
+  IsOneShot: 1
+  Parameters: []
+  MinDistance: 1
+  MaxDistance: 20
+  Length: 2376
 --- !u!114 &4888584469813155280
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -488,6 +764,33 @@ MonoBehaviour:
   MinDistance: 1
   MaxDistance: 20
   Length: 435
+--- !u!114 &6253553314287824508
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ceb653cd98e289a4e8697a1af55201f2, type: 3}
+  m_Name: event:/Music_QeenOfSheba_WeLoveIndies
+  m_EditorClassIdentifier: FMODUnityEditor::FMODUnity.EditorEventRef
+  Path: event:/Music_QeenOfSheba_WeLoveIndies
+  Guid:
+    Data1: 325563772
+    Data2: 1262694422
+    Data3: 167568513
+    Data4: -1424942546
+  Banks:
+  - {fileID: 8994020168354651884}
+  IsStream: 1
+  Is3D: 0
+  IsOneShot: 1
+  Parameters: []
+  MinDistance: 1
+  MaxDistance: 20
+  Length: 150096
 --- !u!114 &6531771711048277327
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -515,6 +818,33 @@ MonoBehaviour:
   MinDistance: 1
   MaxDistance: 20
   Length: 403
+--- !u!114 &7443238492093002261
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ceb653cd98e289a4e8697a1af55201f2, type: 3}
+  m_Name: event:/SFX_Character_Upgrade
+  m_EditorClassIdentifier: FMODUnityEditor::FMODUnity.EditorEventRef
+  Path: event:/SFX_Character_Upgrade
+  Guid:
+    Data1: -1465363292
+    Data2: 1123944571
+    Data3: -599920729
+    Data4: -1040304599
+  Banks:
+  - {fileID: 8994020168354651884}
+  IsStream: 0
+  Is3D: 0
+  IsOneShot: 1
+  Parameters: []
+  MinDistance: 1
+  MaxDistance: 20
+  Length: 862
 --- !u!114 &7777637249014849769
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -692,7 +1022,7 @@ MonoBehaviour:
   Path: FMOD/Desktop/Master.bank
   Name: Master
   StudioPath: bank:/Master
-  lastModified: 639255928861468023
+  lastModified: 639257912603481184
   FileSizes: []
   Exists: 1
 --- !u!114 &9137320103529174229

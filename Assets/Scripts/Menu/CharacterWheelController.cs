@@ -51,17 +51,6 @@ public class CharacterWheelController : MonoBehaviour
                 characterNameText = nameGo.GetComponent<TMPro.TMP_Text>();
             }
         }
-        if (slots != null)
-        {
-            for (int i = 0; i < slots.Length; i++)
-            {
-                int index = i;
-                if (slots[i] != null && slots[i].SelectButton != null)
-                {
-                    slots[i].SelectButton.onClick.AddListener(() => SelectSlot(index));
-                }
-            }
-        }
         CacheWaypoints();
         SetupInputActions();
     }
@@ -118,11 +107,13 @@ public class CharacterWheelController : MonoBehaviour
         if (wheelPrevAction != null) wheelPrevAction.performed += OnPrevPerformed;
 
         UpdateSlotPositionsImmediate();
+        UpdateSlotInteractivity();
         UpdatePreview();
     }
 
     private void Start()
     {
+        UpdateSlotInteractivity();
         UpdatePreview();
     }
 
@@ -189,8 +180,22 @@ public class CharacterWheelController : MonoBehaviour
             StopCoroutine(spinCoroutine);
         }
         spinCoroutine = StartCoroutine(AnimateSlotsToTargets());
+        UpdateSlotInteractivity();
         UpdatePreview();
         EventBus<PlayUISoundEvent>.Raise(new PlayUISoundEvent(UISoundType.CircleMenu));
+    }
+
+    private void UpdateSlotInteractivity()
+    {
+        if (slots == null) return;
+
+        for (int i = 0; i < slots.Length; i++)
+        {
+            if (slots[i] != null)
+            {
+                slots[i].SetTopSlot(i == selectedIndex);
+            }
+        }
     }
 
     public void SelectSlot(int slotIndex)

@@ -18,6 +18,7 @@ public class CharacterSlotUI : MonoBehaviour, IPointerEnterHandler, IPointerExit
     [SerializeField] private Color lockedTint = new Color(0.25f, 0.25f, 0.25f, 1f);
 
     private bool isLocked;
+    private bool isTopSlot;
     private bool isHovered;
     private bool isPressed;
     private Coroutine fadeCoroutine;
@@ -25,6 +26,28 @@ public class CharacterSlotUI : MonoBehaviour, IPointerEnterHandler, IPointerExit
     public CharacterDefinition CharacterDefinition => characterDefinition;
     public bool IsLocked => isLocked;
     public Button SelectButton => selectButton;
+
+    public void SetTopSlot(bool isTop)
+    {
+        isTopSlot = isTop;
+        if (!isTopSlot)
+        {
+            if (fadeCoroutine != null)
+            {
+                StopCoroutine(fadeCoroutine);
+                fadeCoroutine = null;
+            }
+            isHovered = false;
+            isPressed = false;
+            UpdateBaseMaskColor();
+            SetOverlayAlphaImmediate(normalAlpha);
+        }
+
+        if (selectButton != null)
+        {
+            selectButton.interactable = isTopSlot && !isLocked;
+        }
+    }
 
     private void Awake()
     {
@@ -98,7 +121,7 @@ public class CharacterSlotUI : MonoBehaviour, IPointerEnterHandler, IPointerExit
 
         if (selectButton != null)
         {
-            selectButton.interactable = !isLocked;
+            selectButton.interactable = isTopSlot && !isLocked;
             selectButton.transition = Selectable.Transition.None;
         }
     }
@@ -123,7 +146,7 @@ public class CharacterSlotUI : MonoBehaviour, IPointerEnterHandler, IPointerExit
 
     public void OnPointerEnter(PointerEventData eventData)
     {
-        if (isLocked) return;
+        if (!isTopSlot || isLocked) return;
         isHovered = true;
         if (!isPressed)
         {
@@ -134,7 +157,7 @@ public class CharacterSlotUI : MonoBehaviour, IPointerEnterHandler, IPointerExit
 
     public void OnPointerExit(PointerEventData eventData)
     {
-        if (isLocked) return;
+        if (!isTopSlot || isLocked) return;
         isHovered = false;
         isPressed = false;
         UpdateBaseMaskColor();
@@ -143,7 +166,7 @@ public class CharacterSlotUI : MonoBehaviour, IPointerEnterHandler, IPointerExit
 
     public void OnPointerDown(PointerEventData eventData)
     {
-        if (isLocked) return;
+        if (!isTopSlot || isLocked) return;
         isPressed = true;
         UpdateBaseMaskColor();
         FadeOverlay(normalAlpha);
@@ -152,7 +175,7 @@ public class CharacterSlotUI : MonoBehaviour, IPointerEnterHandler, IPointerExit
 
     public void OnPointerUp(PointerEventData eventData)
     {
-        if (isLocked) return;
+        if (!isTopSlot || isLocked) return;
         isPressed = false;
         UpdateBaseMaskColor();
         FadeOverlay(isHovered ? hoverAlpha : normalAlpha);
@@ -214,13 +237,13 @@ public class CharacterSlotUI : MonoBehaviour, IPointerEnterHandler, IPointerExit
         }
         if (selectButton != null)
         {
-            selectButton.interactable = true;
+            selectButton.interactable = isTopSlot;
         }
     }
 
     private void OnSlotClicked()
     {
-        if (isLocked || characterDefinition == null) return;
+        if (!isTopSlot || isLocked || characterDefinition == null) return;
 
         EventBus<CharacterSelectedEvent>.Raise(new CharacterSelectedEvent(characterDefinition));
     }

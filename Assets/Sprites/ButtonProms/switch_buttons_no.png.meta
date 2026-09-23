@@ -1,0 +1,663 @@
+fileFormatVersion: 2
+guid: 36ba183d17eed3942a524c903c47b429
+TextureImporter:
+  internalIDToNameTable:
+  - first:
+      213: 8619023155260138888
+    second: switch_buttons_no_0
+  - first:
+      213: -7132042047965465175
+    second: switch_buttons_no_1
+  - first:
+      213: -8454548480971683078
+    second: switch_buttons_no_2
+  - first:
+      213: 2407963632448641415
+    second: switch_buttons_no_3
+  - first:
+      213: 7976847525914044832
+    second: switch_buttons_no_4
+  - first:
+      213: -3356608834159133910
+    second: switch_buttons_no_5
+  - first:
+      213: -378367934626900221
+    second: switch_buttons_no_6
+  - first:
+      213: -5299567269023917042
+    second: switch_buttons_no_7
+  - first:
+      213: 5717810978762672100
+    second: switch_buttons_no_8
+  - first:
+      213: 1848153163858653091
+    second: switch_buttons_no_9
+  - first:
+      213: -4265324697395439873
+    second: switch_buttons_no_10
+  - first:
+      213: -4768724279985968187
+    second: switch_buttons_no_11
+  - first:
+      213: 120418381924767768
+    second: switch_buttons_no_12
+  - first:
+      213: 7725207886385394837
+    second: switch_buttons_no_13
+  - first:
+      213: 472758407670431973
+    second: switch_buttons_no_14
+  - first:
+      213: 3129872133010274194
+    second: switch_buttons_no_15
+  - first:
+      213: 5176210897570583233
+    second: switch_buttons_no_16
+  - first:
+      213: 6687031312033328187
+    second: switch_buttons_no_17
+  - first:
+      213: -4987916700126128229
+    second: switch_buttons_no_18
+  - first:
+      213: 4300523848966220468
+    second: switch_buttons_no_19
+  - first:
+      213: -7263586541670311676
+    second: switch_buttons_no_20
+  externalObjects: {}
+  serializedVersion: 13
+  mipmaps:
+    mipMapMode: 0
+    enableMipMap: 0
+    sRGBTexture: 1
+    linearTexture: 0
+    fadeOut: 0
+    borderMipMap: 0
+    mipMapsPreserveCoverage: 0
+    alphaTestReferenceValue: 0.5
+    mipMapFadeDistanceStart: 1
+    mipMapFadeDistanceEnd: 3
+  bumpmap:
+    convertToNormalMap: 0
+    externalNormalMap: 0
+    heightScale: 0.25
+    normalMapFilter: 0
+    flipGreenChannel: 0
+  isReadable: 0
+  streamingMipmaps: 0
+  streamingMipmapsPriority: 0
+  vTOnly: 0
+  ignoreMipmapLimit: 0
+  grayScaleToAlpha: 0
+  generateCubemap: 6
+  cubemapConvolution: 0
+  seamlessCubemap: 0
+  textureFormat: 1
+  maxTextureSize: 2048
+  textureSettings:
+    serializedVersion: 2
+    filterMode: 0
+    aniso: 1
+    mipBias: 0
+    wrapU: 1
+    wrapV: 1
+    wrapW: 1
+  nPOTScale: 0
+  lightmap: 0
+  compressionQuality: 50
+  spriteMode: 2
+  spriteExtrude: 1
+  spriteMeshType: 1
+  alignment: 0
+  spritePivot: {x: 0.5, y: 0.5}
+  spritePixelsToUnits: 32
+  spriteBorder: {x: 0, y: 0, z: 0, w: 0}
+  spriteGenerateFallbackPhysicsShape: 1
+  alphaUsage: 1
+  alphaIsTransparency: 1
+  spriteTessellationDetail: -1
+  textureType: 8
+  textureShape: 1
+  singleChannelComponent: 0
+  flipbookRows: 1
+  flipbookColumns: 1
+  maxTextureSizeSet: 0
+  compressionQualitySet: 0
+  textureFormatSet: 0
+  ignorePngGamma: 0
+  applyGammaDecoding: 0
+  swizzle: 50462976
+  cookieLightType: 0
+  platformSettings:
+  - serializedVersion: 4
+    buildTarget: DefaultTexturePlatform
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  - serializedVersion: 4
+    buildTarget: Standalone
+    maxTextureSize: 2048
+    resizeAlgorithm: 0
+    textureFormat: -1
+    textureCompression: 1
+    compressionQuality: 50
+    crunchedCompression: 0
+    allowsAlphaSplitting: 0
+    overridden: 0
+    ignorePlatformSupport: 0
+    androidETC2FallbackOverride: 0
+    forceMaximumCompressionQuality_BC6H_BC7: 0
+  spriteSheet:
+    serializedVersion: 2
+    sprites:
+    - serializedVersion: 2
+      name: switch_buttons_no_0
+      rect:
+        serializedVersion: 2
+        x: 43
+        y: 90
+        width: 22
+        height: 28
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 885a528e4ebec9770800000000000000
+      internalID: 8619023155260138888
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: switch_buttons_no_1
+      rect:
+        serializedVersion: 2
+        x: 107
+        y: 94
+        width: 51
+        height: 24
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 9a57ed76b85e50d90800000000000000
+      internalID: -7132042047965465175
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: switch_buttons_no_2
+      rect:
+        serializedVersion: 2
+        x: 113
+        y: 115
+        width: 45
+        height: 28
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: afa4d5f53f86baa80800000000000000
+      internalID: -8454548480971683078
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: switch_buttons_no_3
+      rect:
+        serializedVersion: 2
+        x: 189
+        y: 115
+        width: 45
+        height: 28
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 78919207a2eca6120800000000000000
+      internalID: 2407963632448641415
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: switch_buttons_no_4
+      rect:
+        serializedVersion: 2
+        x: 189
+        y: 94
+        width: 51
+        height: 24
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 0a96f89cf8473be60800000000000000
+      internalID: 7976847525914044832
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: switch_buttons_no_5
+      rect:
+        serializedVersion: 2
+        x: 14
+        y: 67
+        width: 28
+        height: 22
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: a2bb106ac0eea61d0800000000000000
+      internalID: -3356608834159133910
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: switch_buttons_no_6
+      rect:
+        serializedVersion: 2
+        x: 43
+        y: 67
+        width: 22
+        height: 22
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 3075a2e3e54cfbaf0800000000000000
+      internalID: -378367934626900221
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: switch_buttons_no_7
+      rect:
+        serializedVersion: 2
+        x: 66
+        y: 67
+        width: 28
+        height: 22
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: e0cda8aa5a72476b0800000000000000
+      internalID: -5299567269023917042
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: switch_buttons_no_8
+      rect:
+        serializedVersion: 2
+        x: 124
+        y: 61
+        width: 20
+        height: 20
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 4e74af97aceb95f40800000000000000
+      internalID: 5717810978762672100
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: switch_buttons_no_9
+      rect:
+        serializedVersion: 2
+        x: 153
+        y: 76
+        width: 18
+        height: 18
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 3af2f46b285f5a910800000000000000
+      internalID: 1848153163858653091
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: switch_buttons_no_10
+      rect:
+        serializedVersion: 2
+        x: 176
+        y: 80
+        width: 18
+        height: 10
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: ff65b0059c58ec4c0800000000000000
+      internalID: -4265324697395439873
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: switch_buttons_no_11
+      rect:
+        serializedVersion: 2
+        x: 203
+        y: 61
+        width: 20
+        height: 20
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 5cbe7ab788612ddb0800000000000000
+      internalID: -4768724279985968187
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: switch_buttons_no_12
+      rect:
+        serializedVersion: 2
+        x: 43
+        y: 38
+        width: 22
+        height: 28
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 8189d0f51efcba100800000000000000
+      internalID: 120418381924767768
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: switch_buttons_no_13
+      rect:
+        serializedVersion: 2
+        x: 107
+        y: 44
+        width: 20
+        height: 20
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 5943c0c84a3753b60800000000000000
+      internalID: 7725207886385394837
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: switch_buttons_no_14
+      rect:
+        serializedVersion: 2
+        x: 124
+        y: 28
+        width: 20
+        height: 20
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 5e086c954439f8600800000000000000
+      internalID: 472758407670431973
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: switch_buttons_no_15
+      rect:
+        serializedVersion: 2
+        x: 141
+        y: 45
+        width: 20
+        height: 20
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 297b8784f1a8f6b20800000000000000
+      internalID: 3129872133010274194
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: switch_buttons_no_16
+      rect:
+        serializedVersion: 2
+        x: 186
+        y: 44
+        width: 20
+        height: 20
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 1c25338f26895d740800000000000000
+      internalID: 5176210897570583233
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: switch_buttons_no_17
+      rect:
+        serializedVersion: 2
+        x: 203
+        y: 28
+        width: 20
+        height: 20
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: b3c29a38c8b1dcc50800000000000000
+      internalID: 6687031312033328187
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: switch_buttons_no_18
+      rect:
+        serializedVersion: 2
+        x: 220
+        y: 45
+        width: 20
+        height: 20
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: b975eb7303c57cab0800000000000000
+      internalID: -4987916700126128229
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: switch_buttons_no_19
+      rect:
+        serializedVersion: 2
+        x: 152
+        y: 7
+        width: 20
+        height: 20
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 4ba2abdc7a78eab30800000000000000
+      internalID: 4300523848966220468
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    - serializedVersion: 2
+      name: switch_buttons_no_20
+      rect:
+        serializedVersion: 2
+        x: 176
+        y: 7
+        width: 18
+        height: 20
+      alignment: 0
+      pivot: {x: 0, y: 0}
+      border: {x: 0, y: 0, z: 0, w: 0}
+      customData: 
+      outline: []
+      physicsShape: []
+      tessellationDetail: -1
+      bones: []
+      spriteID: 409de64468e823b90800000000000000
+      internalID: -7263586541670311676
+      vertices: []
+      indices: 
+      edges: []
+      weights: []
+    outline: []
+    customData: 
+    physicsShape: []
+    bones: []
+    spriteID: 
+    internalID: 0
+    vertices: []
+    indices: 
+    edges: []
+    weights: []
+    secondaryTextures: []
+    spriteCustomMetadata:
+      entries: []
+    nameFileIdTable:
+      switch_buttons_no_0: 8619023155260138888
+      switch_buttons_no_1: -7132042047965465175
+      switch_buttons_no_10: -4265324697395439873
+      switch_buttons_no_11: -4768724279985968187
+      switch_buttons_no_12: 120418381924767768
+      switch_buttons_no_13: 7725207886385394837
+      switch_buttons_no_14: 472758407670431973
+      switch_buttons_no_15: 3129872133010274194
+      switch_buttons_no_16: 5176210897570583233
+      switch_buttons_no_17: 6687031312033328187
+      switch_buttons_no_18: -4987916700126128229
+      switch_buttons_no_19: 4300523848966220468
+      switch_buttons_no_2: -8454548480971683078
+      switch_buttons_no_20: -7263586541670311676
+      switch_buttons_no_3: 2407963632448641415
+      switch_buttons_no_4: 7976847525914044832
+      switch_buttons_no_5: -3356608834159133910
+      switch_buttons_no_6: -378367934626900221
+      switch_buttons_no_7: -5299567269023917042
+      switch_buttons_no_8: 5717810978762672100
+      switch_buttons_no_9: 1848153163858653091
+  mipmapLimitGroupName: 
+  pSDRemoveMatte: 0
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
