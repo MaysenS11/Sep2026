@@ -13672,7 +13672,7 @@ BoxCollider2D:
     drawMode: 0
     adaptiveTiling: 0
   m_AutoTiling: 0
-  m_Size: {x: 22.5, y: 14}
+  m_Size: {x: 22, y: 14}
   m_EdgeRadius: 0
 --- !u!4 &61350824
 Transform:
@@ -25681,8 +25681,8 @@ Camera:
   m_NormalizedViewPortRect:
     serializedVersion: 2
     x: 0
-    y: -0.11111111
-    width: 1.528125
+    y: 0
+    width: 1
     height: 1
   near clip plane: 0.3
   far clip plane: 1000
@@ -50315,39 +50315,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 00769c84f72909148bbc6e0b34d967ed, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::Chest.ChestStatDisplayUI
-  unlockedSprite: {fileID: -8313892164107530630, guid: 576481002d880844d916e6ab7d72993e, type: 3}
-  lockedSprite: {fileID: 3133131222343057359, guid: 36e36c9833c92ee4499960bcccbb32e3, type: 3}
-  unlockedColor: {r: 1, g: 1, b: 1, a: 1}
-  lockedColor: {r: 0.4, g: 0.4, b: 0.4, a: 0.8}
-  rows:
-  - label: RANGE
-    statType: 1
-    labelText: {fileID: 1209665492}
-    pips:
-    - {fileID: 1877883601}
-    - {fileID: 2022899665}
-    - {fileID: 670727144}
-  - label: SPEED
-    statType: 3
-    labelText: {fileID: 572959141}
-    pips:
-    - {fileID: 0}
-    - {fileID: 0}
-    - {fileID: 0}
-  - label: ATTACK
-    statType: 2
-    labelText: {fileID: 608797584}
-    pips:
-    - {fileID: 0}
-    - {fileID: 0}
-    - {fileID: 0}
-  - label: DAMAGE
-    statType: 0
-    labelText: {fileID: 564325805}
-    pips:
-    - {fileID: 0}
-    - {fileID: 0}
-    - {fileID: 0}
 --- !u!114 &968858618
 MonoBehaviour:
   m_ObjectHideFlags: 0
