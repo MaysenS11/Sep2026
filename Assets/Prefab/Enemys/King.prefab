@@ -274,7 +274,7 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: e475d8920ce5fd447a38852deeccd7c9, type: 3}
   m_Name: 
   m_EditorClassIdentifier: Assembly-CSharp::EnemyController
-  enemyData: {fileID: 11400000, guid: da23e297f73ad7e4cbcd396109e555dd, type: 2}
+  enemyData: {fileID: 11400000, guid: 9da446325be48894ca75d6581ef9f58e, type: 2}
   tileSize: 1
   blockingLayers:
     serializedVersion: 2

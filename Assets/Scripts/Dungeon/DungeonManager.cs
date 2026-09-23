@@ -56,7 +56,7 @@ namespace Dungeon
         [SerializeField] private Vector2Int fixedChestRoomSize = new Vector2Int(12, 12);
 
         [Header("Boss Room")]
-        [SerializeField] private BossRoomTemplate bossRoomPrefab;
+        [SerializeField] private BossRoom bossRoomPrefab;
 
         [Header("Room Density & Content Settings")]
         [Tooltip("Master room density: 0.0 = completely empty room, 1.0 = every valid interior floor tile is used.")]
@@ -75,7 +75,7 @@ namespace Dungeon
         public DoorSpawner DoorSpawner => doorSpawner;
         public PropSpawner PropSpawner => propSpawner;
         public ChestSpawner ChestSpawner => chestSpawner;
-        public BossRoomTemplate BossRoomPrefab { get => bossRoomPrefab; set => bossRoomPrefab = value; }
+        public BossRoom BossRoomPrefab { get => bossRoomPrefab; set => bossRoomPrefab = value; }
         public float GeneralRoomDensity
         {
             get => generalRoomDensity;
@@ -84,9 +84,6 @@ namespace Dungeon
 
         [SerializeField, HideInInspector] private List<GameManager.RoomData> generatedRooms = new List<GameManager.RoomData>();
         public List<GameManager.RoomData> GeneratedRooms => generatedRooms;
-
-        private GameObject _spawnedBossRoomInstance;
-        private GameObject _spawnedKingInstance;
 
         private readonly DungeonLayoutPlanner _layoutPlanner = new DungeonLayoutPlanner();
         private readonly DungeonTilemapRenderer _tilemapRenderer = new DungeonTilemapRenderer();
@@ -320,16 +317,6 @@ namespace Dungeon
                 {
                     _spawners[s].SpawnContent(room, _tileQuery, fillFloorTilemap, transform);
                 }
-
-                if (room.Type == RoomType.Boss && bossRoomPrefab != null)
-                {
-                    Vector3 roomWorldOrigin = fillFloorTilemap.GetCellCenterWorld(new Vector3Int(room.WorldOriginTile.x, room.WorldOriginTile.y, 0));
-                    _spawnedBossRoomInstance = Object.Instantiate(bossRoomPrefab.gameObject, roomWorldOrigin, Quaternion.identity, transform);
-                    if (_spawnedBossRoomInstance.TryGetComponent<BossRoomTemplate>(out var template))
-                    {
-                        _spawnedKingInstance = template.SpawnAndInitializeBoss(room, transform);
-                    }
-                }
             }
 
             enemySpawner.RoomDensity = savedEnemyDensity;
@@ -350,20 +337,6 @@ namespace Dungeon
             for (int s = 0; s < _spawners.Count; s++)
             {
                 _spawners[s].ClearSpawnedContent();
-            }
-
-            if (_spawnedBossRoomInstance != null)
-            {
-                if (Application.isPlaying) Destroy(_spawnedBossRoomInstance);
-                else DestroyImmediate(_spawnedBossRoomInstance);
-                _spawnedBossRoomInstance = null;
-            }
-
-            if (_spawnedKingInstance != null)
-            {
-                if (Application.isPlaying) Destroy(_spawnedKingInstance);
-                else DestroyImmediate(_spawnedKingInstance);
-                _spawnedKingInstance = null;
             }
 
             var destructibles = GetComponentsInChildren<DestructibleProp>(true);

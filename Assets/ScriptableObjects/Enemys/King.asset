@@ -27,24 +27,26 @@ MonoBehaviour:
   populationPercentage: 0.2
   attackSound:
     Guid:
-      Data1: 0
-      Data2: 0
-      Data3: 0
-      Data4: 0
-    Path: 
+      Data1: -714030937
+      Data2: 1341731329
+      Data3: -466244678
+      Data4: -611393518
+    Path: event:/SFX_Enemy_Rook_Attack
   heartFullSprite: {fileID: 0}
   heartEmptySprite: {fileID: 0}
   damageSound:
     Guid:
-      Data1: 0
-      Data2: 0
-      Data3: 0
-      Data4: 0
-    Path: 
+      Data1: 278823537
+      Data2: 1312377650
+      Data3: 104105129
+      Data4: 1706972795
+    Path: event:/SFX_EvilLaugh_King
   deathSound:
     Guid:
-      Data1: 0
-      Data2: 0
-      Data3: 0
-      Data4: 0
-    Path: 
+      Data1: 1628886829
+      Data2: 1192595881
+      Data3: 1819397257
+      Data4: 1373681418
+    Path: event:/SFX_WinOverKing
+  isImmobile: 1
+  immuneToDirectAttacks: 1

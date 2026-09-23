@@ -53,6 +53,7 @@ public class EnemyController : EnemyBase
         var noMove = new MoveIntent { HasMove = false };
 
         if (stats != null && stats.IsDead) return noMove;
+        if (enemyData is KingData kingData && kingData.IsImmobile) return noMove;
         if (ShouldSkipTurn()) return noMove;
         if (playerTransform == null) return noMove;
 

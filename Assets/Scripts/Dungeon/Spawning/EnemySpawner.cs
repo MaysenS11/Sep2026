@@ -73,7 +73,13 @@ namespace Dungeon.Spawning
             Transform parentContainer)
         {
             if (floorTilemap == null) return;
-            if (room.Type == RoomType.Boss || room.Type == RoomType.Chest) return;
+            if (room.Type == RoomType.Chest) return;
+
+            if (room.Type == RoomType.Boss)
+            {
+                SpawnBossRoomContent(room, tileQuery, floorTilemap, parentContainer);
+                return;
+            }
 
             tileQuery.GetValidInteriorFloorTiles(room, _validTilesBuffer, onlyUnoccupied: true);
 
@@ -205,6 +211,164 @@ namespace Dungeon.Spawning
                 }
             }
             return candidates[candidates.Count - 1].prefab;
+        }
+
+        private void SpawnBossRoomContent(
+            GameManager.RoomData room,
+            RoomTileQuery tileQuery,
+            Tilemap floorTilemap,
+            Transform parentContainer)
+        {
+            var dm = DungeonManager.Instance != null ? DungeonManager.Instance : Object.FindAnyObjectByType<DungeonManager>();
+            if (dm == null || dm.BossRoomPrefab == null) return;
+
+            BossRoom bossRoom = dm.BossRoomPrefab;
+
+            GameObject bossObj = bossRoom.SpawnBossAtRoom(room.WorldOriginTile, floorTilemap, parentContainer, room.RoomIndex);
+            if (bossObj != null)
+            {
+                _spawnedEnemies.Add(bossObj);
+                RegisterUndoInEditor(bossObj, "King Boss");
+            }
+
+            Vector2Int bossTile = bossRoom.GetWorldBossTile(room.WorldOriginTile);
+            tileQuery.MarkOccupied(bossTile);
+
+            List<EnemyData> enemiesToSpawn = bossRoom.GetEnemiesToSpawn();
+            if (enemiesToSpawn == null || enemiesToSpawn.Count == 0) return;
+
+            enemiesToSpawn.Sort((a, b) =>
+            {
+                int pa = a != null ? a.MovePriority : 0;
+                int pb = b != null ? b.MovePriority : 0;
+                return pb.CompareTo(pa);
+            });
+
+            tileQuery.GetValidInteriorFloorTiles(room, _validTilesBuffer, onlyUnoccupied: true);
+
+            _validTilesBuffer.Remove(bossTile);
+            if (room.EntranceDoorTile.HasValue)
+            {
+                Vector2Int door = room.EntranceDoorTile.Value;
+                _validTilesBuffer.Remove(door);
+                _validTilesBuffer.Remove(new Vector2Int(door.x, door.y - 1));
+                _validTilesBuffer.Remove(new Vector2Int(door.x, door.y + 1));
+            }
+
+            Vector2Int doorTile = room.EntranceDoorTile ?? bossRoom.GetWorldDoorTile(room.WorldOriginTile);
+            Vector2 forwardDir = ((Vector2)(bossTile - doorTile)).normalized;
+            bool hasForwardAxis = forwardDir.sqrMagnitude > 0.001f;
+
+            var availableTiles = new List<Vector2Int>(_validTilesBuffer);
+
+            var enemyGroups = new List<List<EnemyData>>();
+            var handled = new HashSet<EnemyData>();
+            for (int i = 0; i < enemiesToSpawn.Count; i++)
+            {
+                EnemyData data = enemiesToSpawn[i];
+                if (data == null || handled.Contains(data)) continue;
+
+                var group = new List<EnemyData>();
+                for (int j = 0; j < enemiesToSpawn.Count; j++)
+                {
+                    if (enemiesToSpawn[j] == data)
+                    {
+                        group.Add(data);
+                    }
+                }
+                handled.Add(data);
+                enemyGroups.Add(group);
+            }
+
+            enemyGroups.Sort((g1, g2) =>
+            {
+                BossRoom.PieceSpawnBand b1 = bossRoom.GetBandForEnemy(g1[0]);
+                BossRoom.PieceSpawnBand b2 = bossRoom.GetBandForEnemy(g2[0]);
+                return b1.distanceToBoss.CompareTo(b2.distanceToBoss);
+            });
+
+            for (int g = 0; g < enemyGroups.Count; g++)
+            {
+                List<EnemyData> group = enemyGroups[g];
+                EnemyData groupData = group[0];
+                BossRoom.PieceSpawnBand band = bossRoom.GetBandForEnemy(groupData);
+
+                float minDist = band.MinDistance;
+                float maxDist = band.MaxDistance;
+                float minDistSqr = minDist * minDist;
+                float maxDistSqr = maxDist * maxDist;
+
+                List<Vector2Int> bandCandidates = new List<Vector2Int>();
+                for (int t = 0; t < availableTiles.Count; t++)
+                {
+                    Vector2Int tile = availableTiles[t];
+                    float distSqr = (tile - bossTile).sqrMagnitude;
+                    if (distSqr >= minDistSqr && distSqr <= maxDistSqr)
+                    {
+                        if (hasForwardAxis)
+                        {
+                            Vector2 toTile = (Vector2)(tile - doorTile);
+                            if (Vector2.Dot(toTile, forwardDir) < -0.5f)
+                            {
+                                continue;
+                            }
+                        }
+                        bandCandidates.Add(tile);
+                    }
+                }
+
+                if (bandCandidates.Count < group.Count)
+                {
+                    var fallbackCandidates = new List<Vector2Int>(availableTiles);
+                    fallbackCandidates.Sort((a, b) =>
+                    {
+                        float diffA = Mathf.Abs(Vector2Int.Distance(a, bossTile) - band.distanceToBoss);
+                        float diffB = Mathf.Abs(Vector2Int.Distance(b, bossTile) - band.distanceToBoss);
+                        return diffA.CompareTo(diffB);
+                    });
+
+                    for (int f = 0; f < fallbackCandidates.Count; f++)
+                    {
+                        if (!bandCandidates.Contains(fallbackCandidates[f]))
+                        {
+                            bandCandidates.Add(fallbackCandidates[f]);
+                            if (bandCandidates.Count >= group.Count) break;
+                        }
+                    }
+                }
+
+                for (int i = 0; i < bandCandidates.Count; i++)
+                {
+                    int r = Random.Range(i, bandCandidates.Count);
+                    Vector2Int temp = bandCandidates[i];
+                    bandCandidates[i] = bandCandidates[r];
+                    bandCandidates[r] = temp;
+                }
+
+                int toSpawn = Mathf.Min(group.Count, bandCandidates.Count);
+                for (int i = 0; i < toSpawn; i++)
+                {
+                    Vector2Int spawnTile = bandCandidates[i];
+                    SpawnConfiguredEnemyAt(groupData, spawnTile, floorTilemap, parentContainer, room.RoomIndex);
+                    tileQuery.MarkOccupied(spawnTile);
+                    availableTiles.Remove(spawnTile);
+                }
+            }
+        }
+
+        private void SpawnConfiguredEnemyAt(EnemyData data, Vector2Int tile, Tilemap floorTilemap, Transform parentContainer, int roomIndex)
+        {
+            Vector3 worldPos = floorTilemap.GetCellCenterWorld(new Vector3Int(tile.x, tile.y, 0));
+            GameObject enemyObj = Object.Instantiate(data.Prefab, worldPos, Quaternion.identity, parentContainer);
+            _spawnedEnemies.Add(enemyObj);
+
+            if (enemyObj.TryGetComponent<EnemyBase>(out var enemyBase))
+            {
+                enemyBase.SetData(data);
+                enemyBase.CurrentRoomIndex = roomIndex;
+            }
+
+            RegisterUndoInEditor(enemyObj, data.EnemyName);
         }
 
         private void SpawnEnemyAt(GameObject prefab, Vector2Int tile, Tilemap floorTilemap, Transform parentContainer, int roomIndex)

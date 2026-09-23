@@ -9,18 +9,12 @@ namespace Dungeon.Editor
         [MenuItem("Dungeon/Setup Boss Room Prefab")]
         public static void Setup()
         {
-            var kingPrefab = AssetDatabase.LoadAssetAtPath<GameObject>("Assets/Prefab/Enemys/King.prefab");
             var root = new GameObject("BossRoom_18x18");
-            var template = root.AddComponent<BossRoomTemplate>();
-            template.KingPrefab = kingPrefab;
+            var template = root.AddComponent<BossRoom>();
 
             var doorMarker = new GameObject("DoorMarker");
             doorMarker.transform.SetParent(root.transform);
             doorMarker.transform.localPosition = new Vector3(9f, 1f, 0f);
-
-            var kingMarker = new GameObject("KingSpawnMarker");
-            kingMarker.transform.SetParent(root.transform);
-            kingMarker.transform.localPosition = new Vector3(9f, 9f, 0f);
 
             var gridObj = new GameObject("Grid");
             gridObj.transform.SetParent(root.transform);
@@ -57,7 +51,6 @@ namespace Dungeon.Editor
 
             var so = new SerializedObject(template);
             so.FindProperty("doorMarker").objectReferenceValue = doorMarker.transform;
-            so.FindProperty("kingSpawnPoint").objectReferenceValue = kingMarker.transform;
             so.FindProperty("fillFloorTilemap").objectReferenceValue = fillFloorTilemap;
             so.FindProperty("borderFloorTilemap").objectReferenceValue = borderFloorTilemap;
             so.FindProperty("wallTilemap").objectReferenceValue = wallTilemap;
@@ -77,7 +70,7 @@ namespace Dungeon.Editor
             if (dm != null && savedPrefab != null)
             {
                 var dmSO = new SerializedObject(dm);
-                dmSO.FindProperty("bossRoomPrefab").objectReferenceValue = savedPrefab.GetComponent<BossRoomTemplate>();
+                dmSO.FindProperty("bossRoomPrefab").objectReferenceValue = savedPrefab.GetComponent<BossRoom>();
                 var bossSizeProp = dmSO.FindProperty("fixedBossRoomSize");
                 if (bossSizeProp != null)
                 {
@@ -101,14 +94,15 @@ namespace Dungeon.Editor
                 return;
             }
 
-            var template = prefab.GetComponent<BossRoomTemplate>();
+            var template = prefab.GetComponent<BossRoom>();
             if (template != null)
             {
-                Debug.Log($"DoorMarker localPos: {template.DoorMarker?.localPosition}, KingMarker localPos: {template.KingSpawnPoint?.localPosition}");
-                LogTilemapBounds("FillFloor", template.FillFloorTilemap);
-                LogTilemapBounds("BorderFloor", template.BorderFloorTilemap);
-                LogTilemapBounds("Wall", template.WallTilemap);
-                LogTilemapBounds("Roof", template.RoofTilemap);
+                Debug.Log($"DoorMarker localPos: {template.DoorMarker?.localPosition}");
+                var tilemaps = prefab.GetComponentsInChildren<Tilemap>(true);
+                for (int i = 0; i < tilemaps.Length; i++)
+                {
+                    LogTilemapBounds(tilemaps[i].gameObject.name, tilemaps[i]);
+                }
             }
         }
 
@@ -135,16 +129,16 @@ namespace Dungeon.Editor
             }
 
             var root = PrefabUtility.InstantiatePrefab(prefab) as GameObject;
-            var template = root.GetComponent<BossRoomTemplate>();
-            if (template == null)
+            var tilemaps = root.GetComponentsInChildren<Tilemap>(true);
+            Tilemap refTm = null;
+            for (int i = 0; i < tilemaps.Length; i++)
             {
-                Object.DestroyImmediate(root);
-                return;
+                if (tilemaps[i].GetUsedTilesCount() > 0)
+                {
+                    refTm = tilemaps[i];
+                    break;
+                }
             }
-
-            Tilemap refTm = template.BorderFloorTilemap != null && template.BorderFloorTilemap.GetUsedTilesCount() > 0
-                ? template.BorderFloorTilemap
-                : template.FillFloorTilemap;
 
             if (refTm == null || refTm.GetUsedTilesCount() == 0)
             {
@@ -157,10 +151,10 @@ namespace Dungeon.Editor
             Vector3Int shift = -refTm.cellBounds.min;
             Debug.Log($"Shifting painted tiles by offset: {shift}");
 
-            ShiftTilemap(template.FillFloorTilemap, shift);
-            ShiftTilemap(template.BorderFloorTilemap, shift);
-            ShiftTilemap(template.WallTilemap, shift);
-            ShiftTilemap(template.RoofTilemap, shift);
+            for (int i = 0; i < tilemaps.Length; i++)
+            {
+                ShiftTilemap(tilemaps[i], shift);
+            }
 
             PrefabUtility.SaveAsPrefabAsset(root, prefabPath);
             Object.DestroyImmediate(root);

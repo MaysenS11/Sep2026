@@ -33,6 +33,7 @@ Transform:
   - {fileID: 3988931976818739939}
   - {fileID: 5140968707601732759}
   - {fileID: 3691728024533877746}
+  - {fileID: 2211711864117991243}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!114 &3690846968732017922
@@ -49,12 +50,37 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Dungeon.BossRoomTemplate
   roomSize: {x: 18, y: 18}
   doorMarker: {fileID: 3988931976818739939}
-  kingSpawnPoint: {fileID: 5140968707601732759}
-  kingPrefab: {fileID: 1228558132822369691, guid: 84a46e027273395478dfa34996b66bc2, type: 3}
   fillFloorTilemap: {fileID: 3645346406638917950}
   borderFloorTilemap: {fileID: 5439553449629519499}
   wallTilemap: {fileID: 5917219150850893024}
   roofTilemap: {fileID: 5208401815860215901}
+  pawnData: {fileID: 11400000, guid: 0a42cc2634daa9a4190a31f23a77b34a, type: 2}
+  knightData: {fileID: 11400000, guid: 7fb1d3cb3e7a65c44a8e6a1aa4ec2e6f, type: 2}
+  bishopData: {fileID: 11400000, guid: 238be3e01144ce4458308c1180633839, type: 2}
+  rookData: {fileID: 11400000, guid: da23e297f73ad7e4cbcd396109e555dd, type: 2}
+  queenData: {fileID: 11400000, guid: 3d6d07abc50a31d45b3a03d9d4a74eb6, type: 2}
+  pawnAmount: 4
+  knightAmount: 2
+  bishopAmount: 2
+  rookAmount: 2
+  queenAmount: 1
+  queenBand:
+    distanceToBoss: 2
+    bandWidth: 1.5
+  rookBand:
+    distanceToBoss: 7
+    bandWidth: 2
+  knightAndBishopBand:
+    distanceToBoss: 10
+    bandWidth: 2
+  pawnBand:
+    distanceToBoss: 14
+    bandWidth: 2.5
+  pawnBossDamage: 1
+  knightBossDamage: 2
+  bishopBossDamage: 2
+  rookBossDamage: 3
+  queenBossDamage: 4
 --- !u!1 &1797019941012118100
 GameObject:
   m_ObjectHideFlags: 0
@@ -7758,3 +7784,65 @@ TilemapRenderer:
   m_SortOrder: 0
   m_Mode: 0
   m_DetectChunkCullingBounds: 0
+--- !u!1001 &5280030829389070846
+PrefabInstance:
+  m_ObjectHideFlags: 0
+  serializedVersion: 2
+  m_Modification:
+    serializedVersion: 3
+    m_TransformParent: {fileID: 2514878167680692308}
+    m_Modifications:
+    - target: {fileID: 1228558132822369691, guid: 84a46e027273395478dfa34996b66bc2, type: 3}
+      propertyPath: m_Name
+      value: King
+      objectReference: {fileID: 0}
+    - target: {fileID: 6338785862651598517, guid: 84a46e027273395478dfa34996b66bc2, type: 3}
+      propertyPath: m_LocalPosition.x
+      value: 9.151239
+      objectReference: {fileID: 0}
+    - target: {fileID: 6338785862651598517, guid: 84a46e027273395478dfa34996b66bc2, type: 3}
+      propertyPath: m_LocalPosition.y
+      value: 17.31
+      objectReference: {fileID: 0}
+    - target: {fileID: 6338785862651598517, guid: 84a46e027273395478dfa34996b66bc2, type: 3}
+      propertyPath: m_LocalPosition.z
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6338785862651598517, guid: 84a46e027273395478dfa34996b66bc2, type: 3}
+      propertyPath: m_LocalRotation.w
+      value: 1
+      objectReference: {fileID: 0}
+    - target: {fileID: 6338785862651598517, guid: 84a46e027273395478dfa34996b66bc2, type: 3}
+      propertyPath: m_LocalRotation.x
+      value: -0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6338785862651598517, guid: 84a46e027273395478dfa34996b66bc2, type: 3}
+      propertyPath: m_LocalRotation.y
+      value: -0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6338785862651598517, guid: 84a46e027273395478dfa34996b66bc2, type: 3}
+      propertyPath: m_LocalRotation.z
+      value: -0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6338785862651598517, guid: 84a46e027273395478dfa34996b66bc2, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.x
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6338785862651598517, guid: 84a46e027273395478dfa34996b66bc2, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.y
+      value: 0
+      objectReference: {fileID: 0}
+    - target: {fileID: 6338785862651598517, guid: 84a46e027273395478dfa34996b66bc2, type: 3}
+      propertyPath: m_LocalEulerAnglesHint.z
+      value: 0
+      objectReference: {fileID: 0}
+    m_RemovedComponents: []
+    m_RemovedGameObjects: []
+    m_AddedGameObjects: []
+    m_AddedComponents: []
+  m_SourcePrefab: {fileID: 100100000, guid: 84a46e027273395478dfa34996b66bc2, type: 3}
+--- !u!4 &2211711864117991243 stripped
+Transform:
+  m_CorrespondingSourceObject: {fileID: 6338785862651598517, guid: 84a46e027273395478dfa34996b66bc2, type: 3}
+  m_PrefabInstance: {fileID: 5280030829389070846}
+  m_PrefabAsset: {fileID: 0}

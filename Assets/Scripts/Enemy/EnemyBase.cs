@@ -41,7 +41,14 @@ public abstract class EnemyBase : MonoBehaviour
     protected bool skipNextTurn = false;
 
     public EnemyData Data => enemyData;
-    public EntityStats Stats => stats;
+    public EntityStats Stats
+    {
+        get
+        {
+            if (stats == null) stats = GetComponent<EntityStats>();
+            return stats;
+        }
+    }
     public bool IsMoving => isMoving;
     public bool SkipNextTurn
     {
@@ -188,7 +195,11 @@ public abstract class EnemyBase : MonoBehaviour
     {
         if (evt.Target != gameObject) return;
 
-        if (!hitSound.IsNull)
+        if (enemyData is KingData kingData && !kingData.DamageSound.IsNull)
+        {
+            RuntimeManager.PlayOneShot(kingData.DamageSound);
+        }
+        else if (!hitSound.IsNull)
         {
             RuntimeManager.PlayOneShot(hitSound);
         }
@@ -256,7 +267,27 @@ public abstract class EnemyBase : MonoBehaviour
 
     protected virtual void OnEntityDied(EntityDiedEvent evt)
     {
-        if (hasDied || evt.Entity != gameObject) return;
+        if (evt.Entity != gameObject)
+        {
+            if (!hasDied && enemyData is KingData && currentRoomIndex >= 0)
+            {
+                if (evt.Entity != null && evt.Entity.TryGetComponent<EnemyBase>(out var deadEnemy) && deadEnemy.CurrentRoomIndex == currentRoomIndex)
+                {
+                    int dmg = 1;
+                    var dm = Dungeon.DungeonManager.Instance != null ? Dungeon.DungeonManager.Instance : FindAnyObjectByType<Dungeon.DungeonManager>();
+                    if (dm != null && dm.BossRoomPrefab != null)
+                    {
+                        dmg = dm.BossRoomPrefab.GetDamageForEnemy(deadEnemy.Data);
+                    }
+                    if (Stats != null)
+                    {
+                        Stats.TakeDamage(dmg, evt.Entity);
+                    }
+                }
+            }
+            return;
+        }
+
         hasDied = true;
 
         SetHeartVisibility(false);
@@ -270,6 +301,11 @@ public abstract class EnemyBase : MonoBehaviour
         if (TryGetComponent<Collider2D>(out var col))
         {
             col.enabled = false;
+        }
+
+        if (enemyData is KingData kingDataOnDeath && !kingDataOnDeath.DeathSound.IsNull)
+        {
+            RuntimeManager.PlayOneShot(kingDataOnDeath.DeathSound);
         }
 
         if (animator != null)

@@ -31,6 +31,14 @@ public class EntityStats : MonoBehaviour, IDamageable
     {
         if (IsDead) return;
 
+        if (source != null && source.GetComponent<PlayerMovement>() != null)
+        {
+            if (TryGetComponent<EnemyBase>(out var enemy) && enemy.Data is KingData kingData && kingData.ImmuneToDirectAttacks)
+            {
+                return;
+            }
+        }
+
         currentHealth = Mathf.Max(0, currentHealth - amount);
         EventBus<EntityDamagedEvent>.Raise(new EntityDamagedEvent(gameObject, source, amount, currentHealth));
 

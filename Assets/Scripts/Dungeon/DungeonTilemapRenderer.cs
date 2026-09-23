@@ -41,14 +41,21 @@ namespace Dungeon
             TileBase wallRuleTile,
             TileBase borderFloorRuleTile,
             TileBase fillFloorRuleTile,
-            BossRoomTemplate bossTemplate = null)
+            BossRoom bossRoom = null)
         {
             for (int i = 0; i < rooms.Count; i++)
             {
                 GameManager.RoomData room = rooms[i];
 
-                if (room.Type == RoomType.Boss && bossTemplate != null)
+                if (room.Type == RoomType.Boss && bossRoom != null)
                 {
+                    bossRoom.CopyTilesTo(
+                        room.WorldOriginTile,
+                        fillFloorTilemap,
+                        borderFloorTilemap,
+                        wallTilemap,
+                        roofTilemap
+                    );
                     continue;
                 }
 

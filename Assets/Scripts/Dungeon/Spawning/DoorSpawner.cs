@@ -18,7 +18,7 @@ namespace Dungeon.Spawning
 
         private Tilemap _objectTilemap;
         private TileBase _fillFloorRuleTile;
-        private BossRoomTemplate _bossRoomTemplate;
+        private BossRoom _bossRoom;
 
         private readonly List<Vector2Int> _validFloorTilesBuffer = new List<Vector2Int>(256);
         private readonly List<Vector2Int> _exitCandidatesBuffer = new List<Vector2Int>(256);
@@ -29,13 +29,13 @@ namespace Dungeon.Spawning
         public TileBase SpecialEntranceDoorTile { get => specialEntranceDoorTile; set => specialEntranceDoorTile = value; }
         public TileBase SpecialExitDoorTile { get => specialExitDoorTile; set => specialExitDoorTile = value; }
         public float MinDoorDistance { get => minDoorDistance; set => minDoorDistance = value; }
-        public BossRoomTemplate BossRoomTemplate { get => _bossRoomTemplate; set => _bossRoomTemplate = value; }
+        public BossRoom BossRoom { get => _bossRoom; set => _bossRoom = value; }
 
-        public void Initialize(Tilemap objectTilemap, TileBase fillFloorRuleTile, BossRoomTemplate bossRoomTemplate = null)
+        public void Initialize(Tilemap objectTilemap, TileBase fillFloorRuleTile, BossRoom bossRoom = null)
         {
             _objectTilemap = objectTilemap;
             _fillFloorRuleTile = fillFloorRuleTile;
-            _bossRoomTemplate = bossRoomTemplate;
+            _bossRoom = bossRoom;
         }
 
         public void SpawnContent(
@@ -50,9 +50,9 @@ namespace Dungeon.Spawning
             if (room.Type == RoomType.Boss)
             {
                 Vector2Int entrance;
-                if (_bossRoomTemplate != null)
+                if (_bossRoom != null)
                 {
-                    entrance = _bossRoomTemplate.GetWorldDoorTile(room.WorldOriginTile);
+                    entrance = _bossRoom.GetWorldDoorTile(room.WorldOriginTile);
                 }
                 else if (_validFloorTilesBuffer.Count > 0)
                 {
