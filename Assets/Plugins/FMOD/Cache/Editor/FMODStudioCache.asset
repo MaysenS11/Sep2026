@@ -69,7 +69,7 @@ MonoBehaviour:
   Path: FMOD/Desktop/Master.strings.bank
   Name: Master.strings
   StudioPath: bank:/Master.strings
-  lastModified: 639257912603501264
+  lastModified: 639257961241431024
   FileSizes:
   - Name: 
     Value: 2494
@@ -453,7 +453,7 @@ MonoBehaviour:
   StringsBanks:
   - {fileID: -8272736750473392735}
   cacheVersion: 131860
-  cacheTime: 639257912603501264
+  cacheTime: 639257961241431024
   SerializableEventsDict:
   - key: event:/Music_CanonInDForTwoRenaissanceHarps
     index: 0
@@ -1022,7 +1022,7 @@ MonoBehaviour:
   Path: FMOD/Desktop/Master.bank
   Name: Master
   StudioPath: bank:/Master
-  lastModified: 639257912603481184
+  lastModified: 639257961241431024
   FileSizes: []
   Exists: 1
 --- !u!114 &9137320103529174229

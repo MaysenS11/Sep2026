@@ -8600,14 +8600,11 @@ MonoBehaviour:
   statsDisplay: {fileID: 63086822}
   characterNameText: {fileID: 1050597455}
   lockedTint: {r: 0.25, g: 0.25, b: 0.25, a: 1}
-  layoutMode: 0
   centerOffset: {x: 0, y: 0}
   radius: 180
   startAngleDeg: 90
-  arcSpreadDeg: 360
-  customWaypointTransforms: []
-  spinDuration: 0.15
-  inputCooldown: 0.2
+  spinDuration: 0.3
+  inputCooldown: 0.4
   inputActionAsset: {fileID: -944628639613478452, guid: 2bcd2660ca9b64942af0de543d8d7100, type: 3}
 --- !u!1 &1385635611
 GameObject:

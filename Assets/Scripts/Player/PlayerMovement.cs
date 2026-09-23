@@ -692,11 +692,11 @@ public class PlayerMovement : MonoBehaviour
     }
 
     private void OnDrawGizmos()
-{
-    Gizmos.color = Color.red;
-    Vector3 testPos = transform.position + new Vector3(lastDirection.x, lastDirection.y, 0) * tileSize;
-    
-    Gizmos.DrawWireSphere(testPos, 0.2f);
-    Gizmos.DrawWireCube(testPos, new Vector3(tileSize * 0.8f, tileSize * 0.8f, 0f));
-}
+    {
+        Gizmos.color = Color.red;
+        Vector3 testPos = transform.position + new Vector3(lastDirection.x, lastDirection.y, 0) * tileSize;
+        
+        Gizmos.DrawWireSphere(testPos, 0.2f);
+        Gizmos.DrawWireCube(testPos, new Vector3(tileSize * 0.8f, tileSize * 0.8f, 0f));
+    }
 }
