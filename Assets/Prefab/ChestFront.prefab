@@ -11,7 +11,6 @@ GameObject:
   - component: {fileID: 8097050157322896653}
   - component: {fileID: 7442189541890232286}
   - component: {fileID: 4550306601744657850}
-  - component: {fileID: 3475185805880012469}
   - component: {fileID: 2667092882829675557}
   - component: {fileID: -9003902240036708020}
   m_Layer: 6
@@ -141,33 +140,6 @@ BoxCollider2D:
   m_AutoTiling: 0
   m_Size: {x: 1, y: 0.88862765}
   m_EdgeRadius: 0
---- !u!50 &3475185805880012469
-Rigidbody2D:
-  serializedVersion: 5
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 8982714623835738434}
-  m_BodyType: 2
-  m_Simulated: 1
-  m_UseFullKinematicContacts: 0
-  m_UseAutoMass: 0
-  m_Mass: 1
-  m_LinearDamping: 0
-  m_AngularDamping: 0.05
-  m_GravityScale: 1
-  m_Material: {fileID: 0}
-  m_IncludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_ExcludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_Interpolate: 0
-  m_SleepingMode: 1
-  m_CollisionDetection: 0
-  m_Constraints: 0
 --- !u!95 &2667092882829675557
 Animator:
   serializedVersion: 7
@@ -204,3 +176,4 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Dungeon.Chest
   animator: {fileID: 2667092882829675557}
   isOpen: 0
+  isChestRoom: 0

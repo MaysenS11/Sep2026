@@ -40,11 +40,17 @@ namespace Dungeon
             TileBase roofRuleTile,
             TileBase wallRuleTile,
             TileBase borderFloorRuleTile,
-            TileBase fillFloorRuleTile)
+            TileBase fillFloorRuleTile,
+            BossRoomTemplate bossTemplate = null)
         {
             for (int i = 0; i < rooms.Count; i++)
             {
                 GameManager.RoomData room = rooms[i];
+
+                if (room.Type == RoomType.Boss && bossTemplate != null)
+                {
+                    continue;
+                }
 
                 DrawDecomposedLayer(room, fillFloorTilemap, fillFloorRuleTile, -2);
                 DrawDecomposedLayer(room, borderFloorTilemap, borderFloorRuleTile, 0);

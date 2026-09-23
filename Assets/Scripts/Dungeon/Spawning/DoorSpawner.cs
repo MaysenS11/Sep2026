@@ -18,6 +18,7 @@ namespace Dungeon.Spawning
 
         private Tilemap _objectTilemap;
         private TileBase _fillFloorRuleTile;
+        private BossRoomTemplate _bossRoomTemplate;
 
         private readonly List<Vector2Int> _validFloorTilesBuffer = new List<Vector2Int>(256);
         private readonly List<Vector2Int> _exitCandidatesBuffer = new List<Vector2Int>(256);
@@ -28,11 +29,13 @@ namespace Dungeon.Spawning
         public TileBase SpecialEntranceDoorTile { get => specialEntranceDoorTile; set => specialEntranceDoorTile = value; }
         public TileBase SpecialExitDoorTile { get => specialExitDoorTile; set => specialExitDoorTile = value; }
         public float MinDoorDistance { get => minDoorDistance; set => minDoorDistance = value; }
+        public BossRoomTemplate BossRoomTemplate { get => _bossRoomTemplate; set => _bossRoomTemplate = value; }
 
-        public void Initialize(Tilemap objectTilemap, TileBase fillFloorRuleTile)
+        public void Initialize(Tilemap objectTilemap, TileBase fillFloorRuleTile, BossRoomTemplate bossRoomTemplate = null)
         {
             _objectTilemap = objectTilemap;
             _fillFloorRuleTile = fillFloorRuleTile;
+            _bossRoomTemplate = bossRoomTemplate;
         }
 
         public void SpawnContent(
@@ -44,23 +47,31 @@ namespace Dungeon.Spawning
             float minDoorDistanceSqr = minDoorDistance * minDoorDistance;
             tileQuery.GetValidInteriorFloorTiles(room, _validFloorTilesBuffer);
 
-            if (_validFloorTilesBuffer.Count < 2) return;
+            if (room.Type == RoomType.Boss)
+            {
+                Vector2Int entrance;
+                if (_bossRoomTemplate != null)
+                {
+                    entrance = _bossRoomTemplate.GetWorldDoorTile(room.WorldOriginTile);
+                }
+                else if (_validFloorTilesBuffer.Count > 0)
+                {
+                    entrance = _validFloorTilesBuffer[Random.Range(0, _validFloorTilesBuffer.Count)];
+                }
+                else
+                {
+                    entrance = room.CenterTile;
+                }
 
-            if (room.Type == RoomType.Start)
-            {
-                room.EntranceDoorTile = null;
-                Vector2Int exit = _validFloorTilesBuffer[Random.Range(0, _validFloorTilesBuffer.Count)];
-                room.ExitDoorTile = exit;
-                tileQuery.MarkOccupied(exit);
-            }
-            else if (room.Type == RoomType.Boss)
-            {
-                Vector2Int entrance = _validFloorTilesBuffer[Random.Range(0, _validFloorTilesBuffer.Count)];
                 room.EntranceDoorTile = entrance;
                 room.ExitDoorTile = null;
                 tileQuery.MarkOccupied(entrance);
             }
-            else
+            else if (_validFloorTilesBuffer.Count < 2)
+            {
+                return;
+            }
+            else if (room.Type == RoomType.Start)
             {
                 Vector2Int entrance = _validFloorTilesBuffer[Random.Range(0, _validFloorTilesBuffer.Count)];
                 room.EntranceDoorTile = entrance;
