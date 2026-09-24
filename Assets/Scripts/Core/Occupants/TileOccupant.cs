@@ -63,10 +63,13 @@ namespace Core.Occupants
             int applied = Math.Min(damage, CurrentHealth);
             CurrentHealth -= applied;
 
+            effects.Add(new DamageTakenEffect(Id, applied, CurrentHealth, source != null ? source.Id : 0));
+
             OnDamaged?.Invoke(this, applied, source);
 
             if (IsDead)
             {
+                effects.Add(new OccupantDestroyedEffect(Id, GridPosition, GetType().Name));
                 OnDied?.Invoke(this);
             }
 

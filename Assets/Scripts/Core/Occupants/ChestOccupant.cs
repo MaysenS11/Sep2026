@@ -35,6 +35,8 @@ namespace Core.Occupants
             IsOpen = true;
             CurrentHealth = 0;
 
+            effects.Add(new ChestOpenedEffect(Id, GridPosition));
+
             OnOpened?.Invoke(this);
 
             return effects;
