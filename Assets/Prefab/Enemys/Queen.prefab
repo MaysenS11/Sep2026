@@ -102,9 +102,7 @@ GameObject:
   - component: {fileID: 6338785862651598517}
   - component: {fileID: 1611507659431043392}
   - component: {fileID: 8181634155171235856}
-  - component: {fileID: 1830716079412913766}
   - component: {fileID: 1798089781929234135}
-  - component: {fileID: 2234665136217097738}
   - component: {fileID: 3541320482356850222}
   m_Layer: 6
   m_Name: Queen
@@ -210,43 +208,6 @@ Animator:
   m_AllowConstantClipSamplingOptimization: 1
   m_KeepAnimatorStateOnDisable: 0
   m_WriteDefaultValuesOnDisable: 0
---- !u!70 &1830716079412913766
-CapsuleCollider2D:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1228558132822369691}
-  m_Enabled: 1
-  serializedVersion: 3
-  m_Density: 1
-  m_Material: {fileID: 0}
-  m_IncludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_ExcludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_LayerOverridePriority: 0
-  m_ForceSendLayers:
-    serializedVersion: 2
-    m_Bits: 4294967295
-  m_ForceReceiveLayers:
-    serializedVersion: 2
-    m_Bits: 4294967295
-  m_ContactCaptureLayers:
-    serializedVersion: 2
-    m_Bits: 4294967295
-  m_CallbackLayers:
-    serializedVersion: 2
-    m_Bits: 4294967295
-  m_IsTrigger: 0
-  m_UsedByEffector: 0
-  m_CompositeOperation: 0
-  m_CompositeOrder: 0
-  m_Offset: {x: 0, y: 0.04}
-  m_Size: {x: 0.72, y: 0.65}
-  m_Direction: 1
 --- !u!114 &1798089781929234135
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -262,35 +223,6 @@ MonoBehaviour:
   maxHealth: 10
   currentHealth: 0
   attackDamage: 2
---- !u!114 &2234665136217097738
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1228558132822369691}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: e475d8920ce5fd447a38852deeccd7c9, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::EnemyController
-  enemyData: {fileID: 11400000, guid: da23e297f73ad7e4cbcd396109e555dd, type: 2}
-  tileSize: 1
-  blockingLayers:
-    serializedVersion: 2
-    m_Bits: 64
-  animator: {fileID: 8181634155171235856}
-  heartDisplay: {fileID: 3541320482356850222}
-  heartsRoot: {fileID: 6221520783464708702}
-  heartSlots:
-  - {fileID: 2036953907014965638}
-  - {fileID: 2182518209597775179}
-  - {fileID: 1403376561627743267}
-  - {fileID: 5023469003591378467}
-  - {fileID: 7593806151459542266}
-  - {fileID: 7945062980952998151}
-  - {fileID: 1825976798987246616}
-  destroyDelayAfterDeath: 0.5
 --- !u!114 &3541320482356850222
 MonoBehaviour:
   m_ObjectHideFlags: 0

@@ -11,9 +11,7 @@ GameObject:
   - component: {fileID: 6338785862651598517}
   - component: {fileID: 1611507659431043392}
   - component: {fileID: 8181634155171235856}
-  - component: {fileID: 1830716079412913766}
   - component: {fileID: 1798089781929234135}
-  - component: {fileID: 2234665136217097738}
   - component: {fileID: 4267290315130084670}
   m_Layer: 6
   m_Name: Bishop
@@ -119,43 +117,6 @@ Animator:
   m_AllowConstantClipSamplingOptimization: 1
   m_KeepAnimatorStateOnDisable: 0
   m_WriteDefaultValuesOnDisable: 0
---- !u!70 &1830716079412913766
-CapsuleCollider2D:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1228558132822369691}
-  m_Enabled: 1
-  serializedVersion: 3
-  m_Density: 1
-  m_Material: {fileID: 0}
-  m_IncludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_ExcludeLayers:
-    serializedVersion: 2
-    m_Bits: 0
-  m_LayerOverridePriority: 0
-  m_ForceSendLayers:
-    serializedVersion: 2
-    m_Bits: 4294967295
-  m_ForceReceiveLayers:
-    serializedVersion: 2
-    m_Bits: 4294967295
-  m_ContactCaptureLayers:
-    serializedVersion: 2
-    m_Bits: 4294967295
-  m_CallbackLayers:
-    serializedVersion: 2
-    m_Bits: 4294967295
-  m_IsTrigger: 0
-  m_UsedByEffector: 0
-  m_CompositeOperation: 0
-  m_CompositeOrder: 0
-  m_Offset: {x: 0, y: 0.04}
-  m_Size: {x: 0.72, y: 0.65}
-  m_Direction: 1
 --- !u!114 &1798089781929234135
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -171,31 +132,6 @@ MonoBehaviour:
   maxHealth: 10
   currentHealth: 0
   attackDamage: 2
---- !u!114 &2234665136217097738
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 1228558132822369691}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: e475d8920ce5fd447a38852deeccd7c9, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: Assembly-CSharp::EnemyController
-  enemyData: {fileID: 11400000, guid: 238be3e01144ce4458308c1180633839, type: 2}
-  tileSize: 1
-  blockingLayers:
-    serializedVersion: 2
-    m_Bits: 64
-  animator: {fileID: 8181634155171235856}
-  heartDisplay: {fileID: 4267290315130084670}
-  heartsRoot: {fileID: 4839837030620412201}
-  heartSlots:
-  - {fileID: 6556328151791921498}
-  - {fileID: 1416328103697592573}
-  - {fileID: 4434061589542302746}
-  destroyDelayAfterDeath: 0.5
 --- !u!114 &4267290315130084670
 MonoBehaviour:
   m_ObjectHideFlags: 0

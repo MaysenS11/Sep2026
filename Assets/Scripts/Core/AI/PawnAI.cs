@@ -23,15 +23,7 @@ namespace Core.AI
             int absDx = Math.Abs(dx);
             int absDy = Math.Abs(dy);
 
-            bool isAdjacent;
-            if (enemy.UsesDiagonalAttack)
-            {
-                isAdjacent = (absDx == 1 && absDy == 1);
-            }
-            else
-            {
-                isAdjacent = BoardCoordinate.IsAdjacentCardinal(enemyPos, playerPos);
-            }
+            bool isAdjacent = (absDx == 1 && absDy == 1);
 
             if (isAdjacent)
             {

@@ -67,11 +67,27 @@ namespace Dungeon.Spawning
                 room.ExitDoorTile = null;
                 tileQuery.MarkOccupied(entrance);
             }
+            else if (room.Type == RoomType.Chest)
+            {
+                if (_validFloorTilesBuffer.Count > 0)
+                {
+                    Vector2Int entrance = _validFloorTilesBuffer[Random.Range(0, _validFloorTilesBuffer.Count)];
+                    room.EntranceDoorTile = entrance;
+                    room.ExitDoorTile = null;
+                    tileQuery.MarkOccupied(entrance);
+                }
+            }
             else if (_validFloorTilesBuffer.Count < 2)
             {
-                return;
+                if (_validFloorTilesBuffer.Count == 1)
+                {
+                    Vector2Int entrance = _validFloorTilesBuffer[0];
+                    room.EntranceDoorTile = entrance;
+                    room.ExitDoorTile = entrance;
+                    tileQuery.MarkOccupied(entrance);
+                }
             }
-            else if (room.Type == RoomType.Start)
+            else
             {
                 Vector2Int entrance = _validFloorTilesBuffer[Random.Range(0, _validFloorTilesBuffer.Count)];
                 room.EntranceDoorTile = entrance;

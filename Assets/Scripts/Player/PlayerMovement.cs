@@ -3,6 +3,10 @@ using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.InputSystem;
 using FMODUnity;
+using Infrastructure;
+using Presentation.Board;
+using Presentation.Entities;
+using Core.Board;
 
 public class PlayerMovement : MonoBehaviour
 {
@@ -34,11 +38,7 @@ public class PlayerMovement : MonoBehaviour
 
     private InputAction moveAction;
     private InputAction attackAction;
-    private InputAction interactAction;
     private InputAction menuAction;
-    private InputAction pattern1Action;
-    private InputAction pattern2Action;
-    private InputAction pattern3Action;
 
     private bool isMoving = false;
     private bool canTakeTurn = true;
@@ -47,8 +47,6 @@ public class PlayerMovement : MonoBehaviour
     private float doorTriggerBlockedUntil;
     private Vector2 lastDirection = Vector2.down;
     private PlayerStats playerStats;
-    private readonly Collider2D[] hitBuffer = new Collider2D[16];
-    private readonly HashSet<IDamageable> damagedEntitiesBuffer = new HashSet<IDamageable>();
     private readonly List<Vector2Int> attackTilesBuffer = new List<Vector2Int>(16);
 
     private static readonly HashSet<Vector2Int> currentAttackTiles = new HashSet<Vector2Int>();
@@ -79,11 +77,7 @@ public class PlayerMovement : MonoBehaviour
         var playerMap = inputActions.FindActionMap("Player");
         moveAction = playerMap.FindAction("Move");
         attackAction = playerMap.FindAction("Attack");
-        interactAction = playerMap.FindAction("Interact");
         menuAction = playerMap.FindAction("Menu");
-        pattern1Action = playerMap.FindAction("1");
-        pattern2Action = playerMap.FindAction("2");
-        pattern3Action = playerMap.FindAction("3");
     }
 
     private void OnEnable()
@@ -97,10 +91,6 @@ public class PlayerMovement : MonoBehaviour
         EventBus<EntityDiedEvent>.Subscribe(OnEntityDied);
         EventBus<SharedAudioConfiguredEvent>.Subscribe(OnSharedAudioConfigured);
         attackAction.performed += OnAttackPerformed;
-        interactAction.performed += OnInteractPerformed;
-        if (pattern1Action != null) pattern1Action.performed += OnPattern1Performed;
-        if (pattern2Action != null) pattern2Action.performed += OnPattern2Performed;
-        if (pattern3Action != null) pattern3Action.performed += OnPattern3Performed;
         if (menuAction != null)
         {
             menuAction.performed += OnMenuPerformed;
@@ -110,10 +100,6 @@ public class PlayerMovement : MonoBehaviour
     private void OnDisable()
     {
         attackAction.performed -= OnAttackPerformed;
-        interactAction.performed -= OnInteractPerformed;
-        if (pattern1Action != null) pattern1Action.performed -= OnPattern1Performed;
-        if (pattern2Action != null) pattern2Action.performed -= OnPattern2Performed;
-        if (pattern3Action != null) pattern3Action.performed -= OnPattern3Performed;
         if (menuAction != null)
         {
             menuAction.performed -= OnMenuPerformed;
@@ -174,7 +160,7 @@ public class PlayerMovement : MonoBehaviour
 
     private IEnumerator ExecutePushCoroutine(PlayerPushedEvent evt)
     {
-        Vector3 destination = TileReservationSystem.SnapToTileCenter(evt.TargetPosition);
+        Vector3 destination = BoardCoordinate.GridToWorldCenter(BoardCoordinate.WorldToGrid(evt.TargetPosition), transform.position.z);
         destination.z = transform.position.z;
         if (IsTileBlocked(destination))
         {
@@ -203,28 +189,6 @@ public class PlayerMovement : MonoBehaviour
 
     private void Update()
     {
-        bool p1 = (pattern1Action != null && pattern1Action.triggered) || (Keyboard.current != null && (Keyboard.current[Key.Digit1].wasPressedThisFrame || Keyboard.current[Key.Numpad1].wasPressedThisFrame));
-        bool p2 = (pattern2Action != null && pattern2Action.triggered) || (Keyboard.current != null && (Keyboard.current[Key.Digit2].wasPressedThisFrame || Keyboard.current[Key.Numpad2].wasPressedThisFrame));
-        bool p3 = (pattern3Action != null && pattern3Action.triggered) || (Keyboard.current != null && (Keyboard.current[Key.Digit3].wasPressedThisFrame || Keyboard.current[Key.Numpad3].wasPressedThisFrame));
-
-        if (p1)
-        {
-            SelectAttackPattern(0);
-        }
-        else if (p2)
-        {
-            SelectAttackPattern(1);
-        }
-        else if (p3)
-        {
-            SelectAttackPattern(2);
-        }
-
-        if (Keyboard.current != null && Keyboard.current[Key.E].wasPressedThisFrame)
-        {
-            TriggerInteract();
-        }
-
         HandleMovement();
     }
 
@@ -275,18 +239,26 @@ public class PlayerMovement : MonoBehaviour
 
         if (GameManager.Instance == null)
         {
-            transform.position = TileReservationSystem.SnapToTileCenter(transform.position);
+            transform.position = BoardCoordinate.GridToWorldCenter(BoardCoordinate.WorldToGrid(transform.position), transform.position.z);
             NotifyTargetingChanged();
             return;
         }
 
         if (GameManager.Instance.DungeonDictionary.TryGetValue(GameManager.Instance.CurrentRoomIndex, out GameManager.RoomData room))
         {
-            MoveToPosition(TileReservationSystem.SnapToTileCenter(room.CenterTilePosition));
+            MoveToPosition(BoardCoordinate.GridToWorldCenter(BoardCoordinate.WorldToGrid(room.CenterTilePosition), transform.position.z));
         }
         else
         {
-            transform.position = TileReservationSystem.SnapToTileCenter(transform.position);
+            transform.position = BoardCoordinate.GridToWorldCenter(BoardCoordinate.WorldToGrid(transform.position), transform.position.z);
+        }
+
+        if (GameManager.Instance != null && GameManager.Instance.Board != null)
+        {
+            Vector2Int gridPos = BoardCoordinate.WorldToGrid(transform.position);
+            int maxHp = playerStats != null ? playerStats.MaxHealth : 6;
+            int atk = playerStats != null ? playerStats.TotalAttackDamage : 2;
+            BoardEntityFactory.CreatePlayer(gameObject, gridPos, GameManager.Instance.Board, maxHp, atk, EffectsQueueRunner.Instance);
         }
 
         NotifyTargetingChanged();
@@ -318,33 +290,51 @@ public class PlayerMovement : MonoBehaviour
             return;
         }
 
-        Vector2Int currentGrid = TileReservationSystem.WorldToGridTile(transform.position);
-        Vector2Int targetGrid = currentGrid + new Vector2Int(Mathf.RoundToInt(inputDir.x), Mathf.RoundToInt(inputDir.y));
-        Vector3 targetPosition = TileReservationSystem.GetTileCenterWorld(targetGrid, transform.position.z);
+        Vector2Int inputDirInt = new Vector2Int(Mathf.RoundToInt(inputDir.x), Mathf.RoundToInt(inputDir.y));
+        if (GameManager.Instance != null && GameManager.Instance.TurnCoordinator != null)
+        {
+            bool dirChanged = lastDirection != inputDir;
+            lastDirection = inputDir;
+            UpdateFacingVisuals(lastDirection);
+            if (dirChanged)
+            {
+                NotifyTargetingChanged();
+            }
+
+            bool moved = GameManager.Instance.TurnCoordinator.TryExecutePlayerMove(inputDirInt, this, () =>
+            {
+                NotifyTargetingChanged();
+                TryTriggerDoorAtCurrentPosition();
+            });
+
+            if (moved)
+            {
+                if (!moveSound.IsNull) RuntimeManager.PlayOneShot(moveSound);
+                canTakeTurn = false;
+                nextMoveTime = Time.time + moveCooldown;
+            }
+            return;
+        }
+
+        Vector2Int currentGrid = BoardCoordinate.WorldToGrid(transform.position);
+        Vector2Int targetGrid = currentGrid + inputDirInt;
+        Vector3 targetPosition = BoardCoordinate.GridToWorldCenter(targetGrid, transform.position.z);
 
         if (IsTileBlocked(targetPosition))
         {
             if (lastDirection != inputDir)
             {
                 lastDirection = inputDir;
-                if (animator != null)
-                {
-                    animator.SetFloat(MoveX, lastDirection.x);
-                    animator.SetFloat(MoveY, lastDirection.y);
-                }
+                UpdateFacingVisuals(lastDirection);
                 NotifyTargetingChanged();
             }
             return;
         }
 
-        bool dirChanged = lastDirection != inputDir;
+        bool directionChanged = lastDirection != inputDir;
         lastDirection = inputDir;
-        if (animator != null)
-        {
-            animator.SetFloat(MoveX, lastDirection.x);
-            animator.SetFloat(MoveY, lastDirection.y);
-        }
-        if (dirChanged)
+        UpdateFacingVisuals(lastDirection);
+        if (directionChanged)
         {
             NotifyTargetingChanged();
         }
@@ -352,6 +342,20 @@ public class PlayerMovement : MonoBehaviour
         canTakeTurn = false;
         nextMoveTime = Time.time + moveCooldown;
         StartCoroutine(MoveToTile(targetPosition));
+    }
+
+    private void UpdateFacingVisuals(Vector2 direction)
+    {
+        if (animator != null)
+        {
+            animator.SetFloat(MoveX, direction.x);
+            animator.SetFloat(MoveY, direction.y);
+        }
+
+        if (TryGetComponent<PlayerTileObject>(out var playerTileObj))
+        {
+            playerTileObj.UpdateFacingDirection(direction);
+        }
     }
 
     private IEnumerator MoveToTile(Vector3 targetPos)
@@ -384,7 +388,7 @@ public class PlayerMovement : MonoBehaviour
 
     private bool IsTileBlocked(Vector3 targetPos)
     {
-        Vector3 centerPos = TileReservationSystem.SnapToTileCenter(targetPos);
+        Vector3 centerPos = BoardCoordinate.GridToWorldCenter(BoardCoordinate.WorldToGrid(targetPos), targetPos.z);
         Collider2D hit = Physics2D.OverlapBox(centerPos, new Vector2(tileSize * 0.8f, tileSize * 0.8f), 0f, obstacleLayer);
         return hit != null && hit.gameObject != gameObject;
     }
@@ -392,6 +396,38 @@ public class PlayerMovement : MonoBehaviour
     private void OnAttackPerformed(InputAction.CallbackContext context)
     {
         if (!canTakeTurn || isMoving || (ScreenFadeTransition.Instance != null && ScreenFadeTransition.Instance.IsTransitioning)) return;
+
+        if (GameManager.Instance != null && GameManager.Instance.TurnCoordinator != null)
+        {
+            canTakeTurn = false;
+            nextMoveTime = Time.time + moveCooldown;
+            if (animator != null) animator.SetTrigger(attackTrigger);
+
+            if (characterDefinition != null && !characterDefinition.AttackSound.IsNull)
+            {
+                RuntimeManager.PlayOneShot(characterDefinition.AttackSound);
+            }
+
+            attackTilesBuffer.Clear();
+            Vector2Int currentGrid = BoardCoordinate.WorldToGrid(transform.position);
+            if (playerStats == null) playerStats = GetComponent<PlayerStats>();
+            AttackPatternData pattern = playerStats != null ? playerStats.CurrentAttackPattern : null;
+            if (pattern != null)
+            {
+                pattern.GetAffectedTiles(currentGrid, lastDirection, attackTilesBuffer);
+            }
+            else
+            {
+                Vector2Int cardinal = AttackPatternData.GetCardinalDirection(lastDirection);
+                attackTilesBuffer.Add(currentGrid + cardinal);
+            }
+
+            GameManager.Instance.TurnCoordinator.TryExecutePlayerAttack(attackTilesBuffer, this, () =>
+            {
+                NotifyTargetingChanged();
+            });
+            return;
+        }
 
         canTakeTurn = false;
         nextMoveTime = Time.time + moveCooldown;
@@ -416,39 +452,16 @@ public class PlayerMovement : MonoBehaviour
         if (playerStats == null) playerStats = GetComponent<PlayerStats>();
         int damage = playerStats != null ? playerStats.TotalAttackDamage : 3;
 
-        AttackPatternData pattern = playerStats != null ? playerStats.CurrentAttackPattern : null;
-        ExecuteAttack(pattern, damage);
+        AttackPatternData legacyPattern = playerStats != null ? playerStats.CurrentAttackPattern : null;
 
         StartCoroutine(CompleteAttackTurn());
-    }
-
-    private void ExecuteAttack(AttackPatternData pattern, int damage)
-    {
-        damagedEntitiesBuffer.Clear();
-        Vector2Int currentGrid = TileReservationSystem.WorldToGridTile(transform.position);
-
-        if (pattern != null)
-        {
-            pattern.GetAffectedTiles(currentGrid, lastDirection, attackTilesBuffer);
-            for (int i = 0; i < attackTilesBuffer.Count; i++)
-            {
-                Vector3 targetWorld = TileReservationSystem.GetTileCenterWorld(attackTilesBuffer[i], transform.position.z);
-                DamageAtTile(targetWorld, damage, damagedEntitiesBuffer);
-            }
-        }
-        else
-        {
-            Vector2Int cardinal = AttackPatternData.GetCardinalDirection(lastDirection);
-            Vector3 targetWorld = TileReservationSystem.GetTileCenterWorld(currentGrid + cardinal, transform.position.z);
-            DamageAtTile(targetWorld, damage, damagedEntitiesBuffer);
-        }
     }
 
     public void NotifyTargetingChanged()
     {
         if (playerStats == null) playerStats = GetComponent<PlayerStats>();
         AttackPatternData pattern = playerStats != null ? playerStats.CurrentAttackPattern : null;
-        Vector2Int currentGrid = TileReservationSystem.WorldToGridTile(transform.position);
+        Vector2Int currentGrid = BoardCoordinate.WorldToGrid(transform.position);
         OnAttackTargetingChanged?.Invoke(currentGrid, lastDirection, pattern);
 
         currentAttackTiles.Clear();
@@ -482,70 +495,10 @@ public class PlayerMovement : MonoBehaviour
         }
     }
 
-    private void DamageAtTile(Vector3 targetPos, int damage, HashSet<IDamageable> damagedEntities)
-    {
-        int hitCount = Physics2D.OverlapBox(targetPos, new Vector2(tileSize * 0.85f, tileSize * 0.85f), 0f, default, hitBuffer);
-        for (int i = 0; i < hitCount; i++)
-        {
-            Collider2D hit = hitBuffer[i];
-            if (hit == null || hit.gameObject == gameObject) continue;
-
-            if (hit.TryGetComponent<IDamageable>(out var damageable) || hit.GetComponentInParent<IDamageable>() is { } parentDamageable && (damageable = parentDamageable) != null)
-            {
-                if (damagedEntities.Add(damageable))
-                {
-                    damageable.TakeDamage(damage, gameObject);
-                }
-            }
-        }
-    }
-
     private IEnumerator CompleteAttackTurn()
     {
         yield return new WaitForSeconds(0.25f);
         EventBus<PlayerActionCompletedEvent>.Raise(new PlayerActionCompletedEvent());
-    }
-
-    private void OnInteractPerformed(InputAction.CallbackContext context)
-    {
-        TriggerInteract();
-    }
-
-    private void TriggerInteract()
-    {
-        Debug.Log("interact pressed");
-        if (isMoving || (ScreenFadeTransition.Instance != null && ScreenFadeTransition.Instance.IsTransitioning)) return;
-        //animator.SetTrigger(interactTrigger);
-
-        Vector2Int facingDir = new Vector2Int(Mathf.RoundToInt(lastDirection.x), Mathf.RoundToInt(lastDirection.y));
-        if (facingDir == Vector2Int.zero) facingDir = Vector2Int.down;
-
-        Vector2Int currentGrid = TileReservationSystem.WorldToGridTile(transform.position);
-        Vector2Int targetGrid = currentGrid + facingDir;
-        Vector3 targetPos = TileReservationSystem.GetTileCenterWorld(targetGrid, transform.position.z);
-
-        Collider2D[] results = Physics2D.OverlapBoxAll(targetPos, new Vector2(tileSize * 0.8f, tileSize * 0.8f), 0f);
-        for (int i = 0; i < results.Length; i++)
-        {
-            if (results[i] == null) continue;
-
-            if (results[i].TryGetComponent<IInteractable>(out var interactable))
-            {
-                if (interactable.CanInteract)
-                {
-                    interactable.Interact(gameObject);
-                    break;
-                }
-            }
-            else if (results[i].TryGetComponent<Dungeon.Chest>(out var chest))
-            {
-                if (chest.TryOpen())
-                {
-                    Debug.Log("chest opening");
-                }
-                break;
-            }
-        }
     }
 
     private void OnMenuPerformed(InputAction.CallbackContext context)
@@ -557,19 +510,40 @@ public class PlayerMovement : MonoBehaviour
     {
         if (isMoving || (ScreenFadeTransition.Instance != null && ScreenFadeTransition.Instance.IsTransitioning) || Time.time < doorTriggerBlockedUntil || GameManager.Instance == null) return;
 
+        doorTriggerBlockedUntil = Time.time + 2.0f;
         TransitionThroughDoor(evt.DoorType);
-        doorTriggerBlockedUntil = Time.time + 0.2f;
     }
 
     private void TryTriggerDoorAtCurrentPosition()
     {
-        GameManager manager = GameManager.Instance;
-        if (manager == null || manager.DoorTilemap == null) return;
+        if (Time.time < doorTriggerBlockedUntil || (ScreenFadeTransition.Instance != null && ScreenFadeTransition.Instance.IsTransitioning)) return;
 
-        Vector3Int cell = manager.DoorTilemap.WorldToCell(transform.position);
-        if (manager.TryResolveDoor(cell, out DoorType doorType))
+        GameManager manager = GameManager.Instance;
+        if (manager == null) return;
+
+        Vector2Int gridPos;
+        if (manager.Board != null && manager.Board.FindPlayer() is { } player)
         {
-            GameManager.TriggerDoor(doorType, new Vector2Int(cell.x, cell.y));
+            gridPos = player.GridPosition;
+        }
+        else
+        {
+            gridPos = Core.Board.BoardCoordinate.WorldToGrid(transform.position);
+        }
+
+        if (manager.TryResolveDoorAtTile(gridPos, out DoorType doorType))
+        {
+            GameManager.TriggerDoor(doorType, gridPos);
+            return;
+        }
+
+        if (manager.DoorTilemap != null)
+        {
+            Vector3Int tilemapCell = manager.DoorTilemap.WorldToCell(transform.position);
+            if (manager.TryResolveDoor(tilemapCell, out doorType))
+            {
+                GameManager.TriggerDoor(doorType, new Vector2Int(tilemapCell.x, tilemapCell.y));
+            }
         }
     }
 
@@ -607,41 +581,100 @@ public class PlayerMovement : MonoBehaviour
             targetDoor = GetSpecialExitDoor(nextRoomIndex);
         }
 
-        if (!targetDoor.HasValue || !manager.DungeonDictionary.TryGetValue(nextRoomIndex, out GameManager.RoomData nextRoom)) return;
+        if (!targetDoor.HasValue || !manager.DungeonDictionary.TryGetValue(nextRoomIndex, out GameManager.RoomData nextRoom))
+        {
+            doorTriggerBlockedUntil = 0f;
+            return;
+        }
+
+        // Abort previous room turn phase and input locks
+        manager.TurnCoordinator?.ResetTurnState();
+
+        void OnTransitionComplete()
+        {
+            MoveToPosition(targetDoor.Value);
+            Vector2Int newGrid = Core.Board.BoardCoordinate.WorldToGrid(targetDoor.Value);
+
+            if (manager.Board != null)
+            {
+                var playerOcc = manager.Board.FindPlayer();
+                if (playerOcc != null)
+                {
+                    manager.Board.Move(playerOcc, newGrid);
+                }
+            }
+
+            if (TryGetComponent<PlayerTileObject>(out var playerTileObj))
+            {
+                playerTileObj.SnapToGrid(newGrid);
+            }
+
+            GameManager.NotifyNewRoomEntered(nextRoom);
+
+            if (manager.Board != null)
+            {
+                BoardEntityFactory.RegisterSceneEntities(manager.Board, manager.TurnCoordinator?.EffectsRunner);
+            }
+
+            canTakeTurn = true;
+            nextMoveTime = 0f;
+            doorTriggerBlockedUntil = Time.time + 1.0f;
+            manager.TurnCoordinator?.ResetTurnState();
+            NotifyTargetingChanged();
+        }
 
         if (ScreenFadeTransition.Instance != null)
         {
-            ScreenFadeTransition.Instance.StartCoroutine(ScreenFadeTransition.Instance.PlayTransition(() =>
-            {
-                MoveToPosition(targetDoor.Value);
-                GameManager.NotifyNewRoomEntered(nextRoom);
-            }));
+            ScreenFadeTransition.Instance.StartCoroutine(ScreenFadeTransition.Instance.PlayTransition(OnTransitionComplete));
         }
         else
         {
-            MoveToPosition(targetDoor.Value);
-            GameManager.NotifyNewRoomEntered(nextRoom);
+            OnTransitionComplete();
         }
     }
 
     private Vector3? GetEntryDoor(int roomIndex)
     {
-        return GameManager.Instance.DungeonDictionary.TryGetValue(roomIndex, out GameManager.RoomData room) ? room.EntryDoorPosition : null;
+        if (GameManager.Instance != null && GameManager.Instance.DungeonDictionary.TryGetValue(roomIndex, out GameManager.RoomData room))
+        {
+            if (room.EntryDoorPosition.HasValue) return room.EntryDoorPosition.Value;
+            if (room.EntranceDoorTile.HasValue) return Core.Board.BoardCoordinate.GridToWorldCenter(room.EntranceDoorTile.Value);
+            return Core.Board.BoardCoordinate.GridToWorldCenter(room.CenterTile);
+        }
+        return null;
     }
 
     private Vector3? GetExitDoor(int roomIndex)
     {
-        return GameManager.Instance.DungeonDictionary.TryGetValue(roomIndex, out GameManager.RoomData room) ? room.ExitDoorPosition : null;
+        if (GameManager.Instance != null && GameManager.Instance.DungeonDictionary.TryGetValue(roomIndex, out GameManager.RoomData room))
+        {
+            if (room.ExitDoorPosition.HasValue) return room.ExitDoorPosition.Value;
+            if (room.ExitDoorTile.HasValue) return Core.Board.BoardCoordinate.GridToWorldCenter(room.ExitDoorTile.Value);
+            return Core.Board.BoardCoordinate.GridToWorldCenter(room.CenterTile);
+        }
+        return null;
     }
 
     private Vector3? GetSpecialEntryDoor(int roomIndex)
     {
-        return GameManager.Instance.DungeonDictionary.TryGetValue(roomIndex, out GameManager.RoomData room) ? room.SpecialEntryDoorPosition : null;
+        if (GameManager.Instance != null && GameManager.Instance.DungeonDictionary.TryGetValue(roomIndex, out GameManager.RoomData room))
+        {
+            if (room.SpecialEntryDoorPosition.HasValue) return room.SpecialEntryDoorPosition.Value;
+            if (room.EntranceDoorTile.HasValue) return Core.Board.BoardCoordinate.GridToWorldCenter(room.EntranceDoorTile.Value);
+            return Core.Board.BoardCoordinate.GridToWorldCenter(room.CenterTile);
+        }
+        return null;
     }
 
     private Vector3? GetSpecialExitDoor(int roomIndex)
     {
-        return GameManager.Instance.DungeonDictionary.TryGetValue(roomIndex, out GameManager.RoomData room) ? room.SpecialExitDoorPosition : null;
+        if (GameManager.Instance != null && GameManager.Instance.DungeonDictionary.TryGetValue(roomIndex, out GameManager.RoomData room))
+        {
+            if (room.SpecialExitDoorPosition.HasValue) return room.SpecialExitDoorPosition.Value;
+            if (room.ExitDoorTile.HasValue) return Core.Board.BoardCoordinate.GridToWorldCenter(room.ExitDoorTile.Value);
+            return Core.Board.BoardCoordinate.GridToWorldCenter(room.CenterTile);
+        }
+        return null;
     }
 
     private void MoveToPosition(Vector3 position)

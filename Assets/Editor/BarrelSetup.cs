@@ -32,22 +32,10 @@ namespace Setup
 
             GameObject instance = PrefabUtility.InstantiatePrefab(prefab) as GameObject;
 
-            EnemyController enemyCtrl = instance.GetComponent<EnemyController>();
-            if (enemyCtrl != null) Object.DestroyImmediate(enemyCtrl, true);
-
-            EntityStats entityStats = instance.GetComponent<EntityStats>();
-            if (entityStats != null) Object.DestroyImmediate(entityStats, true);
-
-            DestructibleProp destructible = instance.GetComponent<DestructibleProp>();
-            if (destructible == null) destructible = instance.AddComponent<DestructibleProp>();
+            Presentation.Entities.PropTileObject propTileObj = instance.GetComponent<Presentation.Entities.PropTileObject>();
+            if (propTileObj == null) propTileObj = instance.AddComponent<Presentation.Entities.PropTileObject>();
 
             PropSpawnData spawnData = FindAsset<PropSpawnData>("BarrelSpawnData t:PropSpawnData", "Assets/ScriptableObjects/BarrelSpawnData.asset");
-            if (spawnData != null)
-            {
-                SerializedObject destSo = new SerializedObject(destructible);
-                destSo.FindProperty("propData").objectReferenceValue = spawnData;
-                destSo.ApplyModifiedProperties();
-            }
 
             instance.layer = 6;
 
@@ -128,7 +116,7 @@ namespace Setup
             if (dm != null)
             {
                 dm.GenerateAndBuildDungeon();
-                DestructibleProp[] barrels = Object.FindObjectsByType<DestructibleProp>(FindObjectsSortMode.None);
+                Presentation.Entities.PropTileObject[] barrels = Object.FindObjectsByType<Presentation.Entities.PropTileObject>(FindObjectsSortMode.None);
                 Debug.Log($"[Dungeon Test] Dungeon generated successfully. Spawned barrels count: {barrels.Length}");
                 UnityEditor.SceneManagement.EditorSceneManager.MarkSceneDirty(dm.gameObject.scene);
             }

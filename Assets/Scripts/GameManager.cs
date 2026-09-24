@@ -1,6 +1,11 @@
 using System.Collections.Generic;
 using UnityEngine;
 using UnityEngine.Tilemaps;
+using Core.Board;
+using Core.Occupants;
+using Core.Scheduling;
+using Infrastructure;
+using Presentation.Board;
 
 public enum DoorType { EntryDoor, ExitDoor, SpecialExitDoor, SpecialEntryDoor }
 public enum RoomType { Start, Normal, Chest, Boss }
@@ -22,6 +27,9 @@ public class GameManager : MonoBehaviour
         }
         private set => _instance = value;
     }
+
+    public BoardTurnCoordinator TurnCoordinator { get; private set; }
+    public GameBoard Board => TurnCoordinator?.Board;
 
     [System.Serializable]
     public class RoomData
@@ -132,19 +140,32 @@ public class GameManager : MonoBehaviour
     private Transform playerTransform;
     private Coroutine enemyTurnCoroutine;
 
-    [Header("Turn Ticket Configuration")]
-    [SerializeField] private EnemyTicketSettings enemyTicketSettings;
-
-    public EnemyTicketSettings TicketSettings
-    {
-        get => enemyTicketSettings;
-        set => enemyTicketSettings = value;
-    }
-
     private void Awake()
     {
         if (Instance != null && Instance != this) { Destroy(gameObject); return; }
         Instance = this;
+
+        EffectsQueueRunner runner = Object.FindAnyObjectByType<EffectsQueueRunner>();
+        if (runner == null)
+        {
+            runner = gameObject.AddComponent<EffectsQueueRunner>();
+        }
+
+        TurnCoordinator = new BoardTurnCoordinator(new GameBoard(60, 60, new Vector2Int(-30, -30)), new TurnBatchScheduler(), runner);
+    }
+
+    public void InitializeBoard(GameBoard newBoard)
+    {
+        if (TurnCoordinator == null)
+        {
+            EffectsQueueRunner runner = Object.FindAnyObjectByType<EffectsQueueRunner>();
+            if (runner == null) runner = gameObject.AddComponent<EffectsQueueRunner>();
+            TurnCoordinator = new BoardTurnCoordinator(newBoard, new TurnBatchScheduler(), runner);
+        }
+        else
+        {
+            TurnCoordinator.SetBoard(newBoard);
+        }
     }
 
     private void Start()
@@ -153,6 +174,11 @@ public class GameManager : MonoBehaviour
         for (int i = 0; i < existing.Length; i++)
         {
             RegisterEnemy(existing[i]);
+        }
+
+        if (Board != null)
+        {
+            BoardEntityFactory.RegisterSceneEntities(Board, TurnCoordinator?.EffectsRunner);
         }
     }
 
@@ -201,7 +227,14 @@ public class GameManager : MonoBehaviour
     public void ClearEnemies()
     {
         activeEnemies.Clear();
-        TileReservationSystem.ClearAll();
+        if (Board != null)
+        {
+            var enemies = new List<EnemyOccupant>(Board.GetOccupantsOfType<EnemyOccupant>());
+            for (int i = 0; i < enemies.Count; i++)
+            {
+                Board.Remove(enemies[i]);
+            }
+        }
     }
 
     private void OnEntityDied(EntityDiedEvent evt)
@@ -214,6 +247,11 @@ public class GameManager : MonoBehaviour
 
     private void OnPlayerActionCompleted(PlayerActionCompletedEvent evt)
     {
+        if (TurnCoordinator != null && TurnCoordinator.IsTurnInProgress)
+        {
+            return;
+        }
+
         if (enemyTurnCoroutine != null)
         {
             StopCoroutine(enemyTurnCoroutine);
@@ -223,131 +261,14 @@ public class GameManager : MonoBehaviour
 
     private System.Collections.IEnumerator ExecuteEnemyTurn()
     {
-        // Clean up null or dead references
-        activeEnemies.RemoveAll(e => e == null || (e.Stats != null && e.Stats.IsDead));
-
-        if (activeEnemies.Count == 0)
+        if (TurnCoordinator != null)
+        {
+            yield return StartCoroutine(TurnCoordinator.RunEnemyTurnPhase());
+        }
+        else
         {
             EventBus<EnemyTurnCompletedEvent>.Raise(new EnemyTurnCompletedEvent());
-            yield break;
         }
-
-        if (playerTransform == null)
-        {
-            PlayerMovement player = Object.FindAnyObjectByType<PlayerMovement>();
-            if (player != null) playerTransform = player.transform;
-        }
-
-        TileReservationSystem.ClearAll();
-
-        Vector3 playerPos = playerTransform != null ? playerTransform.position : Vector3.zero;
-        activeEnemies.Sort((a, b) =>
-        {
-            int pa = a.GetMovePriority();
-            int pb = b.GetMovePriority();
-            if (pa != pb) return pa.CompareTo(pb);
-
-            float da = Vector3.Distance(a.transform.position, playerPos);
-            float db = Vector3.Distance(b.transform.position, playerPos);
-            return da.CompareTo(db);
-        });
-
-        int plannedCount = 0;
-        int skippedCount = 0;
-        int maxTickets = enemyTicketSettings != null ? enemyTicketSettings.MaxActiveFollowers : int.MaxValue;
-
-        for (int i = 0; i < activeEnemies.Count; i++)
-        {
-            EnemyBase enemy = activeEnemies[i];
-            if (enemy == null) continue;
-
-            if (plannedCount >= maxTickets)
-            {
-                enemy.PlannedPath = null;
-                skippedCount++;
-                continue;
-            }
-
-            MoveIntent intent = enemy.PlanMove(playerTransform);
-
-            if (intent.HasMove)
-            {
-                var reservationPath = new List<Vector2Int>(intent.Path);
-                if (intent.IsAttack && intent.PlayerPushTile.HasValue)
-                {
-                    reservationPath.Add(intent.PlayerPushTile.Value);
-                }
-
-                if (TileReservationSystem.TryReservePath(reservationPath, enemy))
-                {
-                    enemy.PlannedPath = intent.Path;
-                    enemy.CurrentIntent = intent;
-                    plannedCount++;
-                }
-                else
-                {
-                    EventBus<EnemyMoveBlockedEvent>.Raise(new EnemyMoveBlockedEvent(
-                        enemy.gameObject,
-                        intent.Path.Count > 0 ? intent.Path[intent.Path.Count - 1] : Vector2Int.zero
-                    ));
-                    enemy.PlannedPath = null;
-                    skippedCount++;
-                }
-            }
-            else
-            {
-                enemy.PlannedPath = null;
-                skippedCount++;
-            }
-        }
-
-        EventBus<EnemyTurnPlannedEvent>.Raise(new EnemyTurnPlannedEvent(plannedCount, skippedCount));
-
-        for (int i = 0; i < activeEnemies.Count; i++)
-        {
-            if (activeEnemies[i] != null && activeEnemies[i].PlannedPath != null)
-            {
-                activeEnemies[i].SetKinematic(true);
-            }
-        }
-
-        int pendingEnemies = 0;
-
-        for (int i = 0; i < activeEnemies.Count; i++)
-        {
-            EnemyBase enemy = activeEnemies[i];
-            if (enemy != null && enemy.PlannedPath != null)
-            {
-                pendingEnemies++;
-                StartCoroutine(RunSingleEnemyMove(enemy, () => pendingEnemies--));
-            }
-        }
-
-        while (pendingEnemies > 0)
-        {
-            yield return null;
-        }
-
-        for (int i = 0; i < activeEnemies.Count; i++)
-        {
-            if (activeEnemies[i] != null)
-            {
-                activeEnemies[i].SetKinematic(false);
-                activeEnemies[i].PlannedPath = null;
-            }
-        }
-
-        TileReservationSystem.ClearAll();
-        EventBus<EnemyTurnCompletedEvent>.Raise(new EnemyTurnCompletedEvent());
-    }
-
-    private System.Collections.IEnumerator RunSingleEnemyMove(EnemyBase enemy, System.Action onComplete)
-    {
-        if (enemy != null)
-        {
-            yield return StartCoroutine(enemy.ExecuteMove());
-        }
-        onComplete?.Invoke();
     }
 
     public void ConfigureDoorTiles(Tilemap tilemap, TileBase entryTile, TileBase exitTile, TileBase specialEntryTile, TileBase specialExitTile)
@@ -362,16 +283,58 @@ public class GameManager : MonoBehaviour
     public bool TryResolveDoor(Vector3Int cell, out DoorType doorType)
     {
         doorType = default;
-        if (doorTilemap == null) return false;
 
-        TileBase tile = doorTilemap.GetTile(cell);
-        if (tile == entranceDoorTile) doorType = DoorType.EntryDoor;
-        else if (tile == exitDoorTile) doorType = DoorType.ExitDoor;
-        else if (tile == specialExitDoorTile) doorType = DoorType.SpecialExitDoor;
-        else if (tile == specialEntranceDoorTile) doorType = DoorType.SpecialEntryDoor;
-        else return false;
+        if (doorTilemap != null)
+        {
+            TileBase tile = doorTilemap.GetTile(cell);
+            if (tile != null)
+            {
+                if (tile == entranceDoorTile)
+                {
+                    doorType = (DungeonDictionary.TryGetValue(CurrentRoomIndex, out var r) && r.Type == RoomType.Chest)
+                        ? DoorType.SpecialEntryDoor
+                        : DoorType.EntryDoor;
+                    return true;
+                }
+                if (tile == exitDoorTile)
+                {
+                    doorType = DoorType.ExitDoor;
+                    return true;
+                }
+                if (tile == specialExitDoorTile)
+                {
+                    doorType = DoorType.SpecialExitDoor;
+                    return true;
+                }
+                if (tile == specialEntranceDoorTile)
+                {
+                    doorType = DoorType.SpecialEntryDoor;
+                    return true;
+                }
+            }
+        }
 
-        return true;
+        if (DungeonDictionary != null && DungeonDictionary.TryGetValue(CurrentRoomIndex, out var currentRoom))
+        {
+            Vector2Int grid = new Vector2Int(cell.x, cell.y);
+            if (currentRoom.ExitDoorTile.HasValue && currentRoom.ExitDoorTile.Value == grid)
+            {
+                doorType = (currentRoom.ParentRoomIndex != -1) ? DoorType.SpecialExitDoor : DoorType.ExitDoor;
+                return true;
+            }
+            if (currentRoom.EntranceDoorTile.HasValue && currentRoom.EntranceDoorTile.Value == grid)
+            {
+                doorType = (currentRoom.Type == RoomType.Chest) ? DoorType.SpecialEntryDoor : DoorType.EntryDoor;
+                return true;
+            }
+        }
+
+        return false;
+    }
+
+    public bool TryResolveDoorAtTile(Vector2Int gridPos, out DoorType doorType)
+    {
+        return TryResolveDoor(new Vector3Int(gridPos.x, gridPos.y, 0), out doorType);
     }
 
     public static void TriggerDoor(DoorType type, Vector2Int doorTilePos)

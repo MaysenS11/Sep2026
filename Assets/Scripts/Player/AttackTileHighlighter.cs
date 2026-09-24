@@ -119,7 +119,7 @@ public class AttackTileHighlighter : MonoBehaviour
         {
             if (i < neededCount)
             {
-                Vector3 worldPos = TileReservationSystem.GetTileCenterWorld(targetTilesBuffer[i], transform.position.z);
+                Vector3 worldPos = Core.Board.BoardCoordinate.GridToWorldCenter(targetTilesBuffer[i], transform.position.z);
                 indicatorPool[i].transform.position = worldPos;
                 indicatorPool[i].SetActive(true);
             }
@@ -139,7 +139,7 @@ public class AttackTileHighlighter : MonoBehaviour
 
         if (indicatorPool.Count > 0 && indicatorPool[0] != null)
         {
-            Vector3 worldPos = TileReservationSystem.GetTileCenterWorld(cell, transform.position.z);
+            Vector3 worldPos = Core.Board.BoardCoordinate.GridToWorldCenter(cell, transform.position.z);
             indicatorPool[0].transform.position = worldPos;
             indicatorPool[0].SetActive(true);
         }

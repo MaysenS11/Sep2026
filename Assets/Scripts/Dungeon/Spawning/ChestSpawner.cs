@@ -203,6 +203,12 @@ namespace Dungeon.Spawning
             _spawnedChests.Add(chest);
             tileQuery.MarkOccupied(tile);
 
+            if (GameManager.Instance != null && GameManager.Instance.Board != null)
+            {
+                bool isChestRoom = room != null && room.Type == RoomType.Chest;
+                Infrastructure.BoardEntityFactory.CreateChest(chest, tile, GameManager.Instance.Board, isChestRoom, Presentation.Board.EffectsQueueRunner.Instance);
+            }
+
             EventBus<PropSpawnedEvent>.Raise(new PropSpawnedEvent(chest, tile, room));
             RegisterUndoInEditor(chest, label);
         }

@@ -47,7 +47,7 @@ namespace Core.Occupants
             MovePriority = movePriority;
             DetectionRange = detectionRange;
             MaxLineSteps = maxLineSteps;
-            UsesDiagonalAttack = usesDiagonalAttack;
+            UsesDiagonalAttack = (archetype == EnemyArchetype.Pawn) || usesDiagonalAttack;
             SkipNextTurn = false;
 
             // Enemies are NEVER pushable

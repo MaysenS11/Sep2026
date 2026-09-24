@@ -1,7 +1,7 @@
 using UnityEngine;
 using FMODUnity;
 
-public class PlayerStats : MonoBehaviour, IDamageable
+public class PlayerStats : MonoBehaviour
 {
     [Header("Health Settings")]
     [SerializeField] private int maxHealth = 3;
@@ -163,7 +163,7 @@ public class PlayerStats : MonoBehaviour, IDamageable
     }
 
     [Header("Common Player Defaults")]
-    [SerializeField] private int defaultStartHealth = 16;
+    [SerializeField] private int defaultStartHealth = 6;
     [SerializeField] private Color lockedTint = new Color(0.25f, 0.25f, 0.25f, 1f);
 
     public Color LockedTint => lockedTint;
@@ -284,7 +284,6 @@ public class PlayerStats : MonoBehaviour, IDamageable
     {
         hasPlayedLowLifeSound = false;
         EventBus<EntityDiedEvent>.Raise(new EntityDiedEvent(gameObject));
-        Debug.Log("Player has died.");
     }
 
     public void ResetHealth()

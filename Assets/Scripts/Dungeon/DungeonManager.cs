@@ -143,8 +143,14 @@ namespace Dungeon
             }
             else if (generatedRooms != null && generatedRooms.Count > 0)
             {
+                if (GameManager.Instance != null)
+                {
+                    var newBoard = Infrastructure.DungeonBridge.BuildBoardFromDungeon(generatedRooms, 10, fillFloorTilemap, borderFloorTilemap);
+                    GameManager.Instance.InitializeBoard(newBoard);
+                }
                 PublishDungeonData();
                 PositionPlayerAtStartRoom();
+                RegisterSceneEntitiesOnBoard();
                 CameraBounds cameraBounds = Object.FindAnyObjectByType<CameraBounds>();
                 if (cameraBounds != null)
                 {
@@ -253,9 +259,16 @@ namespace Dungeon
             }
             SpawnRoomContents();
 
+            if (GameManager.Instance != null)
+            {
+                var newBoard = Infrastructure.DungeonBridge.BuildBoardFromDungeon(generatedRooms, 10, fillFloorTilemap, borderFloorTilemap);
+                GameManager.Instance.InitializeBoard(newBoard);
+            }
+
             PublishDungeonData();
 
             PositionPlayerAtStartRoom();
+            RegisterSceneEntitiesOnBoard();
 
             CameraBounds cameraBounds = Object.FindAnyObjectByType<CameraBounds>();
             if (cameraBounds != null)
@@ -296,7 +309,24 @@ namespace Dungeon
                     EditorUtility.SetDirty(playerMovement.gameObject);
 #endif
                 }
+
+                if (GameManager.Instance != null && GameManager.Instance.Board != null)
+                {
+                    Vector2Int gridPos = GeneratedRooms[0].CenterTile;
+                    int maxHp = playerMovement.TryGetComponent<PlayerStats>(out var pStats) ? pStats.MaxHealth : 6;
+                    int atk = pStats != null ? pStats.TotalAttackDamage : 2;
+                    Infrastructure.BoardEntityFactory.CreatePlayer(playerMovement.gameObject, gridPos, GameManager.Instance.Board, maxHp, atk, Presentation.Board.EffectsQueueRunner.Instance);
+                }
             }
+        }
+
+        private void RegisterSceneEntitiesOnBoard()
+        {
+            if (GameManager.Instance == null || GameManager.Instance.Board == null)
+            {
+                return;
+            }
+            Infrastructure.BoardEntityFactory.RegisterSceneEntities(GameManager.Instance.Board, Presentation.Board.EffectsQueueRunner.Instance);
         }
 
         private void SpawnRoomContents()
@@ -333,13 +363,22 @@ namespace Dungeon
             if (debugTilemap != null) debugTilemap.ClearAllTiles();
             if (objectTilemap != null) objectTilemap.ClearAllTiles();
 
+            if (GameManager.Instance != null && GameManager.Instance.Board != null)
+            {
+                GameManager.Instance.Board.ClearOccupants();
+            }
+            if (Presentation.Board.EffectsQueueRunner.Instance != null)
+            {
+                Presentation.Board.EffectsQueueRunner.Instance.ClearRegistry();
+            }
+
             RegisterDefaultSpawners();
             for (int s = 0; s < _spawners.Count; s++)
             {
                 _spawners[s].ClearSpawnedContent();
             }
 
-            var destructibles = GetComponentsInChildren<DestructibleProp>(true);
+            var destructibles = GetComponentsInChildren<Presentation.Entities.PropTileObject>(true);
             for (int i = 0; i < destructibles.Length; i++)
             {
                 if (destructibles[i] != null)

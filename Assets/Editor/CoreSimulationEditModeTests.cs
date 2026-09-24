@@ -28,5 +28,17 @@ namespace Tests.Editor
         {
             SchedulingTests.RunAllTests();
         }
+
+        [Test]
+        public void Presentation_AllPhase5Tests_Pass()
+        {
+            PresentationTests.RunAllTests();
+        }
+
+        [Test]
+        public void Integration_AllPhase6Tests_Pass()
+        {
+            IntegrationTurnLoopTests.RunAllTests();
+        }
     }
 }

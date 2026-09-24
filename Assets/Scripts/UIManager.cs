@@ -131,19 +131,25 @@ public class UIManager : MonoBehaviour
             InitializeHearts();
         }
 
-        int halfHeartsRemaining = Mathf.Max(0, currentHealth / 2);
+        int totalSlots = registeredHearts.Count;
+        if (totalSlots == 0) return;
 
-        for (int i = 0; i < registeredHearts.Count; i++)
+        float healthPerSlot = (maxHealth > 0) ? (float)maxHealth / totalSlots : 2f;
+        float currentHp = Mathf.Clamp(currentHealth, 0, maxHealth > 0 ? maxHealth : totalSlots * 2);
+
+        for (int i = 0; i < totalSlots; i++)
         {
             HeartSlotItem slot = registeredHearts[i];
-            int heartValue = (i + 1) * 2;
+            float slotStartHp = i * healthPerSlot;
+            float slotFullHp = (i + 1) * healthPerSlot;
+            float slotHalfHp = slotStartHp + (healthPerSlot * 0.5f);
 
-            if (halfHeartsRemaining >= heartValue)
+            if (currentHp >= slotFullHp - 0.001f)
             {
                 if (slot.Half != null) slot.Half.SetActive(true);
                 if (slot.Full != null) slot.Full.SetActive(true);
             }
-            else if (halfHeartsRemaining == heartValue - 1)
+            else if (currentHp >= slotHalfHp - 0.001f || (healthPerSlot <= 2f && currentHp > slotStartHp))
             {
                 if (slot.Half != null) slot.Half.SetActive(true);
                 if (slot.Full != null) slot.Full.SetActive(false);

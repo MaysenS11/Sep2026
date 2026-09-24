@@ -1,6 +1,6 @@
 using UnityEngine;
 
-public class EntityStats : MonoBehaviour, IDamageable
+public class EntityStats : MonoBehaviour
 {
     [Header("Stats")]
     [SerializeField] private int maxHealth = 10;

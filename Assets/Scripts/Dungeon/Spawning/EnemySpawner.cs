@@ -229,6 +229,13 @@ namespace Dungeon.Spawning
             {
                 _spawnedEnemies.Add(bossObj);
                 RegisterUndoInEditor(bossObj, "King Boss");
+
+                if (GameManager.Instance != null && GameManager.Instance.Board != null)
+                {
+                    Vector2Int bTile = bossRoom.GetWorldBossTile(room.WorldOriginTile);
+                    EnemyData bossData = bossObj.TryGetComponent<EnemyBase>(out var eb) ? eb.Data : null;
+                    Infrastructure.BoardEntityFactory.CreateEnemy(bossObj, bTile, GameManager.Instance.Board, Core.Occupants.EnemyArchetype.Queen, bossData, Presentation.Board.EffectsQueueRunner.Instance);
+                }
             }
 
             Vector2Int bossTile = bossRoom.GetWorldBossTile(room.WorldOriginTile);
@@ -368,6 +375,20 @@ namespace Dungeon.Spawning
                 enemyBase.CurrentRoomIndex = roomIndex;
             }
 
+            if (GameManager.Instance != null && GameManager.Instance.Board != null)
+            {
+                Core.Occupants.EnemyArchetype archetype = Core.Occupants.EnemyArchetype.Pawn;
+                switch (data.MovementPattern)
+                {
+                    case EnemyMovementPattern.SingleMove: archetype = Core.Occupants.EnemyArchetype.Pawn; break;
+                    case EnemyMovementPattern.KnightMove: archetype = Core.Occupants.EnemyArchetype.Knight; break;
+                    case EnemyMovementPattern.BishopMove: archetype = Core.Occupants.EnemyArchetype.Bishop; break;
+                    case EnemyMovementPattern.RookMove: archetype = Core.Occupants.EnemyArchetype.Rook; break;
+                    case EnemyMovementPattern.QueenMove: archetype = Core.Occupants.EnemyArchetype.Queen; break;
+                }
+                Infrastructure.BoardEntityFactory.CreateEnemy(enemyObj, tile, GameManager.Instance.Board, archetype, data, Presentation.Board.EffectsQueueRunner.Instance);
+            }
+
             RegisterUndoInEditor(enemyObj, data.EnemyName);
         }
 
@@ -377,9 +398,36 @@ namespace Dungeon.Spawning
             GameObject enemyObj = Object.Instantiate(prefab, worldPos, Quaternion.identity, parentContainer);
             _spawnedEnemies.Add(enemyObj);
 
+            EnemyData data = null;
             if (enemyObj.TryGetComponent<EnemyBase>(out var enemyBase))
             {
                 enemyBase.CurrentRoomIndex = roomIndex;
+                data = enemyBase.Data;
+            }
+
+            if (GameManager.Instance != null && GameManager.Instance.Board != null)
+            {
+                Core.Occupants.EnemyArchetype archetype = Core.Occupants.EnemyArchetype.Pawn;
+                if (data != null)
+                {
+                    switch (data.MovementPattern)
+                    {
+                        case EnemyMovementPattern.SingleMove: archetype = Core.Occupants.EnemyArchetype.Pawn; break;
+                        case EnemyMovementPattern.KnightMove: archetype = Core.Occupants.EnemyArchetype.Knight; break;
+                        case EnemyMovementPattern.BishopMove: archetype = Core.Occupants.EnemyArchetype.Bishop; break;
+                        case EnemyMovementPattern.RookMove: archetype = Core.Occupants.EnemyArchetype.Rook; break;
+                        case EnemyMovementPattern.QueenMove: archetype = Core.Occupants.EnemyArchetype.Queen; break;
+                    }
+                }
+                else if (prefab != null)
+                {
+                    string lower = prefab.name.ToLowerInvariant();
+                    if (lower.Contains("knight")) archetype = Core.Occupants.EnemyArchetype.Knight;
+                    else if (lower.Contains("bishop")) archetype = Core.Occupants.EnemyArchetype.Bishop;
+                    else if (lower.Contains("rook")) archetype = Core.Occupants.EnemyArchetype.Rook;
+                    else if (lower.Contains("queen") || lower.Contains("king")) archetype = Core.Occupants.EnemyArchetype.Queen;
+                }
+                Infrastructure.BoardEntityFactory.CreateEnemy(enemyObj, tile, GameManager.Instance.Board, archetype, data, Presentation.Board.EffectsQueueRunner.Instance);
             }
 
             RegisterUndoInEditor(enemyObj, prefab.name);

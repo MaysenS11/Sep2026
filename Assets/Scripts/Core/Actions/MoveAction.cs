@@ -41,16 +41,10 @@ namespace Core.Actions
             Vector2Int startPos = Occupant.GridPosition;
             if (startPos == Destination) return effects;
 
-            List<Vector2Int> resolvedPath;
+            List<Vector2Int> resolvedPath = new List<Vector2Int> { startPos };
 
             if (Path != null && Path.Length > 0)
             {
-                resolvedPath = new List<Vector2Int>();
-                if (Path[0] != startPos)
-                {
-                    resolvedPath.Add(startPos);
-                }
-
                 for (int i = 0; i < Path.Length; i++)
                 {
                     Vector2Int step = Path[i];

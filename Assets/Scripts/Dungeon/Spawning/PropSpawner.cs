@@ -136,6 +136,26 @@ namespace Dungeon.Spawning
                 _spawnedProps.Add(propObj);
                 tileQuery.MarkOccupied(spawnTile);
 
+                if (GameManager.Instance != null && GameManager.Instance.Board != null)
+                {
+                    bool isPillar = (data != null && data.PropName != null && data.PropName.ToLowerInvariant().Contains("pillar")) ||
+                                    (data != null && data.Prefab != null && data.Prefab.name.ToLowerInvariant().Contains("pillar"));
+                    if (isPillar)
+                    {
+                        Infrastructure.BoardEntityFactory.CreateObstacle(propObj, spawnTile, GameManager.Instance.Board, Core.Occupants.ObstacleType.Pillar, Presentation.Board.EffectsQueueRunner.Instance);
+                    }
+                    else
+                    {
+                        Core.Occupants.DestructiblePropType propType = Core.Occupants.DestructiblePropType.Barrel;
+                        if (data != null && data.PropName != null && data.PropName.ToLowerInvariant().Contains("crate"))
+                        {
+                            propType = Core.Occupants.DestructiblePropType.Crate;
+                        }
+                        int hp = 1;
+                        Infrastructure.BoardEntityFactory.CreateProp(propObj, spawnTile, GameManager.Instance.Board, propType, hp, Presentation.Board.EffectsQueueRunner.Instance);
+                    }
+                }
+
                 EventBus<PropSpawnedEvent>.Raise(new PropSpawnedEvent(propObj, spawnTile, room));
                 RegisterUndoInEditor(propObj, data.PropName);
             }

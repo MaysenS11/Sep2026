@@ -86,18 +86,11 @@ public class UIAudioManager : MonoBehaviour
 
     private void OnPropDestroyed(PropDestroyedEvent evt)
     {
-        if (evt.Prop != null && evt.Prop.TryGetComponent<DestructibleProp>(out var prop))
+        if (evt.Prop != null && (evt.Prop.name.Contains("Barrel") || evt.Prop.name.Contains("barrel") || evt.Prop.name.Contains("Prop")))
         {
-            if (prop.PropData != null && prop.PropData.PropName == "Barrel")
+            if (!destroyBarrelSound.IsNull)
             {
-                if (!destroyBarrelSound.IsNull)
-                {
-                    RuntimeManager.PlayOneShot(destroyBarrelSound);
-                }
-                else
-                {
-                    Debug.LogWarning("[UIAudioManager] destroyBarrelSound is not assigned.");
-                }
+                RuntimeManager.PlayOneShot(destroyBarrelSound);
             }
         }
     }

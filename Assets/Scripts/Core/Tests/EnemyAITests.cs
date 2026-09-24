@@ -62,30 +62,34 @@ namespace Core.Tests
             Assert(distantPawn.GridPosition == new Vector2Int(1, 2), "Pawn moved to (1,2)");
             board.Remove(distantPawn);
 
-            // 2. Pawn cardinally adjacent to player: attacks and pushes player North
-            var adjacentPawn = new EnemyOccupant(EnemyArchetype.Pawn, attackDamage: 2, initialPosition: new Vector2Int(1, 3));
-            board.Place(adjacentPawn, new Vector2Int(1, 3));
+            // 2. Pawn diagonally adjacent to player: attacks and pushes player diagonally
+            var diagBoard = new GameBoard(6, 6);
+            var diagPlayer = new PlayerOccupant(maxHealth: 6, initialPosition: new Vector2Int(2, 4));
+            diagBoard.Place(diagPlayer, new Vector2Int(2, 4));
 
-            var attackIntent = EnemyAIFactory.EvaluateEnemy(board, adjacentPawn);
-            Assert(attackIntent.IntentType == IntentType.AttackPush, "Adjacent pawn intends to AttackPush");
-            Assert(attackIntent.TargetPosition == new Vector2Int(1, 4), "Pawn targets player tile (1,4)");
-            Assert(attackIntent.PushDirection == BoardCoordinate.North, "Push direction is North");
+            var adjacentPawn = new EnemyOccupant(EnemyArchetype.Pawn, attackDamage: 2, initialPosition: new Vector2Int(1, 3));
+            diagBoard.Place(adjacentPawn, new Vector2Int(1, 3));
+
+            var attackIntent = EnemyAIFactory.EvaluateEnemy(diagBoard, adjacentPawn);
+            Assert(attackIntent.IntentType == IntentType.AttackPush, "Diagonally adjacent pawn intends to AttackPush");
+            Assert(attackIntent.TargetPosition == new Vector2Int(2, 4), "Pawn targets player tile (2,4)");
+            Assert(attackIntent.PushDirection == new Vector2Int(1, 1), "Push direction is NorthEast");
             Assert(attackIntent.GeneratedAction is AttackPushAction, "Generates AttackPushAction");
 
-            attackIntent.GeneratedAction.Execute(board);
-            Assert(player.GridPosition == new Vector2Int(1, 5), "Player pushed to (1,5)");
-            Assert(adjacentPawn.GridPosition == new Vector2Int(1, 4), "Pawn moved into former player tile (1,4)");
-            Assert(player.CurrentHealth == 4, "Player took 2 damage (HP: 4/6)");
+            attackIntent.GeneratedAction.Execute(diagBoard);
+            Assert(diagPlayer.GridPosition == new Vector2Int(3, 5), "Player pushed to (3,5)");
+            Assert(adjacentPawn.GridPosition == new Vector2Int(2, 4), "Pawn moved into former player tile (2,4)");
+            Assert(diagPlayer.CurrentHealth == 4, "Player took 2 damage (HP: 4/6)");
         }
 
         private static void TestPawnBlockedPushRecoil()
         {
             var board = new GameBoard(6, 6);
-            var player = new PlayerOccupant(maxHealth: 6, initialPosition: new Vector2Int(1, 4));
-            board.Place(player, new Vector2Int(1, 4));
+            var player = new PlayerOccupant(maxHealth: 6, initialPosition: new Vector2Int(2, 4));
+            board.Place(player, new Vector2Int(2, 4));
 
-            // Wall directly behind player at (1, 5)
-            board.SetWall(new Vector2Int(1, 5), true);
+            // Wall directly behind player diagonally at (3, 5)
+            board.SetWall(new Vector2Int(3, 5), true);
 
             var pawn = new EnemyOccupant(EnemyArchetype.Pawn, maxHealth: 4, initialPosition: new Vector2Int(1, 3));
             board.Place(pawn, new Vector2Int(1, 3));
@@ -96,7 +100,7 @@ namespace Core.Tests
             Assert(intent.GeneratedAction is BlockedPushAction, "Generates BlockedPushAction");
 
             intent.GeneratedAction.Execute(board);
-            Assert(player.GridPosition == new Vector2Int(1, 4), "Player remains at (1,4)");
+            Assert(player.GridPosition == new Vector2Int(2, 4), "Player remains at (2,4)");
             Assert(pawn.GridPosition == new Vector2Int(1, 3), "Pawn remains at origin (1,3)");
             Assert(pawn.CurrentHealth == 3, "Pawn took 1 recoil damage");
             Assert(pawn.SkipNextTurn, "Pawn is stunned for next turn");
