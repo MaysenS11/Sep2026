@@ -13672,7 +13672,7 @@ BoxCollider2D:
     drawMode: 0
     adaptiveTiling: 0
   m_AutoTiling: 0
-  m_Size: {x: 22, y: 14}
+  m_Size: {x: 22.5, y: 14}
   m_EdgeRadius: 0
 --- !u!4 &61350824
 Transform:
@@ -25681,8 +25681,8 @@ Camera:
   m_NormalizedViewPortRect:
     serializedVersion: 2
     x: 0
-    y: 0
-    width: 1
+    y: -0.11111111
+    width: 1.528125
     height: 1
   near clip plane: 0.3
   far clip plane: 1000
@@ -50074,12 +50074,37 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Dungeon.BossRoomTemplate
   roomSize: {x: 18, y: 18}
   doorMarker: {fileID: 476659812}
-  kingSpawnPoint: {fileID: 722363392}
-  kingPrefab: {fileID: 1228558132822369691, guid: 84a46e027273395478dfa34996b66bc2, type: 3}
   fillFloorTilemap: {fileID: 505853867}
   borderFloorTilemap: {fileID: 371469966}
   wallTilemap: {fileID: 1046485954}
   roofTilemap: {fileID: 1606058840}
+  pawnData: {fileID: 0}
+  knightData: {fileID: 0}
+  bishopData: {fileID: 0}
+  rookData: {fileID: 0}
+  queenData: {fileID: 0}
+  pawnAmount: 0
+  knightAmount: 0
+  bishopAmount: 0
+  rookAmount: 0
+  queenAmount: 0
+  queenBand:
+    distanceToBoss: 2
+    bandWidth: 1.5
+  rookBand:
+    distanceToBoss: 4
+    bandWidth: 2
+  knightAndBishopBand:
+    distanceToBoss: 6
+    bandWidth: 2
+  pawnBand:
+    distanceToBoss: 8.5
+    bandWidth: 2.5
+  pawnBossDamage: 1
+  knightBossDamage: 2
+  bishopBossDamage: 2
+  rookBossDamage: 3
+  queenBossDamage: 4
 --- !u!1 &937617938
 GameObject:
   m_ObjectHideFlags: 0
