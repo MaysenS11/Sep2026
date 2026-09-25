@@ -107,17 +107,17 @@ public class GameSpawnSettings : ScriptableObject
         }
     }
 
-    public float GetWeightForPattern(EnemyMovementPattern pattern)
+    public float GetWeightForArchetype(Core.Occupants.EnemyArchetype archetype)
     {
-        switch (pattern)
+        switch (archetype)
         {
-            case EnemyMovementPattern.SingleMove:
+            case Core.Occupants.EnemyArchetype.Pawn:
                 return pawnWeight;
-            case EnemyMovementPattern.KnightMove:
+            case Core.Occupants.EnemyArchetype.Knight:
                 return knightWeight;
-            case EnemyMovementPattern.RookMove:
+            case Core.Occupants.EnemyArchetype.Rook:
                 return rookWeight;
-            case EnemyMovementPattern.BishopMove:
+            case Core.Occupants.EnemyArchetype.Bishop:
                 return bishopWeight;
             default:
                 return 1f;
@@ -127,7 +127,7 @@ public class GameSpawnSettings : ScriptableObject
     public float GetWeightForEnemy(EnemyData enemyData)
     {
         if (enemyData == null) return 1f;
-        return GetWeightForPattern(enemyData.MovementPattern);
+        return GetWeightForArchetype(enemyData.Archetype);
     }
 
     public float GetWeightForEnemy(string enemyName)

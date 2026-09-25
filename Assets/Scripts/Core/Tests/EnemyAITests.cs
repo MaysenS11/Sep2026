@@ -31,8 +31,9 @@ namespace Core.Tests
             TestStunnedEnemySkipsTurnAndClearsStun();
             TestDetectionRange();
             TestBlockedLineOfSightDoesNotAttackThroughObstacle();
+            TestMaxLineStepsLimitsAttackRange();
 
-            Debug.Log("[EnemyAITests] All 13 Phase 3 test cases passed successfully!");
+            Debug.Log("[EnemyAITests] All 14 Phase 3 test cases passed successfully!");
         }
 
         private static void Assert(bool condition, string testName)
@@ -112,8 +113,8 @@ namespace Core.Tests
             var player = new PlayerOccupant(maxHealth: 6, initialPosition: new Vector2Int(2, 2));
             board.Place(player, new Vector2Int(2, 2));
 
-            // Pawn configured with UsesDiagonalAttack = true at (1, 1)
-            var diagPawn = new EnemyOccupant(EnemyArchetype.Pawn, usesDiagonalAttack: true, initialPosition: new Vector2Int(1, 1));
+            // Pawn attacks diagonally by default
+            var diagPawn = new EnemyOccupant(EnemyArchetype.Pawn, initialPosition: new Vector2Int(1, 1));
             board.Place(diagPawn, new Vector2Int(1, 1));
 
             var intent = EnemyAIFactory.EvaluateEnemy(board, diagPawn);
@@ -337,18 +338,12 @@ namespace Core.Tests
             var player = new PlayerOccupant(initialPosition: new Vector2Int(0, 6));
             board.Place(player, new Vector2Int(0, 6));
 
-            // Rook with DetectionRange = 4 at (0, 0). Player is 6 tiles away (> 4)
-            var rook = new EnemyOccupant(EnemyArchetype.Rook, detectionRange: 4, initialPosition: new Vector2Int(0, 0));
+            // Rook at (0, 0) with sufficient reach. Player is 6 tiles away.
+            var rook = new EnemyOccupant(EnemyArchetype.Rook, maxLineSteps: 10, initialPosition: new Vector2Int(0, 0));
             board.Place(rook, new Vector2Int(0, 0));
 
             var intentOut = EnemyAIFactory.EvaluateEnemy(board, rook);
-            Assert(intentOut.IntentType == IntentType.Wait, "Enemy beyond detection range must Wait");
-
-            // Move player to (0, 4), distance is now 4 (within detection range)
-            board.Move(player, new Vector2Int(0, 4));
-
-            var intentIn = EnemyAIFactory.EvaluateEnemy(board, rook);
-            Assert(intentIn.IntentType == IntentType.AttackPush, "Enemy within detection range acts on player");
+            Assert(intentOut.IntentType == IntentType.AttackPush, "Enemy acts on player regardless of distance (no range cutoff)");
         }
 
         private static void TestBlockedLineOfSightDoesNotAttackThroughObstacle()
@@ -357,7 +352,7 @@ namespace Core.Tests
             var player = new PlayerOccupant(initialPosition: new Vector2Int(0, 5));
             board.Place(player, new Vector2Int(0, 5));
 
-            var rook = new EnemyOccupant(EnemyArchetype.Rook, initialPosition: new Vector2Int(0, 0));
+            var rook = new EnemyOccupant(EnemyArchetype.Rook, maxLineSteps: 8, initialPosition: new Vector2Int(0, 0));
             board.Place(rook, new Vector2Int(0, 0));
 
             // Place an impassable pillar at (0, 3) blocking the line of sight between Rook and Player
@@ -370,6 +365,20 @@ namespace Core.Tests
                 "Rook cannot attack through intervening pillar");
             // Rook should advance up to pillar or choose another path
             Assert(intent.TargetPosition.y < 3, "Rook target position stops before the pillar");
+        }
+
+        private static void TestMaxLineStepsLimitsAttackRange()
+        {
+            var board = new GameBoard(8, 8);
+            var player = new PlayerOccupant(maxHealth: 6, initialPosition: new Vector2Int(1, 5));
+            board.Place(player, new Vector2Int(1, 5));
+
+            var rook = new EnemyOccupant(EnemyArchetype.Rook, maxLineSteps: 2, initialPosition: new Vector2Int(1, 1));
+            board.Place(rook, new Vector2Int(1, 1));
+
+            var intent = EnemyAIFactory.EvaluateEnemy(board, rook);
+            Assert(intent.IntentType == IntentType.Move, "Rook cannot attack player beyond MaxLineSteps; chooses Move");
+            Assert(intent.TargetPosition == new Vector2Int(1, 3), "Rook advances max 2 steps towards player to (1, 3)");
         }
 
 #if UNITY_EDITOR

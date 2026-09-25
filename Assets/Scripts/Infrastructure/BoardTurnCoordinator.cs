@@ -24,6 +24,7 @@ namespace Infrastructure
         public float PlayerMoveDuration { get; set; } = 0.2f;
         public float PlayerAttackDuration { get; set; } = 0.25f;
         public float EnemyTurnTotalDuration { get; set; } = 0.8f;
+        public EnemySettings EnemySettings { get; set; }
 
         public bool IsTurnInProgress { get; private set; }
         public bool IsPlayerInputLocked => IsTurnInProgress;
@@ -305,31 +306,6 @@ namespace Infrastructure
                 if (enemy.IsDead)
                 {
                     Board.Remove(enemy);
-
-                    // Minion-linked damage to King
-                    if (enemy.Archetype != EnemyArchetype.King)
-                    {
-                        EnemyOccupant king = null;
-                        foreach (var occ in Board.GetOccupantsOfType<EnemyOccupant>())
-                        {
-                            if (occ.Archetype == EnemyArchetype.King && !occ.IsDead)
-                            {
-                                king = occ;
-                                break;
-                            }
-                        }
-
-                        if (king != null)
-                        {
-                            int minionDmg = enemy.AttackDamage > 0 ? enemy.AttackDamage : 1;
-                            var kingEffects = king.TakeDamage(minionDmg, enemy);
-                            emittedEffects.AddRange(kingEffects);
-                            if (king.IsDead)
-                            {
-                                Board.Remove(king);
-                            }
-                        }
-                    }
                 }
             }
             else if (occupant is ChestOccupant chest)
@@ -438,8 +414,10 @@ namespace Infrastructure
                 enactedActions.Add(enacted);
             }
 
-            // Build path-disjoint batches with evenly divided time slices
-            batches = BatchScheduler.BuildBatches(enactedActions, EnemyTurnTotalDuration);
+            float enemyDuration = (EnemySettings != null && EnemySettings.EnemyMoveDuration > 0f)
+                ? EnemySettings.EnemyMoveDuration
+                : EnemyTurnTotalDuration;
+            batches = BatchScheduler.BuildBatches(enactedActions, enemyDuration);
             return enactedActions;
         }
 

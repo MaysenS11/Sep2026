@@ -28,6 +28,8 @@ namespace Core.Tests
             Debug.Log("[PlanETests] Starting Plan E test suite...");
 
             RunNamedTest("TestChest_4StatPool_ExcludesSpeed", TestChest_4StatPool_ExcludesSpeed);
+            RunNamedTest("TestChest_TierProgression", TestChest_TierProgression);
+            RunNamedTest("TestChest_HealBelowHalfCondition", TestChest_HealBelowHalfCondition);
             RunNamedTest("TestChest_StatUpgradeTiersAndValues", TestChest_StatUpgradeTiersAndValues);
             RunNamedTest("TestMinimap_RevealAndAutoDiscoverChildChest", TestMinimap_RevealAndAutoDiscoverChildChest);
             RunNamedTest("TestThreatOverlay_KnightLShapedThreats", TestThreatOverlay_KnightLShapedThreats);
@@ -36,7 +38,7 @@ namespace Core.Tests
             RunNamedTest("TestKeyRebinding_DoubleBindingValidation", TestKeyRebinding_DoubleBindingValidation);
             RunNamedTest("TestBestCompletionTime_And_MaskKeyAward", TestBestCompletionTime_And_MaskKeyAward);
 
-            Debug.Log("[PlanETests] All 8 Plan E test cases passed successfully!");
+            Debug.Log("[PlanETests] All 10 Plan E test cases passed successfully!");
         }
 
         private static void RunNamedTest(string name, Action testAction)
@@ -82,6 +84,79 @@ namespace Core.Tests
                     Assert(isValidStat, $"Stat {card.StatType} must belong to the 4-stat pool");
                 }
             }
+        }
+
+        public static void TestChest_TierProgression()
+        {
+            var player = new PlayerOccupant(maxHealth: 6, attackDamage: 3);
+            var db = ScriptableObject.CreateInstance<StatCardDatabase>();
+
+            var initialCards = CardGenerator.GenerateCards(player, db);
+            foreach (var card in initialCards)
+            {
+                if (!card.IsHeal)
+                {
+                    Assert(card.Tier == 1, $"Expected tier 1 for unupgraded stat {card.StatType}, got {card.Tier}");
+                }
+            }
+
+            player.UpgradeStat(StatType.AttackDamage);
+            Assert(player.GetUpgradeTier(StatType.AttackDamage) == 1, "Player should be tier 1 attack");
+
+            bool foundTier2Attack = false;
+            for (int trial = 0; trial < 20; trial++)
+            {
+                var cards = CardGenerator.GenerateCards(player, db);
+                foreach (var card in cards)
+                {
+                    if (card.StatType == StatType.AttackDamage)
+                    {
+                        Assert(card.Tier == 2, $"Expected tier 2 for once-upgraded attack, got {card.Tier}");
+                        foundTier2Attack = true;
+                    }
+                }
+            }
+            Assert(foundTier2Attack, "Should have generated tier 2 attack card across trials");
+
+            player.UpgradeStat(StatType.AttackDamage);
+            Assert(player.GetUpgradeTier(StatType.AttackDamage) == 2, "Player should be tier 2 attack");
+
+            for (int trial = 0; trial < 10; trial++)
+            {
+                var cards = CardGenerator.GenerateCards(player, db);
+                foreach (var card in cards)
+                {
+                    Assert(card.StatType != StatType.AttackDamage, "Maxed attack stat must never generate again");
+                }
+            }
+        }
+
+        public static void TestChest_HealBelowHalfCondition()
+        {
+            var player = new PlayerOccupant(maxHealth: 6, attackDamage: 3);
+            var db = ScriptableObject.CreateInstance<StatCardDatabase>();
+
+            player.UpgradeStat(StatType.Health);
+            player.UpgradeStat(StatType.Health);
+            Assert(player.GetUpgradeTier(StatType.Health) == 2, "Health should be max tier 2");
+
+            player.UpgradeStat(StatType.AttackDamage);
+            player.UpgradeStat(StatType.AttackDamage);
+            player.UpgradeStat(StatType.Defence);
+            player.UpgradeStat(StatType.Defence);
+
+            Assert(player.CurrentHealth == player.MaxHealth, "Player should be at full health");
+
+            player.TakeDamage(player.MaxHealth / 2 + 1 + player.Defence);
+            Assert(player.CurrentHealth <= player.MaxHealth / 2f, "Player health should now be <= 50%");
+
+            var damagedCards = CardGenerator.GenerateCards(player, db);
+            bool hasHeal = false;
+            foreach (var card in damagedCards)
+            {
+                if (card.IsHeal) hasHeal = true;
+            }
+            Assert(hasHeal, "Damaged player (<= 50% health) with maxed stats should receive Heal cards");
         }
 
         public static void TestChest_StatUpgradeTiersAndValues()

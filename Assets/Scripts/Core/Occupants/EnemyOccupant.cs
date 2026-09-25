@@ -12,8 +12,7 @@ namespace Core.Occupants
         Knight,
         Bishop,
         Rook,
-        Queen,
-        King
+        Queen
     }
 
     /// Pure C# authoritative data model for an enemy unit on the GameBoard.
@@ -23,14 +22,26 @@ namespace Core.Occupants
         public EnemyArchetype Archetype { get; }
         public int AttackDamage { get; set; }
         public int MovePriority { get; set; }
-        public int DetectionRange { get; set; }
         public int MaxLineSteps { get; set; }
-        public bool UsesDiagonalAttack { get; set; }
+        public bool UsesDiagonalAttack => Archetype == EnemyArchetype.Pawn;
         public EnemySmartness IntelligenceLevel { get; set; }
-        public bool IsImmobile { get; set; }
-        public bool ImmuneToDirectAttacks { get; set; }
+        public EnemySmartness Smartness
+        {
+            get => IntelligenceLevel;
+            set => IntelligenceLevel = value;
+        }
+        public bool IsBoss { get; set; }
+        public bool IsImmobile
+        {
+            get => IsBoss;
+            set => IsBoss = value;
+        }
+        public bool ImmuneToDirectAttacks
+        {
+            get => IsBoss;
+            set => IsBoss = value;
+        }
 
-        /// If true, this enemy skips its next action (e.g. from damage stun or recoil).
         public bool SkipNextTurn { get; set; }
 
         public EnemyOccupant(
@@ -38,13 +49,12 @@ namespace Core.Occupants
             int maxHealth = 4,
             int attackDamage = 1,
             int movePriority = 0,
-            int detectionRange = 6,
-            int maxLineSteps = 3,
-            bool usesDiagonalAttack = false,
+            int maxLineSteps = -1,
             Vector2Int initialPosition = default,
             int id = 0,
             string name = null,
-            EnemySmartness? intelligenceLevel = null,
+            EnemySmartness intelligenceLevel = EnemySmartness.Mid,
+            bool isBoss = false,
             bool isImmobile = false,
             bool immuneToDirectAttacks = false)
             : base(maxHealth, initialPosition, id, name ?? archetype.ToString())
@@ -52,43 +62,11 @@ namespace Core.Occupants
             Archetype = archetype;
             AttackDamage = attackDamage;
             MovePriority = movePriority;
-            DetectionRange = detectionRange;
-            MaxLineSteps = maxLineSteps;
-            UsesDiagonalAttack = (archetype == EnemyArchetype.Pawn) || usesDiagonalAttack;
+            MaxLineSteps = maxLineSteps >= 0 ? maxLineSteps : (archetype == EnemyArchetype.Queen ? 7 : (archetype == EnemyArchetype.Pawn ? 1 : 3));
             SkipNextTurn = false;
+            IntelligenceLevel = intelligenceLevel;
+            IsBoss = isBoss || isImmobile || immuneToDirectAttacks;
 
-            if (intelligenceLevel.HasValue)
-            {
-                IntelligenceLevel = intelligenceLevel.Value;
-            }
-            else
-            {
-                switch (archetype)
-                {
-                    case EnemyArchetype.Pawn:
-                        IntelligenceLevel = EnemySmartness.Dumb;
-                        break;
-                    case EnemyArchetype.Knight:
-                    case EnemyArchetype.Bishop:
-                        IntelligenceLevel = EnemySmartness.Mid;
-                        break;
-                    case EnemyArchetype.Rook:
-                    case EnemyArchetype.Queen:
-                        IntelligenceLevel = EnemySmartness.Smart;
-                        break;
-                    case EnemyArchetype.King:
-                        IntelligenceLevel = EnemySmartness.Dumb;
-                        break;
-                    default:
-                        IntelligenceLevel = EnemySmartness.Mid;
-                        break;
-                }
-            }
-
-            IsImmobile = (archetype == EnemyArchetype.King) || isImmobile;
-            ImmuneToDirectAttacks = (archetype == EnemyArchetype.King) || immuneToDirectAttacks;
-
-            // Enemies are NEVER pushable
             IsPushable = false;
         }
 

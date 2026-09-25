@@ -65,7 +65,7 @@ namespace Core.Tests
             var player = new PlayerOccupant(maxHealth: 6, attackDamage: 2, initialPosition: new Vector2Int(5, 5), id: 1);
             board.Place(player, new Vector2Int(5, 5));
 
-            var pawn = new EnemyOccupant(EnemyArchetype.Pawn, maxHealth: 4, attackDamage: 1, movePriority: 0, detectionRange: 10, initialPosition: new Vector2Int(5, 8), id: 2);
+            var pawn = new EnemyOccupant(EnemyArchetype.Pawn, maxHealth: 4, attackDamage: 1, movePriority: 0, initialPosition: new Vector2Int(5, 8), id: 2);
             board.Place(pawn, new Vector2Int(5, 8));
 
             // 1. Player moves North to (5, 6)
@@ -90,7 +90,7 @@ namespace Core.Tests
             var player = new PlayerOccupant(maxHealth: 6, attackDamage: 2, initialPosition: new Vector2Int(5, 5), id: 1);
             board.Place(player, new Vector2Int(5, 5));
 
-            var pawn = new EnemyOccupant(EnemyArchetype.Pawn, maxHealth: 4, attackDamage: 1, movePriority: 0, detectionRange: 10, initialPosition: new Vector2Int(5, 6), id: 2);
+            var pawn = new EnemyOccupant(EnemyArchetype.Pawn, maxHealth: 4, attackDamage: 1, movePriority: 0, initialPosition: new Vector2Int(5, 6), id: 2);
             board.Place(pawn, new Vector2Int(5, 6));
 
             // Player attacks cell (5, 6)
@@ -186,7 +186,7 @@ namespace Core.Tests
             board.Place(player, new Vector2Int(5, 5));
 
             // Knight at (6, 7) - L-shape jump to (5, 5) with push direction South (0, -1) to (5, 4) which is wall
-            var knight = new EnemyOccupant(EnemyArchetype.Knight, maxHealth: 4, attackDamage: 2, movePriority: 0, detectionRange: 10, initialPosition: new Vector2Int(6, 7), id: 3);
+            var knight = new EnemyOccupant(EnemyArchetype.Knight, maxHealth: 4, attackDamage: 2, movePriority: 0, initialPosition: new Vector2Int(6, 7), id: 3);
             board.Place(knight, new Vector2Int(6, 7));
 
             // Run enemy turn

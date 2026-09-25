@@ -1,0 +1,475 @@
+using System.Collections.Generic;
+using UnityEngine;
+using UnityEngine.Tilemaps;
+
+#if UNITY_EDITOR
+using UnityEditor;
+#endif
+
+namespace Dungeon.Spawning
+{
+    [System.Serializable]
+    public class PropSpawner : IDungeonSpawner
+    {
+        [Header("Prop Spawn Settings")]
+        [Range(0f, 1f)]
+        [SerializeField] private float propDensity = 0.5f;
+
+        [Header("Prop Spawn Configurations")]
+        [SerializeField] private PropSpawnData barrelSpawnData;
+        [SerializeField] private PillarSpawnData pillarSpawnData;
+        [SerializeField] private List<PropSpawnData> additionalPropData = new List<PropSpawnData>();
+
+        private readonly List<GameObject> _spawnedProps = new List<GameObject>();
+        private readonly List<Vector2Int> _validTilesBuffer = new List<Vector2Int>(256);
+
+        public float PropDensity
+        {
+            get => propDensity;
+            set => propDensity = Mathf.Clamp01(value);
+        }
+
+        public PropSpawnData BarrelSpawnData
+        {
+            get => barrelSpawnData;
+            set => barrelSpawnData = value;
+        }
+
+        public PillarSpawnData PillarSpawnData
+        {
+            get => pillarSpawnData;
+            set => pillarSpawnData = value;
+        }
+
+        public List<PropSpawnData> AdditionalPropData => additionalPropData;
+
+        public void SpawnContent(
+            GameManager.RoomData room,
+            RoomTileQuery tileQuery,
+            Tilemap floorTilemap,
+            Transform parentContainer)
+        {
+            if (floorTilemap == null) return;
+
+            if (barrelSpawnData != null)
+            {
+                SpawnConfiguredProp(barrelSpawnData, room, tileQuery, floorTilemap, parentContainer);
+            }
+
+            if (pillarSpawnData != null)
+            {
+                SpawnPillars(pillarSpawnData, room, tileQuery, floorTilemap, parentContainer);
+            }
+
+            if (additionalPropData != null)
+            {
+                for (int i = 0; i < additionalPropData.Count; i++)
+                {
+                    PropSpawnData data = additionalPropData[i];
+                    if (data != null)
+                    {
+                        if (data is PillarSpawnData pData)
+                        {
+                            SpawnPillars(pData, room, tileQuery, floorTilemap, parentContainer);
+                        }
+                        else
+                        {
+                            SpawnConfiguredProp(data, room, tileQuery, floorTilemap, parentContainer);
+                        }
+                    }
+                }
+            }
+        }
+
+        private void SpawnConfiguredProp(
+            PropSpawnData data,
+            GameManager.RoomData room,
+            RoomTileQuery tileQuery,
+            Tilemap floorTilemap,
+            Transform parentContainer)
+        {
+            if (data == null || data.Prefab == null) return;
+            if (data is PillarSpawnData pData)
+            {
+                SpawnPillars(pData, room, tileQuery, floorTilemap, parentContainer);
+                return;
+            }
+
+            if (room.Type == RoomType.Normal && !data.AllowInNormalRooms) return;
+            if (room.Type == RoomType.Chest && !data.AllowInChestRooms) return;
+            if (room.Type == RoomType.Boss && !data.AllowInBossRooms) return;
+
+            tileQuery.GetValidInteriorFloorTiles(room, _validTilesBuffer, onlyUnoccupied: true);
+
+            if (data.AvoidRoomCenter)
+            {
+                _validTilesBuffer.RemoveAll(t =>
+                    Mathf.Abs(t.x - room.CenterTile.x) <= 1 &&
+                    Mathf.Abs(t.y - room.CenterTile.y) <= 1);
+            }
+
+            if (data.AvoidDoorTiles)
+            {
+                RemoveTilesNear(room.EntranceDoorTile, 1);
+                RemoveTilesNear(room.ExitDoorTile, 1);
+            }
+
+            RemoveStairAndLandingZone(room.EntranceDoorTile);
+            RemoveStairAndLandingZone(room.ExitDoorTile);
+
+            if (_validTilesBuffer.Count == 0) return;
+
+            // 0% prop density means explicitly 0 props spawned
+            if (propDensity <= 0f || data.SpawnDensity <= 0f) return;
+
+            float combinedDensity = propDensity * data.SpawnDensity;
+            int targetCount = Mathf.RoundToInt(combinedDensity * _validTilesBuffer.Count);
+            if (targetCount <= 0 && combinedDensity > 0f && data.MinPerRoom > 0)
+            {
+                targetCount = data.MinPerRoom;
+            }
+            if (data.MaxPerRoom > 0 && targetCount > data.MaxPerRoom)
+            {
+                targetCount = data.MaxPerRoom;
+            }
+
+            Vector2Int propSize = data.Size;
+            if (data.Prefab != null && data.Prefab.TryGetComponent<Presentation.Entities.PillarTileObject>(out var pComp))
+            {
+                propSize = pComp.Size;
+            }
+
+            int toSpawn = Mathf.Min(targetCount, _validTilesBuffer.Count);
+            for (int i = 0; i < toSpawn; i++)
+            {
+                if (_validTilesBuffer.Count == 0) break;
+
+                // Find a candidate origin where all tiles in propSize footprint are valid and unoccupied
+                Vector2Int spawnTile = Vector2Int.zero;
+                bool foundValidFootprint = false;
+
+                for (int attempt = 0; attempt < _validTilesBuffer.Count; attempt++)
+                {
+                    int pickIndex = Random.Range(0, _validTilesBuffer.Count);
+                    Vector2Int candidate = _validTilesBuffer[pickIndex];
+
+                    bool fits = true;
+                    for (int dx = 0; dx < propSize.x; dx++)
+                    {
+                        for (int dy = 0; dy < propSize.y; dy++)
+                        {
+                            Vector2Int checkTile = new Vector2Int(candidate.x + dx, candidate.y + dy);
+                            if (!_validTilesBuffer.Contains(checkTile))
+                            {
+                                fits = false;
+                                break;
+                            }
+                        }
+                        if (!fits) break;
+                    }
+
+                    if (fits)
+                    {
+                        spawnTile = candidate;
+                        foundValidFootprint = true;
+                        break;
+                    }
+                }
+
+                if (!foundValidFootprint) break;
+
+                // Remove all footprint tiles from available buffer and mark occupied
+                for (int dx = 0; dx < propSize.x; dx++)
+                {
+                    for (int dy = 0; dy < propSize.y; dy++)
+                    {
+                        Vector2Int tile = new Vector2Int(spawnTile.x + dx, spawnTile.y + dy);
+                        _validTilesBuffer.Remove(tile);
+                        tileQuery.MarkOccupied(tile);
+                    }
+                }
+
+                float worldX = spawnTile.x + (propSize.x * 0.5f);
+                float worldY = spawnTile.y + (propSize.y * 0.5f);
+                Vector3 worldPos = new Vector3(worldX, worldY, floorTilemap.transform.position.z);
+
+                GameObject propObj = Object.Instantiate(data.Prefab, worldPos, Quaternion.identity, parentContainer);
+                _spawnedProps.Add(propObj);
+
+                if (GameManager.Instance != null && GameManager.Instance.Board != null)
+                {
+                    bool isPillar = (data is PillarSpawnData) ||
+                                    (data != null && data.PropName != null && data.PropName.ToLowerInvariant().Contains("pillar")) ||
+                                    (data != null && data.Prefab != null && data.Prefab.name.ToLowerInvariant().Contains("pillar")) ||
+                                    propObj.GetComponent<Presentation.Entities.PillarTileObject>() != null;
+                    if (isPillar)
+                    {
+                        Infrastructure.BoardEntityFactory.CreatePillar(propObj, spawnTile, propSize, GameManager.Instance.Board, Presentation.Board.EffectsQueueRunner.Instance);
+                    }
+                    else
+                    {
+                        Core.Occupants.DestructiblePropType propType = Core.Occupants.DestructiblePropType.Barrel;
+                        if (data != null && data.PropName != null && data.PropName.ToLowerInvariant().Contains("crate"))
+                        {
+                            propType = Core.Occupants.DestructiblePropType.Crate;
+                        }
+                        int hp = 1;
+                        Infrastructure.BoardEntityFactory.CreateProp(propObj, spawnTile, GameManager.Instance.Board, propType, hp, Presentation.Board.EffectsQueueRunner.Instance);
+                    }
+                }
+
+                EventBus<PropSpawnedEvent>.Raise(new PropSpawnedEvent(propObj, spawnTile, room));
+                RegisterUndoInEditor(propObj, data.PropName);
+            }
+        }
+
+        private void SpawnPillars(
+            PillarSpawnData pillarData,
+            GameManager.RoomData room,
+            RoomTileQuery tileQuery,
+            Tilemap floorTilemap,
+            Transform parentContainer)
+        {
+            if (pillarData == null) return;
+            if (room.Type == RoomType.Normal && !pillarData.AllowInNormalRooms) return;
+            if (room.Type == RoomType.Chest && !pillarData.AllowInChestRooms) return;
+            if (room.Type == RoomType.Boss && !pillarData.AllowInBossRooms) return;
+
+            var configuredPillars = pillarData.GetConfiguredPillars();
+            if (configuredPillars == null || configuredPillars.Count == 0) return;
+
+            var availableVariants = new List<PillarConfig>();
+            for (int i = 0; i < configuredPillars.Count; i++)
+            {
+                if (configuredPillars[i] != null && configuredPillars[i].Prefab != null)
+                {
+                    availableVariants.Add(configuredPillars[i]);
+                }
+            }
+            if (availableVariants.Count == 0) return;
+
+            tileQuery.GetValidInteriorFloorTiles(room, _validTilesBuffer, onlyUnoccupied: true);
+
+            if (pillarData.AvoidRoomCenter)
+            {
+                _validTilesBuffer.RemoveAll(t =>
+                    Mathf.Abs(t.x - room.CenterTile.x) <= 1 &&
+                    Mathf.Abs(t.y - room.CenterTile.y) <= 1);
+            }
+
+            if (pillarData.AvoidDoorTiles)
+            {
+                RemoveTilesNear(room.EntranceDoorTile, 1);
+                RemoveTilesNear(room.ExitDoorTile, 1);
+            }
+
+            if (pillarData.MinDistanceToDoors > 0)
+            {
+                RemoveTilesNear(room.EntranceDoorTile, pillarData.MinDistanceToDoors);
+                RemoveTilesNear(room.ExitDoorTile, pillarData.MinDistanceToDoors);
+                if (room.EntranceDoorTile.HasValue)
+                {
+                    RemoveTilesNear(new Vector2Int(room.EntranceDoorTile.Value.x, room.EntranceDoorTile.Value.y - 1), pillarData.MinDistanceToDoors);
+                }
+                if (room.ExitDoorTile.HasValue)
+                {
+                    RemoveTilesNear(new Vector2Int(room.ExitDoorTile.Value.x, room.ExitDoorTile.Value.y - 1), pillarData.MinDistanceToDoors);
+                }
+            }
+
+            RemoveStairAndLandingZone(room.EntranceDoorTile);
+            RemoveStairAndLandingZone(room.ExitDoorTile);
+
+            if (_validTilesBuffer.Count == 0) return;
+            if (propDensity <= 0f || pillarData.SpawnDensity <= 0f) return;
+
+            float combinedDensity = propDensity * pillarData.SpawnDensity;
+            int targetCount = Mathf.RoundToInt(combinedDensity * _validTilesBuffer.Count);
+            if (targetCount <= 0 && combinedDensity > 0f && pillarData.MinPerRoom > 0)
+            {
+                targetCount = pillarData.MinPerRoom;
+            }
+            if (pillarData.MaxPerRoom > 0 && targetCount > pillarData.MaxPerRoom)
+            {
+                targetCount = pillarData.MaxPerRoom;
+            }
+
+            int toSpawn = Mathf.Min(targetCount, _validTilesBuffer.Count);
+            for (int i = 0; i < toSpawn; i++)
+            {
+                if (_validTilesBuffer.Count == 0) break;
+
+                var tryOrder = new List<PillarConfig>(availableVariants);
+                Shuffle(tryOrder);
+
+                bool placed = false;
+                for (int v = 0; v < tryOrder.Count; v++)
+                {
+                    var config = tryOrder[v];
+                    Vector2Int propSize = config.Size;
+                    if (config.Prefab.TryGetComponent<Presentation.Entities.PillarTileObject>(out var pComp))
+                    {
+                        propSize = pComp.Size;
+                    }
+
+                    if (TryFindValidOrigin(config, propSize, room, pillarData, out Vector2Int spawnTile))
+                    {
+                        for (int dx = 0; dx < propSize.x; dx++)
+                        {
+                            for (int dy = 0; dy < propSize.y; dy++)
+                            {
+                                Vector2Int tile = new Vector2Int(spawnTile.x + dx, spawnTile.y + dy);
+                                _validTilesBuffer.Remove(tile);
+                                tileQuery.MarkOccupied(tile);
+                            }
+                        }
+
+                        float worldX = spawnTile.x + (propSize.x * 0.5f);
+                        float worldY = spawnTile.y + (propSize.y * 0.5f);
+                        Vector3 worldPos = new Vector3(worldX, worldY, floorTilemap.transform.position.z);
+
+                        GameObject propObj = Object.Instantiate(config.Prefab, worldPos, Quaternion.identity, parentContainer);
+                        _spawnedProps.Add(propObj);
+
+                        if (GameManager.Instance != null && GameManager.Instance.Board != null)
+                        {
+                            Infrastructure.BoardEntityFactory.CreatePillar(propObj, spawnTile, propSize, GameManager.Instance.Board, Presentation.Board.EffectsQueueRunner.Instance);
+                        }
+
+                        EventBus<PropSpawnedEvent>.Raise(new PropSpawnedEvent(propObj, spawnTile, room));
+                        RegisterUndoInEditor(propObj, config.Prefab.name);
+
+                        placed = true;
+                        break;
+                    }
+                }
+
+                if (!placed)
+                {
+                    break;
+                }
+            }
+        }
+
+        private bool TryFindValidOrigin(
+            PillarConfig config,
+            Vector2Int propSize,
+            GameManager.RoomData room,
+            PillarSpawnData pillarData,
+            out Vector2Int validOrigin)
+        {
+            validOrigin = Vector2Int.zero;
+            if (_validTilesBuffer.Count == 0) return false;
+
+            int count = _validTilesBuffer.Count;
+            int offset = Random.Range(0, count);
+
+            for (int attempt = 0; attempt < count; attempt++)
+            {
+                Vector2Int candidate = _validTilesBuffer[(offset + attempt) % count];
+
+                if (pillarData.MinDistanceToWalls > 0)
+                {
+                    if (!RoomTileQuery.IsDistanceValidFromWalls(room, candidate, propSize, pillarData.MinDistanceToWalls))
+                    {
+                        continue;
+                    }
+                }
+
+                bool fits = true;
+                for (int dx = 0; dx < propSize.x; dx++)
+                {
+                    for (int dy = 0; dy < propSize.y; dy++)
+                    {
+                        Vector2Int checkTile = new Vector2Int(candidate.x + dx, candidate.y + dy);
+                        if (!_validTilesBuffer.Contains(checkTile))
+                        {
+                            fits = false;
+                            break;
+                        }
+                        if (!config.AllowInOrNearHallways)
+                        {
+                            int lx = checkTile.x - room.WorldOriginTile.x;
+                            int ly = checkTile.y - room.WorldOriginTile.y;
+                            if (RoomTileQuery.IsNearHallwayTile(room, lx, ly, 1))
+                            {
+                                fits = false;
+                                break;
+                            }
+                        }
+                    }
+                    if (!fits) break;
+                }
+
+                if (fits)
+                {
+                    validOrigin = candidate;
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
+        private static void Shuffle<T>(IList<T> list)
+        {
+            int n = list.Count;
+            while (n > 1)
+            {
+                n--;
+                int k = Random.Range(0, n + 1);
+                T value = list[k];
+                list[k] = list[n];
+                list[n] = value;
+            }
+        }
+
+        private void RemoveTilesNear(Vector2Int? doorTile, int radius)
+        {
+            if (!doorTile.HasValue) return;
+            Vector2Int pos = doorTile.Value;
+            _validTilesBuffer.RemoveAll(t =>
+                Mathf.Abs(t.x - pos.x) <= radius &&
+                Mathf.Abs(t.y - pos.y) <= radius);
+        }
+
+        private void RemoveStairAndLandingZone(Vector2Int? doorTile)
+        {
+            if (!doorTile.HasValue) return;
+            Vector2Int pos = doorTile.Value;
+            Vector2Int landing = new Vector2Int(pos.x, pos.y - 1);
+            _validTilesBuffer.RemoveAll(t => t == pos || t == landing);
+        }
+
+        public void ClearSpawnedContent()
+        {
+            for (int i = 0; i < _spawnedProps.Count; i++)
+            {
+                if (_spawnedProps[i] != null)
+                {
+                    if (Application.isPlaying)
+                    {
+                        Object.Destroy(_spawnedProps[i]);
+                    }
+                    else
+                    {
+                        Object.DestroyImmediate(_spawnedProps[i]);
+                    }
+                }
+            }
+            _spawnedProps.Clear();
+        }
+
+        private static void RegisterUndoInEditor(GameObject obj, string name)
+        {
+#if UNITY_EDITOR
+            if (!Application.isPlaying)
+            {
+                Undo.RegisterCreatedObjectUndo(obj, $"Spawn Prop {name}");
+                EditorUtility.SetDirty(obj);
+            }
+#endif
+        }
+    }
+}
+

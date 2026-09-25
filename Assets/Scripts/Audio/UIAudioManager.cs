@@ -266,6 +266,7 @@ public class UIAudioManager : MonoBehaviour
         EventBus<SharedAudioConfiguredEvent>.Raise(new SharedAudioConfiguredEvent(
             moveSound,
             hitSound,
+            deathSound,
             lowLifeSound,
             openChestSound,
             destroyBarrelSound
@@ -301,6 +302,10 @@ public class UIAudioManager : MonoBehaviour
         if (hitSound.IsNull)
         {
             hitSound = RuntimeManager.PathToEventReference("event:/SFX_EnemyHitFeedback");
+        }
+        if (deathSound.IsNull)
+        {
+            deathSound = RuntimeManager.PathToEventReference("event:/SFX_Enemy_Destroy");
         }
         if (lowLifeSound.IsNull)
         {

@@ -23,16 +23,14 @@ namespace Core.Tests
             Debug.Log("[PlanCTests] Starting Plan C AI Intelligence, Prefab Boss Room & Keys test suite...");
 
             RunNamedTest("TestAI_IntelligenceLevels_AssignedProperly", TestAI_IntelligenceLevels_AssignedProperly);
-            RunNamedTest("TestAI_King_IsStationaryAndWaits", TestAI_King_IsStationaryAndWaits);
             RunNamedTest("TestAI_RookSmart_SeeksCardinalLineOfSight", TestAI_RookSmart_SeeksCardinalLineOfSight);
             RunNamedTest("TestAI_QueenSmart_Tracking", TestAI_QueenSmart_Tracking);
             RunNamedTest("TestAI_PawnDumb_HasErraticMovementBranch", TestAI_PawnDumb_HasErraticMovementBranch);
-            RunNamedTest("TestBoss_MinionLinkedDamageToKing", TestBoss_MinionLinkedDamageToKing);
             RunNamedTest("TestKeys_FlyingKeyParticleProceduralSpriteAndDelivery", TestKeys_FlyingKeyParticleProceduralSpriteAndDelivery);
             RunNamedTest("TestKeys_KeyholderAuraAndDeathEmission", TestKeys_KeyholderAuraAndDeathEmission);
             RunNamedTest("TestKeys_ChildChestRoomLockAndUnlock", TestKeys_ChildChestRoomLockAndUnlock);
 
-            Debug.Log("[PlanCTests] All 9 Plan C test cases passed successfully!");
+            Debug.Log("[PlanCTests] All 7 Plan C test cases passed successfully!");
         }
 
         private static void RunNamedTest(string name, Action testAction)
@@ -80,26 +78,7 @@ namespace Core.Tests
 
             var queen = new EnemyOccupant(EnemyArchetype.Queen, intelligenceLevel: EnemySmartness.Smart);
             Assert(queen.IntelligenceLevel == EnemySmartness.Smart, "Queen is Smart");
-
-            var king = new EnemyOccupant(EnemyArchetype.King, isImmobile: true, immuneToDirectAttacks: true);
-            Assert(king.Archetype == EnemyArchetype.King, "Archetype is King");
-            Assert(king.IsImmobile, "King is immobile");
-            Assert(king.ImmuneToDirectAttacks, "King is immune to direct attacks");
-        }
-
-        public static void TestAI_King_IsStationaryAndWaits()
-        {
-            var board = new GameBoard(10, 10);
-            var king = new EnemyOccupant(EnemyArchetype.King, isImmobile: true, immuneToDirectAttacks: true, initialPosition: new Vector2Int(5, 5));
-            board.Place(king, new Vector2Int(5, 5));
-
-            var player = new PlayerOccupant(6, 2, new Vector2Int(5, 4));
-            board.Place(player, new Vector2Int(5, 4));
-
-            EnemyIntent intent = EnemyAIFactory.EvaluateEnemy(board, king);
-            Assert(intent != null, "King returns an intent");
-            Assert(intent.IntentType == IntentType.Wait, "King intent is Wait (stationary, no movement loops, no attack actions)");
-            Assert(intent.GeneratedAction == null, "King generated action is null");
+            Assert(queen.Smartness == EnemySmartness.Smart, "Smartness property alias matches IntelligenceLevel");
         }
 
         public static void TestAI_RookSmart_SeeksCardinalLineOfSight()
@@ -150,47 +129,6 @@ namespace Core.Tests
             Assert(intent != null, "Pawn intent generated");
             Assert(intent.IntentType == IntentType.Move, "Pawn chooses move");
             Assert(board.CanEnter(intent.TargetPosition), "Pawn target position is valid enterable tile");
-        }
-
-        public static void TestBoss_MinionLinkedDamageToKing()
-        {
-            var board = new GameBoard(10, 10);
-            var coordinator = new BoardTurnCoordinator(board);
-
-            var player = new PlayerOccupant(maxHealth: 6, attackDamage: 3, initialPosition: new Vector2Int(3, 3));
-            board.Place(player, new Vector2Int(3, 3));
-
-            // King placed at (5, 5) with 10 HP, immune to direct player attack
-            var king = new EnemyOccupant(EnemyArchetype.King, maxHealth: 10, isImmobile: true, immuneToDirectAttacks: true, initialPosition: new Vector2Int(5, 5));
-            board.Place(king, new Vector2Int(5, 5));
-
-            // Direct attack on King deals 0 damage due to ImmuneToDirectAttacks
-            var directKingAttack = new List<Vector2Int> { new Vector2Int(5, 5) };
-            coordinator.SimulatePlayerAttack(directKingAttack, out _);
-            Assert(king.CurrentHealth == 10, "King is immune to direct player attacks");
-
-            // Minion placed at (3, 4) with 2 HP and 2 attack damage
-            var minion = new EnemyOccupant(EnemyArchetype.Pawn, maxHealth: 2, attackDamage: 2, initialPosition: new Vector2Int(3, 4));
-            board.Place(minion, new Vector2Int(3, 4));
-
-            // Player attacks minion at (3, 4)
-            var minionAttack = new List<Vector2Int> { new Vector2Int(3, 4) };
-            coordinator.SimulatePlayerAttack(minionAttack, out var emittedEffects);
-
-            Assert(minion.IsDead, "Minion is killed by player attack");
-            Assert(!board.IsOccupied(new Vector2Int(3, 4)), "Minion removed from board");
-
-            // Minion death must transfer minion damage to King!
-            Assert(king.CurrentHealth == 8, $"King HP reduced by minion damage (10 -> 8, actual {king.CurrentHealth})");
-
-            // Spawn and kill another minion with 8 attack to slay King
-            var powerfulMinion = new EnemyOccupant(EnemyArchetype.Rook, maxHealth: 1, attackDamage: 8, initialPosition: new Vector2Int(3, 4));
-            board.Place(powerfulMinion, new Vector2Int(3, 4));
-            coordinator.SimulatePlayerAttack(minionAttack, out _);
-
-            Assert(powerfulMinion.IsDead, "Powerful minion killed");
-            Assert(king.IsDead, "King defeated by transferred minion damage reaching 0 HP");
-            Assert(!board.IsOccupied(new Vector2Int(5, 5)), "King removed from board on death");
         }
 
         public static void TestKeys_FlyingKeyParticleProceduralSpriteAndDelivery()

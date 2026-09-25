@@ -21,7 +21,7 @@ namespace Core.AI
                 return EnemyIntent.CreateWait(enemy);
             }
 
-            if (enemy.Archetype == EnemyArchetype.King || enemy.IsImmobile)
+            if (enemy.IsImmobile)
             {
                 return EnemyIntent.CreateWait(enemy);
             }
@@ -35,15 +35,6 @@ namespace Core.AI
             if (player == null || player.IsDead)
             {
                 return EnemyIntent.CreateWait(enemy);
-            }
-
-            if (enemy.DetectionRange > 0)
-            {
-                int distance = BoardCoordinate.ChebyshevDistance(enemy.GridPosition, player.GridPosition);
-                if (distance > enemy.DetectionRange)
-                {
-                    return EnemyIntent.CreateWait(enemy);
-                }
             }
 
             return DecideIntent(board, enemy, player);

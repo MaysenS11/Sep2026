@@ -348,9 +348,6 @@ namespace Core.Tests
             FlyingHeartParticle particle = null;
             try
             {
-                var stats = targetObj.AddComponent<PlayerStats>();
-                int hpBefore = stats.CurrentHealth;
-
                 particle = FlyingHeartParticle.Spawn(Vector3.zero, targetObj.transform, duration: 0.05f, restoreAmount: 1);
                 Assert(particle != null, "FlyingHeartParticle spawned");
             }

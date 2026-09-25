@@ -1,0 +1,28 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 2fb0fe26c02af114fbcaa12bda03d315, type: 3}
+  m_Name: PillarSpawnData
+  m_EditorClassIdentifier: Assembly-CSharp::Dungeon.Spawning.PillarSpawnData
+  propName: Prop
+  prefab: {fileID: 1866264966231486302, guid: 24f0502c2961d37409b98ce636d17c6a, type: 3}
+  size: {x: 3, y: 3}
+  spawnDensity: 0.385
+  minPerRoom: 1
+  maxPerRoom: 3
+  allowInNormalRooms: 1
+  allowInChestRooms: 0
+  allowInBossRooms: 0
+  avoidDoorTiles: 1
+  avoidRoomCenter: 1
+  pillars: []
+  minDistanceToWalls: 2
+  minDistanceToDoors: 4

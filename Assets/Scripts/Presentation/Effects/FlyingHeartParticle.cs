@@ -124,16 +124,6 @@ namespace Presentation.Effects
         {
             Vector3 arrivalPos = _targetTransform != null ? _targetTransform.position : transform.position;
 
-            // 1. Restore PlayerStats if available
-            PlayerStats stats = _targetTransform != null ? _targetTransform.GetComponent<PlayerStats>() : null;
-            if (stats == null)
-            {
-                stats = FindAnyObjectByType<PlayerStats>();
-            }
-            if (stats != null)
-            {
-                stats.Heal(healAmount);
-            }
 
             // 2. Restore PlayerOccupant on authoritative GameBoard if available
             if (GameManager.Instance != null && GameManager.Instance.Board != null)

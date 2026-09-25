@@ -108,12 +108,6 @@ namespace Infrastructure
                 occupant.InitializeFromCharacter(pMove.CharacterDefinition, maxHealth);
             }
 
-            if (go.TryGetComponent<PlayerStats>(out var pStats))
-            {
-                pStats.Occupant = occupant;
-                pStats.SyncFromOccupant();
-            }
-
             board.ForcePlace(occupant, gridPos);
 
             var activeRunner = runner != null ? runner : EffectsQueueRunner.Instance;
@@ -147,31 +141,29 @@ namespace Infrastructure
 
             int id = GetNextOccupantId();
 
-            int maxHealth = data != null ? data.MaxHealth : (archetype == EnemyArchetype.King ? 20 : 4);
-            int attackDamage = data != null ? data.AttackDamage : (archetype == EnemyArchetype.King ? 0 : 1);
-            int movePriority = data != null ? data.MovePriority : 0;
-            int detectionRange = data != null ? Math.Max(12, data.DetectionRange) : 12;
-            int maxLineSteps = data != null ? data.MaxLineSteps : 3;
-            bool usesDiagonalAttack = (archetype == EnemyArchetype.Pawn) || (data != null && data.UsesDiagonalAttack);
+            if (data != null)
+            {
+                archetype = data.Archetype;
+            }
 
-            EnemySmartness? smartness = data != null ? data.Smartness : (EnemySmartness?)null;
-            bool isImmobile = archetype == EnemyArchetype.King || (data is KingData kd && kd.IsImmobile);
-            bool immuneDirect = archetype == EnemyArchetype.King || (data is KingData kd2 && kd2.ImmuneToDirectAttacks);
+            bool isBoss = data != null && data.IsBoss;
+            int maxHealth = data != null ? data.MaxHealth : (isBoss ? 20 : 4);
+            int attackDamage = data != null ? data.AttackDamage : (isBoss ? 0 : 1);
+            int movePriority = data != null ? data.MovePriority : 0;
+            int maxLineSteps = data != null ? data.MaxLineSteps : (archetype == EnemyArchetype.Pawn ? 1 : 3);
+            EnemySmartness smartness = data != null ? data.Smartness : EnemySmartness.Mid;
 
             var occupant = new EnemyOccupant(
                 archetype: archetype,
                 maxHealth: maxHealth,
                 attackDamage: attackDamage,
                 movePriority: movePriority,
-                detectionRange: detectionRange,
                 maxLineSteps: maxLineSteps,
-                usesDiagonalAttack: usesDiagonalAttack,
                 initialPosition: gridPos,
                 id: id,
-                name: data != null ? data.EnemyName : archetype.ToString(),
+                name: archetype.ToString(),
                 intelligenceLevel: smartness,
-                isImmobile: isImmobile,
-                immuneToDirectAttacks: immuneDirect
+                isBoss: isBoss
             );
 
             presenter.OccupantId = id;
@@ -404,8 +396,9 @@ namespace Infrastructure
                 PlayerOccupant existingPlayer = board.FindPlayer();
                 if (existingPlayer == null)
                 {
-                    int maxHp = playerMovement.TryGetComponent<PlayerStats>(out var stats) ? stats.MaxHealth : 6;
-                    int atk = stats != null ? stats.TotalAttackDamage : 2;
+                    var charDef = playerMovement.CharacterDefinition;
+                    int maxHp = (charDef != null && charDef.HealthTierValues != null && charDef.HealthTierValues.Length > 0) ? charDef.HealthTierValues[0] : 6;
+                    int atk = (charDef != null && charDef.AttackTierValues != null && charDef.AttackTierValues.Length > 0) ? charDef.AttackTierValues[0] : 2;
                     CreatePlayer(playerMovement.gameObject, pGrid, board, maxHp, atk, activeRunner);
                 }
                 else
@@ -456,22 +449,29 @@ namespace Infrastructure
                 }
                 // Enemies
                 else if (lower.Contains("pawn") || lower.Contains("knight") || lower.Contains("bishop") ||
-                    lower.Contains("rook") || lower.Contains("queen") || lower.Contains("king") ||
-                    lower.Contains("enemy") || t.GetComponent<EntityStats>() != null || t.GetComponent<EnemyTileObject>() != null)
+                    lower.Contains("rook") || lower.Contains("queen") ||
+                    lower.Contains("enemy") || t.GetComponent<EnemyBase>() != null || t.GetComponent<EnemyTileObject>() != null)
                 {
+                    if (lower.Contains("king"))
+                    {
+                        continue;
+                    }
+
                     bool isAlreadyRegistered = t.TryGetComponent<EnemyTileObject>(out var presenter) &&
                                                presenter.OccupantId != 0 &&
                                                board.GetOccupantById(presenter.OccupantId) != null;
                     if (!isAlreadyRegistered)
                     {
-                        EnemyArchetype archetype = EnemyArchetype.Pawn;
-                        if (lower.Contains("king") || (t.TryGetComponent<EnemyBase>(out var ebKing) && ebKing.Data is KingData)) archetype = EnemyArchetype.King;
-                        else if (lower.Contains("knight")) archetype = EnemyArchetype.Knight;
-                        else if (lower.Contains("bishop")) archetype = EnemyArchetype.Bishop;
-                        else if (lower.Contains("rook")) archetype = EnemyArchetype.Rook;
-                        else if (lower.Contains("queen")) archetype = EnemyArchetype.Queen;
-
                         EnemyData data = t.TryGetComponent<EnemyBase>(out var eb) ? eb.Data : null;
+                        EnemyArchetype archetype = data != null ? data.Archetype : EnemyArchetype.Pawn;
+                        if (data == null)
+                        {
+                            if (lower.Contains("knight")) archetype = EnemyArchetype.Knight;
+                            else if (lower.Contains("bishop")) archetype = EnemyArchetype.Bishop;
+                            else if (lower.Contains("rook")) archetype = EnemyArchetype.Rook;
+                            else if (lower.Contains("queen")) archetype = EnemyArchetype.Queen;
+                        }
+
                         CreateEnemy(t.gameObject, pos, board, archetype, data, activeRunner);
                     }
                 }

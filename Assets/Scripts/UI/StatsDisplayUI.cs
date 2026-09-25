@@ -14,22 +14,10 @@ public class StatsDisplayUI : MonoBehaviour
     [Header("Stat Rows")]
     [SerializeField] private StatRow[] rows;
 
-    private PlayerStats cachedPlayerStats;
-
     private void OnEnable()
     {
-        EnsurePlayerStats();
-        Refresh();
-    }
-
-    private void EnsurePlayerStats()
-    {
-        if (cachedPlayerStats == null)
-        {
-            cachedPlayerStats = Object.FindAnyObjectByType<PlayerStats>(FindObjectsInactive.Include);
-        }
-
         RestoreReferencesIfMissing();
+        Refresh();
     }
 
     private void RestoreReferencesIfMissing()
@@ -88,39 +76,17 @@ public class StatsDisplayUI : MonoBehaviour
         }
     }
 
-    public void SetPlayerStats(PlayerStats playerStats)
-    {
-        cachedPlayerStats = playerStats;
-        Refresh();
-    }
-
     public void Refresh()
     {
-        EnsurePlayerStats();
+        RestoreReferencesIfMissing();
         if (rows == null) return;
 
-        Core.Occupants.PlayerOccupant playerOcc = null;
-        if (cachedPlayerStats != null && cachedPlayerStats.Occupant != null)
-        {
-            playerOcc = cachedPlayerStats.Occupant;
-        }
-        else if (GameManager.Instance != null && GameManager.Instance.Board != null)
-        {
-            playerOcc = GameManager.Instance.Board.FindPlayer();
-        }
+        Core.Occupants.PlayerOccupant playerOcc = GameManager.Instance?.Board?.FindPlayer();
 
         foreach (var row in rows)
         {
             if (row == null) continue;
-            int statValue = 1;
-            if (playerOcc != null)
-            {
-                statValue = playerOcc.GetCurrentStatValue(row.statType);
-            }
-            else if (cachedPlayerStats != null)
-            {
-                statValue = cachedPlayerStats.GetCurrentStatValue(row.statType);
-            }
+            int statValue = playerOcc != null ? playerOcc.GetCurrentStatValue(row.statType) : 1;
             UpdateRowPips(row, statValue);
         }
     }
@@ -129,13 +95,34 @@ public class StatsDisplayUI : MonoBehaviour
     {
         if (character == null) return;
 
-        EnsurePlayerStats();
-        if (cachedPlayerStats != null)
-        {
-            cachedPlayerStats.SetCharacterDefinition(character);
-        }
+        RestoreReferencesIfMissing();
+        if (rows == null) return;
 
-        Refresh();
+        foreach (var row in rows)
+        {
+            if (row == null) continue;
+            int baseValue = GetBaseStatValue(character, row.statType);
+            UpdateRowPips(row, baseValue);
+        }
+    }
+
+    private int GetBaseStatValue(CharacterDefinition character, StatType statType)
+    {
+        switch (statType)
+        {
+            case StatType.AttackDamage:
+                return (character.AttackTierValues != null && character.AttackTierValues.Length > 0) ? character.AttackTierValues[0] : 1;
+            case StatType.Defence:
+                return (character.DefenceTierValues != null && character.DefenceTierValues.Length > 0) ? character.DefenceTierValues[0] : 0;
+            case StatType.Health:
+                return (character.HealthTierValues != null && character.HealthTierValues.Length > 0) ? character.HealthTierValues[0] : 6;
+            case StatType.AttackRange:
+                return (character.RangeTierValues != null && character.RangeTierValues.Length > 0) ? character.RangeTierValues[0] : 1;
+            case StatType.Speed:
+                return (character.SpeedTierValues != null && character.SpeedTierValues.Length > 0) ? character.SpeedTierValues[0] : 1;
+            default:
+                return 1;
+        }
     }
 
     [Header("Preview Colors")]
@@ -144,37 +131,22 @@ public class StatsDisplayUI : MonoBehaviour
 
     public void PreviewStat(StatType statType)
     {
-        EnsurePlayerStats();
+        RestoreReferencesIfMissing();
         if (rows == null) return;
 
-        Core.Occupants.PlayerOccupant playerOcc = null;
-        if (cachedPlayerStats != null && cachedPlayerStats.Occupant != null)
-        {
-            playerOcc = cachedPlayerStats.Occupant;
-        }
-        else if (GameManager.Instance != null && GameManager.Instance.Board != null)
-        {
-            playerOcc = GameManager.Instance.Board.FindPlayer();
-        }
+        Core.Occupants.PlayerOccupant playerOcc = GameManager.Instance?.Board?.FindPlayer();
 
         foreach (var row in rows)
         {
             if (row == null) continue;
-            int currentValue = (playerOcc != null) 
-                ? playerOcc.GetCurrentStatValue(row.statType) 
-                : (cachedPlayerStats != null ? cachedPlayerStats.GetCurrentStatValue(row.statType) : 1);
+            int currentValue = playerOcc != null ? playerOcc.GetCurrentStatValue(row.statType) : 1;
 
             int previewValue = currentValue;
             if (row.statType == statType)
             {
-                int currentTier = (playerOcc != null) 
-                    ? playerOcc.GetUpgradeTier(statType) 
-                    : (cachedPlayerStats != null ? cachedPlayerStats.GetUpgradeTier(statType) : 0);
-
+                int currentTier = playerOcc != null ? playerOcc.GetUpgradeTier(statType) : 0;
                 int nextTier = Mathf.Clamp(currentTier + 1, 0, 2);
-                int[] values = (playerOcc != null) 
-                    ? playerOcc.GetTierValues(statType) 
-                    : (cachedPlayerStats != null ? cachedPlayerStats.GetTierValues(statType) : null);
+                int[] values = playerOcc?.GetTierValues(statType);
 
                 if (values != null && nextTier < values.Length)
                 {

@@ -109,12 +109,7 @@ namespace Presentation.Entities
             }
             else
             {
-                // Fallback direct restore if no player GameObject exists in scene
-                var stats = Object.FindAnyObjectByType<PlayerStats>();
-                if (stats != null)
-                {
-                    stats.Heal(healthRestoreAmount);
-                }
+                GameManager.Instance?.Board?.FindPlayer()?.Heal(healthRestoreAmount);
                 EventBus<HeartCollectedEvent>.Raise(new HeartCollectedEvent(healthRestoreAmount, startPos));
             }
         }

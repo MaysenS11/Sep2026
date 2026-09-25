@@ -18,13 +18,15 @@ namespace Core.AI
         {
             Vector2Int enemyPos = enemy.GridPosition;
             Vector2Int playerPos = player.GridPosition;
+            int maxSteps = enemy.MaxLineSteps > 0 ? enemy.MaxLineSteps : 1;
 
             foreach (var dir in AllowedDirections)
             {
                 var rayPath = new List<Vector2Int> { enemyPos };
                 Vector2Int current = enemyPos + dir;
+                int step = 1;
 
-                while (board.IsInBounds(current) && !board.IsWall(current))
+                while (board.IsInBounds(current) && !board.IsWall(current) && step <= maxSteps)
                 {
                     rayPath.Add(current);
 
@@ -54,10 +56,9 @@ namespace Core.AI
                     }
 
                     current += dir;
+                    step++;
                 }
             }
-
-            int maxSteps = enemy.MaxLineSteps > 0 ? enemy.MaxLineSteps : 1;
             Vector2Int bestDestination = enemyPos;
             List<Vector2Int> bestPath = null;
             float bestScore = float.MaxValue;

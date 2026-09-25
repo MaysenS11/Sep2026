@@ -30,7 +30,6 @@ namespace Chest
         private readonly List<ChestCardUI> selectedCards = new List<ChestCardUI>();
         private int maxPicks = 1;
         private CanvasGroup canvasGroup;
-        private PlayerStats cachedPlayerStats;
 
         private void Awake()
         {
@@ -91,12 +90,8 @@ namespace Chest
                 }
             }
 
-            if (cachedPlayerStats == null)
-            {
-                cachedPlayerStats = FindAnyObjectByType<PlayerStats>();
-            }
-
-            if (cachedPlayerStats == null || cardDatabase == null || cardPrefab == null)
+            var playerOcc = GameManager.Instance?.Board?.FindPlayer();
+            if (playerOcc == null || cardDatabase == null || cardPrefab == null)
             {
                 return;
             }
@@ -115,7 +110,7 @@ namespace Chest
                 statDisplayUI.Refresh();
             }
 
-            List<CardRewardItem> cards = CardGenerator.GenerateCards(cachedPlayerStats, cardDatabase);
+            List<CardRewardItem> cards = CardGenerator.GenerateCards(playerOcc, cardDatabase);
             if (cards.Count == 0) return;
 
             for (int i = 0; i < cards.Count; i++)
@@ -192,21 +187,7 @@ namespace Chest
 
         private void ApplyReward(CardRewardItem item)
         {
-            if (cachedPlayerStats == null)
-            {
-                cachedPlayerStats = FindAnyObjectByType<PlayerStats>();
-            }
-
-            Core.Occupants.PlayerOccupant playerOcc = null;
-            if (cachedPlayerStats != null && cachedPlayerStats.Occupant != null)
-            {
-                playerOcc = cachedPlayerStats.Occupant;
-            }
-            else if (GameManager.Instance != null && GameManager.Instance.Board != null)
-            {
-                playerOcc = GameManager.Instance.Board.FindPlayer();
-            }
-
+            var playerOcc = GameManager.Instance?.Board?.FindPlayer();
             if (playerOcc != null)
             {
                 if (item.IsHeal)
@@ -216,22 +197,10 @@ namespace Chest
                 else
                 {
                     playerOcc.UpgradeStat(item.StatType);
-                }
-
-                if (cachedPlayerStats != null)
-                {
-                    cachedPlayerStats.SyncFromOccupant();
-                }
-            }
-            else if (cachedPlayerStats != null)
-            {
-                if (item.IsHeal)
-                {
-                    cachedPlayerStats.ResetHealth();
-                }
-                else
-                {
-                    cachedPlayerStats.UpgradeStat(item.StatType);
+                    if (item.StatType == StatType.Health)
+                    {
+                        playerOcc.ResetHealth();
+                    }
                 }
             }
         }

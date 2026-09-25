@@ -118,22 +118,6 @@ namespace Presentation.Entities
         public override IEnumerator AnimateDamageRoutine(int damage)
         {
             SetAnimatorTrigger(TakeDamageHash);
-
-            var playerOcc = GameManager.Instance?.Board?.FindPlayer();
-            var stats = GetComponent<PlayerStats>();
-            if (stats != null)
-            {
-                stats.TakeDamage(damage, null);
-                if (playerOcc != null)
-                {
-                    EventBus<PlayerHealthChangedEvent>.Raise(new PlayerHealthChangedEvent(playerOcc.CurrentHealth, playerOcc.MaxHealth));
-                }
-            }
-            else if (playerOcc != null)
-            {
-                EventBus<PlayerHealthChangedEvent>.Raise(new PlayerHealthChangedEvent(playerOcc.CurrentHealth, playerOcc.MaxHealth));
-            }
-
             yield return base.AnimateDamageRoutine(damage);
         }
 

@@ -12,17 +12,12 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 06b8e2f9b37b2ef438cefd2f82a4264c, type: 3}
   m_Name: Pawn
   m_EditorClassIdentifier: Assembly-CSharp::EnemyData
-  enemyName: Pawn
   prefab: {fileID: 1228558132822369691, guid: e787d67c5100aaf418072ed4af238bed, type: 3}
+  archetype: 0
   maxHealth: 1
   attackDamage: 1
-  stepSpeed: 5
-  detectionRange: 6
-  movementPattern: 0
-  usesDiagonalAttack: 1
   smartness: 0
   maxLineSteps: 1
-  movesInterval: 1
   movePriority: 0
   populationPercentage: 0.35
   attackSound:
@@ -32,5 +27,3 @@ MonoBehaviour:
       Data3: 1512986760
       Data4: -645404666
     Path: event:/SFX_Enemy_Pawn_Attack
-  heartFullSprite: {fileID: 21300000, guid: 5c341d93a0822b84491c18f7cc14453d, type: 3}
-  heartEmptySprite: {fileID: 21300000, guid: 82b5b6f996979204fa5a1017b5e1ce60, type: 3}

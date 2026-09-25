@@ -12,13 +12,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: b24ccb64191009249a3ca7221d685891, type: 3}
   m_Name: StatCardDatabase
   m_EditorClassIdentifier: Assembly-CSharp::Chest.StatCardDatabase
-  statCards:
-  - statType: 1
-    cardSprite: {fileID: -1431578346, guid: 61bef70e13def5d43a4133a5b3d53ebd, type: 3}
-  - statType: 2
-    cardSprite: {fileID: -1349854501, guid: 61bef70e13def5d43a4133a5b3d53ebd, type: 3}
-  - statType: 0
-    cardSprite: {fileID: 544490610, guid: 61bef70e13def5d43a4133a5b3d53ebd, type: 3}
-  - statType: 3
-    cardSprite: {fileID: 343100027, guid: 61bef70e13def5d43a4133a5b3d53ebd, type: 3}
-  healCardSprite: {fileID: -129707243, guid: 61bef70e13def5d43a4133a5b3d53ebd, type: 3}
+  cards:
+  - {fileID: 11400000, guid: 1fef4ebf636d5544294882bf1918d886, type: 2}
+  - {fileID: 11400000, guid: e455c8f83cb739c48b4cb3f7df1f6f93, type: 2}
+  - {fileID: 11400000, guid: 874030969cc4e72438d926e06bde6192, type: 2}
+  - {fileID: 11400000, guid: 32b314847f98d1340bac54c52f8c79e7, type: 2}
