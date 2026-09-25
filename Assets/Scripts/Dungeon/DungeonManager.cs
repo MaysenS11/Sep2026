@@ -57,6 +57,7 @@ namespace Dungeon
 
         [Header("Boss Room")]
         [SerializeField] private BossRoom bossRoomPrefab;
+        [SerializeField] private BossRoom activeBossRoomInstance;
 
         [Header("Room Density & Content Settings")]
         [Tooltip("Master room density: 0.0 = completely empty room, 1.0 = every valid interior floor tile is used.")]
@@ -107,12 +108,34 @@ namespace Dungeon
         {
             EventBus<GenerateDungeonEvent>.Subscribe(OnGenerateDungeonEvent);
             EventBus<ClearDungeonEvent>.Subscribe(OnClearDungeonEvent);
+            EventBus<RoomEnteredEvent>.Subscribe(OnRoomEntered);
         }
 
         private void OnDisable()
         {
             EventBus<GenerateDungeonEvent>.Unsubscribe(OnGenerateDungeonEvent);
             EventBus<ClearDungeonEvent>.Unsubscribe(OnClearDungeonEvent);
+            EventBus<RoomEnteredEvent>.Unsubscribe(OnRoomEntered);
+        }
+
+        private void OnRoomEntered(RoomEnteredEvent evt)
+        {
+            if (evt.Room != null && evt.Room.Type == RoomType.Boss)
+            {
+                if (activeBossRoomInstance == null)
+                {
+                    activeBossRoomInstance = Object.FindAnyObjectByType<BossRoom>();
+                }
+                if (activeBossRoomInstance != null && GameManager.Instance != null && GameManager.Instance.Board != null)
+                {
+                    activeBossRoomInstance.ScanAndRegisterBossEntities(
+                        evt.Room.WorldOriginTile,
+                        GameManager.Instance.Board,
+                        GameManager.Instance.TurnCoordinator?.EffectsRunner,
+                        evt.Room.RoomIndex
+                    );
+                }
+            }
         }
 
         private void OnClearDungeonEvent(ClearDungeonEvent evt)
@@ -189,6 +212,24 @@ namespace Dungeon
 
         private void RegisterDefaultSpawners()
         {
+            if (objectTilemap == null)
+            {
+                var go = GameObject.Find("ObjectTilemap") ?? GameObject.Find("Objects") ?? GameObject.Find("DoorTilemap");
+                if (go != null) objectTilemap = go.GetComponent<Tilemap>();
+                if (objectTilemap == null)
+                {
+                    var allTilemaps = Object.FindObjectsByType<Tilemap>(FindObjectsSortMode.None);
+                    foreach (var tm in allTilemaps)
+                    {
+                        if (tm.name.ToLower().Contains("object") || tm.name.ToLower().Contains("door"))
+                        {
+                            objectTilemap = tm;
+                            break;
+                        }
+                    }
+                }
+            }
+
             _spawners.Clear();
             doorSpawner.Initialize(objectTilemap, fillFloorRuleTile, bossRoomPrefab);
             _spawners.Add(doorSpawner);
@@ -252,6 +293,16 @@ namespace Dungeon
                 fillFloorRuleTile,
                 bossRoomPrefab
             );
+
+            GameManager.RoomData bossRoomData = generatedRooms != null ? generatedRooms.Find(r => r.Type == RoomType.Boss) : null;
+            if (bossRoomData != null && bossRoomPrefab != null && activeBossRoomInstance == null)
+            {
+                Vector3 bossPos = fillFloorTilemap != null
+                    ? fillFloorTilemap.GetCellCenterWorld(new Vector3Int(bossRoomData.WorldOriginTile.x, bossRoomData.WorldOriginTile.y, 0))
+                    : new Vector3(bossRoomData.WorldOriginTile.x, bossRoomData.WorldOriginTile.y, 0f);
+                activeBossRoomInstance = Object.Instantiate(bossRoomPrefab, bossPos, Quaternion.identity, transform);
+                activeBossRoomInstance.name = "BossRoom_Instance";
+            }
 
             if (generatedRooms != null && generatedRooms.Count > 0)
             {
@@ -351,6 +402,53 @@ namespace Dungeon
 
             enemySpawner.RoomDensity = savedEnemyDensity;
             propSpawner.PropDensity = savedPropDensity;
+
+            AssignChildChestRoomKeyholders();
+        }
+
+        private void AssignChildChestRoomKeyholders()
+        {
+            if (GeneratedRooms == null || GeneratedRooms.Count == 0) return;
+
+            var chestRooms = GeneratedRooms.FindAll(r => r.Type == RoomType.Chest);
+            if (chestRooms.Count == 0) return;
+
+            var allEnemies = new List<EnemyBase>(GetComponentsInChildren<EnemyBase>(true));
+            if (allEnemies.Count == 0)
+            {
+                allEnemies.AddRange(Object.FindObjectsByType<EnemyBase>(FindObjectsSortMode.None));
+            }
+
+            for (int i = 0; i < chestRooms.Count; i++)
+            {
+                var chestRoom = chestRooms[i];
+                chestRoom.IsLocked = true;
+
+                int parentIdx = chestRoom.ParentRoomIndex;
+                var candidates = allEnemies.FindAll(e =>
+                    e != null &&
+                    !(e.Data is KingData) &&
+                    !e.name.ToLower().Contains("king") &&
+                    e.GetComponent<Keyholder>() == null &&
+                    (parentIdx == -1 || Mathf.Abs(e.CurrentRoomIndex - parentIdx) <= 1));
+
+                if (candidates.Count == 0)
+                {
+                    candidates = allEnemies.FindAll(e =>
+                        e != null &&
+                        !(e.Data is KingData) &&
+                        !e.name.ToLower().Contains("king") &&
+                        e.GetComponent<Keyholder>() == null);
+                }
+
+                if (candidates.Count > 0)
+                {
+                    int pick = Random.Range(0, candidates.Count);
+                    EnemyBase selected = candidates[pick];
+                    Keyholder kh = selected.gameObject.AddComponent<Keyholder>();
+                    kh.Initialize(chestRoom.RoomIndex);
+                }
+            }
         }
 
         [ContextMenu("Clear Dungeon Tiles")]
@@ -362,6 +460,13 @@ namespace Dungeon
             if (fillFloorTilemap != null) fillFloorTilemap.ClearAllTiles();
             if (debugTilemap != null) debugTilemap.ClearAllTiles();
             if (objectTilemap != null) objectTilemap.ClearAllTiles();
+
+            if (activeBossRoomInstance != null)
+            {
+                if (Application.isPlaying) Destroy(activeBossRoomInstance.gameObject);
+                else DestroyImmediate(activeBossRoomInstance.gameObject);
+                activeBossRoomInstance = null;
+            }
 
             if (GameManager.Instance != null && GameManager.Instance.Board != null)
             {

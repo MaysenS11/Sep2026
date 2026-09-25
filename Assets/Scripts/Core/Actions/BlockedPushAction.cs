@@ -23,6 +23,7 @@ namespace Core.Actions
         public PlayerOccupant Player { get; }
         public Vector2Int PushDirection { get; }
         public int RecoilDamage { get; }
+        public int Damage { get; }
 
         private readonly Vector2Int? _explicitBlockerPos;
         private readonly int _explicitBlockerOccupantId;
@@ -33,13 +34,27 @@ namespace Core.Actions
             Vector2Int pushDirection = default,
             int recoilDamage = 1,
             Vector2Int? blockerPos = null,
-            int blockerOccupantId = 0)
+            int blockerOccupantId = 0,
+            int damage = -1)
         {
             Attacker = attacker ?? throw new ArgumentNullException(nameof(attacker));
             Player = player ?? throw new ArgumentNullException(nameof(player));
             RecoilDamage = Math.Max(1, recoilDamage);
             _explicitBlockerPos = blockerPos;
             _explicitBlockerOccupantId = blockerOccupantId;
+
+            if (damage > 0)
+            {
+                Damage = damage;
+            }
+            else if (attacker is EnemyOccupant enemy)
+            {
+                Damage = enemy.AttackDamage;
+            }
+            else
+            {
+                Damage = 1;
+            }
 
             if (pushDirection == Vector2Int.zero)
             {
@@ -115,6 +130,14 @@ namespace Core.Actions
             if (Attacker.IsDead)
             {
                 board.Remove(Attacker);
+            }
+
+            var playerDamageEffects = Player.TakeDamage(Damage, Attacker);
+            effects.AddRange(playerDamageEffects);
+
+            if (Player.IsDead)
+            {
+                board.Remove(Player);
             }
 
             return effects;

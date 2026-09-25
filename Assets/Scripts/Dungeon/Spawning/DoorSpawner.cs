@@ -77,6 +77,29 @@ namespace Dungeon.Spawning
                     tileQuery.MarkOccupied(entrance);
                 }
             }
+            else if (room.Type == RoomType.Start)
+            {
+                // Start room has NO entry door behind the player
+                room.EntranceDoorTile = null;
+
+                if (_validFloorTilesBuffer.Count > 0)
+                {
+                    int maxSqrDist = -1;
+                    Vector2Int farthestTile = _validFloorTilesBuffer[0];
+                    for (int t = 0; t < _validFloorTilesBuffer.Count; t++)
+                    {
+                        Vector2Int tile = _validFloorTilesBuffer[t];
+                        int sqrDist = (tile - room.CenterTile).sqrMagnitude;
+                        if (sqrDist > maxSqrDist)
+                        {
+                            maxSqrDist = sqrDist;
+                            farthestTile = tile;
+                        }
+                    }
+                    room.ExitDoorTile = farthestTile;
+                    tileQuery.MarkOccupied(farthestTile);
+                }
+            }
             else if (_validFloorTilesBuffer.Count < 2)
             {
                 if (_validFloorTilesBuffer.Count == 1)
@@ -135,7 +158,7 @@ namespace Dungeon.Spawning
             TileBase inTile = room.Type == RoomType.Chest && specialEntranceDoorTile != null ? specialEntranceDoorTile : entranceDoorTile;
             TileBase outTile = room.ParentRoomIndex != -1 && specialExitDoorTile != null ? specialExitDoorTile : exitDoorTile;
 
-            if (room.EntranceDoorTile.HasValue && inTile != null)
+            if (room.Type != RoomType.Start && room.EntranceDoorTile.HasValue && inTile != null)
             {
                 Vector3Int pos = new Vector3Int(room.EntranceDoorTile.Value.x, room.EntranceDoorTile.Value.y, 0);
                 if (_fillFloorRuleTile != null) floorTilemap.SetTile(pos, _fillFloorRuleTile);

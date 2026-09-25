@@ -9,6 +9,10 @@ namespace Dungeon.Spawning
         [SerializeField] private string propName = "Prop";
         [SerializeField] private GameObject prefab;
 
+        [Header("Footprint Dimensions")]
+        [Tooltip("Multi-tile footprint dimensions (e.g. 1x1, 1x2, 2x2)")]
+        [SerializeField] private Vector2Int size = Vector2Int.one;
+
         [Header("Spawn Settings")]
         [Range(0f, 1f)]
         [SerializeField] private float spawnDensity = 0.05f;
@@ -24,6 +28,7 @@ namespace Dungeon.Spawning
 
         public string PropName => propName;
         public GameObject Prefab => prefab;
+        public Vector2Int Size => (size.x < 1 || size.y < 1) ? Vector2Int.one : size;
         public float SpawnDensity => spawnDensity;
         public int MinPerRoom => minPerRoom;
         public int MaxPerRoom => maxPerRoom;
@@ -36,6 +41,11 @@ namespace Dungeon.Spawning
         public void SetDensity(float density)
         {
             spawnDensity = Mathf.Clamp01(density);
+        }
+
+        public void SetSize(Vector2Int newSize)
+        {
+            size = new Vector2Int(Mathf.Max(1, newSize.x), Mathf.Max(1, newSize.y));
         }
     }
 }

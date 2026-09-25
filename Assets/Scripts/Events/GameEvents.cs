@@ -240,6 +240,18 @@ public readonly struct PropDestroyedEvent : IEvent
     }
 }
 
+public readonly struct HeartCollectedEvent : IEvent
+{
+    public readonly int Amount;
+    public readonly Vector3 WorldPosition;
+
+    public HeartCollectedEvent(int amount, Vector3 worldPosition)
+    {
+        Amount = amount;
+        WorldPosition = worldPosition;
+    }
+}
+
 public readonly struct ClearDungeonEvent : IEvent
 {
 }
@@ -314,4 +326,40 @@ public readonly struct StatUpgradeAppliedEvent : IEvent
 
 public readonly struct ChestRewardClosedEvent : IEvent
 {
+}
+
+public readonly struct KeyCollectedEvent : IEvent
+{
+    public readonly int Amount;
+
+    public KeyCollectedEvent(int amount = 1)
+    {
+        Amount = amount;
+    }
+}
+
+public readonly struct GameWonEvent : IEvent
+{
+    public readonly float RunTime;
+    public readonly string MaskId;
+    public readonly bool IsFirstDefeat;
+
+    public GameWonEvent(float runTime = 0f, string maskId = "", bool isFirstDefeat = false)
+    {
+        RunTime = runTime;
+        MaskId = maskId;
+        IsFirstDefeat = isFirstDefeat;
+    }
+}
+
+public readonly struct GameOverEvent : IEvent
+{
+    public readonly float RunTime;
+    public readonly string MaskId;
+
+    public GameOverEvent(float runTime = 0f, string maskId = "")
+    {
+        RunTime = runTime;
+        MaskId = maskId;
+    }
 }

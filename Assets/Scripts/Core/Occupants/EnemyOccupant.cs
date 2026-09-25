@@ -12,7 +12,8 @@ namespace Core.Occupants
         Knight,
         Bishop,
         Rook,
-        Queen
+        Queen,
+        King
     }
 
     /// Pure C# authoritative data model for an enemy unit on the GameBoard.
@@ -25,6 +26,9 @@ namespace Core.Occupants
         public int DetectionRange { get; set; }
         public int MaxLineSteps { get; set; }
         public bool UsesDiagonalAttack { get; set; }
+        public EnemySmartness IntelligenceLevel { get; set; }
+        public bool IsImmobile { get; set; }
+        public bool ImmuneToDirectAttacks { get; set; }
 
         /// If true, this enemy skips its next action (e.g. from damage stun or recoil).
         public bool SkipNextTurn { get; set; }
@@ -39,7 +43,10 @@ namespace Core.Occupants
             bool usesDiagonalAttack = false,
             Vector2Int initialPosition = default,
             int id = 0,
-            string name = null)
+            string name = null,
+            EnemySmartness? intelligenceLevel = null,
+            bool isImmobile = false,
+            bool immuneToDirectAttacks = false)
             : base(maxHealth, initialPosition, id, name ?? archetype.ToString())
         {
             Archetype = archetype;
@@ -49,6 +56,37 @@ namespace Core.Occupants
             MaxLineSteps = maxLineSteps;
             UsesDiagonalAttack = (archetype == EnemyArchetype.Pawn) || usesDiagonalAttack;
             SkipNextTurn = false;
+
+            if (intelligenceLevel.HasValue)
+            {
+                IntelligenceLevel = intelligenceLevel.Value;
+            }
+            else
+            {
+                switch (archetype)
+                {
+                    case EnemyArchetype.Pawn:
+                        IntelligenceLevel = EnemySmartness.Dumb;
+                        break;
+                    case EnemyArchetype.Knight:
+                    case EnemyArchetype.Bishop:
+                        IntelligenceLevel = EnemySmartness.Mid;
+                        break;
+                    case EnemyArchetype.Rook:
+                    case EnemyArchetype.Queen:
+                        IntelligenceLevel = EnemySmartness.Smart;
+                        break;
+                    case EnemyArchetype.King:
+                        IntelligenceLevel = EnemySmartness.Dumb;
+                        break;
+                    default:
+                        IntelligenceLevel = EnemySmartness.Mid;
+                        break;
+                }
+            }
+
+            IsImmobile = (archetype == EnemyArchetype.King) || isImmobile;
+            ImmuneToDirectAttacks = (archetype == EnemyArchetype.King) || immuneToDirectAttacks;
 
             // Enemies are NEVER pushable
             IsPushable = false;

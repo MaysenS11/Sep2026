@@ -189,7 +189,7 @@ namespace Core.Tests
             // 1. Player does NOT move
             Assert(board.GetOccupant(new Vector2Int(2, 2)) == player, "Player must remain at (2,2)");
             Assert(player.GridPosition == new Vector2Int(2, 2), "Player GridPosition unchanged");
-            Assert(player.CurrentHealth == 6, "Player takes no damage");
+            Assert(player.CurrentHealth == 5, "Player took 1 incoming attack damage (HP: 5/6)");
 
             // 2. Attacking enemy CANNOT enter player's tile, stays at origin
             Assert(board.GetOccupant(new Vector2Int(1, 2)) == pawn, "Pawn remains at origin (1,2)");
@@ -209,10 +209,15 @@ namespace Core.Tests
             Assert(recoilEffect.RecoilDamage == 1, "Recoil damage is 1");
             Assert(recoilEffect.BlockerPos == new Vector2Int(3, 2), "Blocker pos is wall at (3,2)");
 
-            var damageEffect = effects.Find(e => e is DamageTakenEffect) as DamageTakenEffect;
-            Assert(damageEffect != null, "DamageTakenEffect emitted for recoil");
-            Assert(damageEffect.OccupantId == pawn.Id, "Damage taken by pawn");
-            Assert(damageEffect.DamageAmount == 1, "Recoil damage amount is 1");
+            var pawnDamageEffect = effects.Find(e => e is DamageTakenEffect d && d.OccupantId == pawn.Id) as DamageTakenEffect;
+            Assert(pawnDamageEffect != null, "DamageTakenEffect emitted for recoil");
+            Assert(pawnDamageEffect.OccupantId == pawn.Id, "Damage taken by pawn");
+            Assert(pawnDamageEffect.DamageAmount == 1, "Recoil damage amount is 1");
+
+            var playerDamageEffect = effects.Find(e => e is DamageTakenEffect d && d.OccupantId == player.Id) as DamageTakenEffect;
+            Assert(playerDamageEffect != null, "DamageTakenEffect emitted for player incoming attack damage");
+            Assert(playerDamageEffect.OccupantId == player.Id, "Damage taken by player");
+            Assert(playerDamageEffect.DamageAmount == 1, "Player incoming damage amount is 1");
         }
 
         private static void TestBlockedPushActionDistantEnemyRepositioning()

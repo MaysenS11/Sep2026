@@ -12,9 +12,10 @@ public enum EnemyMovementPattern
 
 public enum EnemySmartness
 {
-    Lazy,
-    Mid,
-    Smart
+    Dumb = 0,
+    Lazy = 0,
+    Mid = 1,
+    Smart = 2
 }
 
 [CreateAssetMenu(fileName = "NewEnemyData", menuName = "Dungeon/Enemy Data")]
@@ -63,6 +64,7 @@ public class EnemyData : ScriptableObject
     public EnemyMovementPattern MovementPattern => movementPattern;
     public bool UsesDiagonalAttack => usesDiagonalAttack;
     public EnemySmartness Smartness => smartness;
+    public EnemySmartness IntelligenceLevel => smartness;
     public int MaxLineSteps => maxLineSteps;
     public int MovesInterval => movesInterval;
     public int MovePriority => movePriority;

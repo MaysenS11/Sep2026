@@ -21,6 +21,11 @@ namespace Core.AI
                 return EnemyIntent.CreateWait(enemy);
             }
 
+            if (enemy.Archetype == EnemyArchetype.King || enemy.IsImmobile)
+            {
+                return EnemyIntent.CreateWait(enemy);
+            }
+
             if (board == null)
             {
                 return EnemyIntent.CreateWait(enemy);
@@ -77,7 +82,7 @@ namespace Core.AI
             }
             else
             {
-                var action = new BlockedPushAction(enemy, player, pushDir, recoilDamage: 1, blockerPos: pushDest);
+                var action = new BlockedPushAction(enemy, player, pushDir, recoilDamage: 1, blockerPos: pushDest, damage: enemy.AttackDamage);
                 var path = blockedPath ?? new List<Vector2Int> { enemy.GridPosition };
                 return new EnemyIntent(
                     enemy: enemy,

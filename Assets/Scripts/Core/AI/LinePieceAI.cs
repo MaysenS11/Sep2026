@@ -60,7 +60,7 @@ namespace Core.AI
             int maxSteps = enemy.MaxLineSteps > 0 ? enemy.MaxLineSteps : 1;
             Vector2Int bestDestination = enemyPos;
             List<Vector2Int> bestPath = null;
-            float bestDist = BoardCoordinate.EuclideanDistance(enemyPos, playerPos);
+            float bestScore = float.MaxValue;
 
             foreach (var dir in AllowedDirections)
             {
@@ -75,10 +75,10 @@ namespace Core.AI
                     }
 
                     currentPath.Add(current);
-                    float dist = BoardCoordinate.EuclideanDistance(current, playerPos);
-                    if (dist < bestDist)
+                    float score = ScoreCandidateTile(current, playerPos, enemy);
+                    if (score < bestScore)
                     {
-                        bestDist = dist;
+                        bestScore = score;
                         bestDestination = current;
                         bestPath = new List<Vector2Int>(currentPath);
                     }
@@ -101,6 +101,15 @@ namespace Core.AI
             }
 
             return EnemyIntent.CreateWait(enemy);
+        }
+
+        /// <summary>
+        /// Scores a candidate move destination for line pieces. Lower score is preferred.
+        /// Overridden by Smart pieces (Rook, Queen) to prioritize establishing line-of-sight.
+        /// </summary>
+        protected virtual float ScoreCandidateTile(Vector2Int candidate, Vector2Int playerPos, EnemyOccupant enemy)
+        {
+            return BoardCoordinate.EuclideanDistance(candidate, playerPos);
         }
     }
 }

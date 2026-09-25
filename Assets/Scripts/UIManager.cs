@@ -5,9 +5,12 @@ using TMPro;
 
 public class UIManager : MonoBehaviour
 {
+    public static UIManager Instance { get; private set; }
+
     [Header("Runtime Counter")]
     [SerializeField] private TMP_Text timerText;
     private float elapsedTime;
+    public float ElapsedTime => elapsedTime;
     private int lastDisplayedSecond = -1;
     private readonly char[] timerBuffer = new char[8];
 
@@ -20,15 +23,21 @@ public class UIManager : MonoBehaviour
 
     private struct HeartSlotItem
     {
+        public GameObject Root;
         public GameObject Half;
         public GameObject Full;
     }
 
     private readonly List<HeartSlotItem> registeredHearts = new List<HeartSlotItem>();
+    private Transform healthContainerTransform;
     private bool isInitialized = false;
 
     private void Awake()
     {
+        if (Instance == null)
+        {
+            Instance = this;
+        }
         InitializeHearts();
     }
 
@@ -40,26 +49,30 @@ public class UIManager : MonoBehaviour
 
         if (heartSlots == null || heartSlots.Length == 0)
         {
-            Transform healthContainer = transform.Find("IngamePanel/HealthContainer");
-            if (healthContainer == null)
+            healthContainerTransform = transform.Find("IngamePanel/HealthContainer");
+            if (healthContainerTransform == null)
             {
-                healthContainer = transform.Find("HUD/HealthContainer");
+                healthContainerTransform = transform.Find("HUD/HealthContainer");
             }
-            if (healthContainer == null)
+            if (healthContainerTransform == null)
             {
                 var foundHc = GameObject.Find("HealthContainer");
-                if (foundHc != null) healthContainer = foundHc.transform;
+                if (foundHc != null) healthContainerTransform = foundHc.transform;
             }
 
-            if (healthContainer != null)
+            if (healthContainerTransform != null)
             {
                 var containerList = new List<Transform>();
-                for (int i = 0; i < healthContainer.childCount; i++)
+                for (int i = 0; i < healthContainerTransform.childCount; i++)
                 {
-                    containerList.Add(healthContainer.GetChild(i));
+                    containerList.Add(healthContainerTransform.GetChild(i));
                 }
                 heartSlots = containerList.ToArray();
             }
+        }
+        else if (heartSlots.Length > 0 && heartSlots[0] != null)
+        {
+            healthContainerTransform = heartSlots[0].parent;
         }
 
         if (heartSlots != null)
@@ -74,6 +87,7 @@ public class UIManager : MonoBehaviour
 
                 registeredHearts.Add(new HeartSlotItem
                 {
+                    Root = slotTransform.gameObject,
                     Half = halfTrans != null ? halfTrans.gameObject : null,
                     Full = fullTrans != null ? fullTrans.gameObject : null
                 });
@@ -131,25 +145,51 @@ public class UIManager : MonoBehaviour
             InitializeHearts();
         }
 
-        int totalSlots = registeredHearts.Count;
-        if (totalSlots == 0) return;
+        if (registeredHearts.Count == 0) return;
 
-        float healthPerSlot = (maxHealth > 0) ? (float)maxHealth / totalSlots : 2f;
-        float currentHp = Mathf.Clamp(currentHealth, 0, maxHealth > 0 ? maxHealth : totalSlots * 2);
+        int neededSlots = Mathf.Max(1, Mathf.CeilToInt(maxHealth / 2f));
+
+        // Dynamically instantiate additional heart containers if maxHealth expanded beyond pre-spawned count
+        while (registeredHearts.Count < neededSlots && registeredHearts.Count > 0 && healthContainerTransform != null)
+        {
+            GameObject template = registeredHearts[0].Root;
+            if (template == null) break;
+
+            GameObject newSlotGo = Instantiate(template, healthContainerTransform);
+            newSlotGo.name = $"HeartSlot_{registeredHearts.Count}";
+            Transform halfTrans = newSlotGo.transform.Find("HeartHalf");
+            Transform fullTrans = newSlotGo.transform.Find("HeartFull");
+
+            registeredHearts.Add(new HeartSlotItem
+            {
+                Root = newSlotGo,
+                Half = halfTrans != null ? halfTrans.gameObject : null,
+                Full = fullTrans != null ? fullTrans.gameObject : null
+            });
+        }
+
+        int totalSlots = registeredHearts.Count;
 
         for (int i = 0; i < totalSlots; i++)
         {
             HeartSlotItem slot = registeredHearts[i];
-            float slotStartHp = i * healthPerSlot;
-            float slotFullHp = (i + 1) * healthPerSlot;
-            float slotHalfHp = slotStartHp + (healthPerSlot * 0.5f);
+            if (slot.Root == null) continue;
 
-            if (currentHp >= slotFullHp - 0.001f)
+            if (i >= neededSlots)
+            {
+                slot.Root.SetActive(false);
+                continue;
+            }
+
+            slot.Root.SetActive(true);
+            int slotHp = currentHealth - (i * 2);
+
+            if (slotHp >= 2)
             {
                 if (slot.Half != null) slot.Half.SetActive(true);
                 if (slot.Full != null) slot.Full.SetActive(true);
             }
-            else if (currentHp >= slotHalfHp - 0.001f || (healthPerSlot <= 2f && currentHp > slotStartHp))
+            else if (slotHp == 1)
             {
                 if (slot.Half != null) slot.Half.SetActive(true);
                 if (slot.Full != null) slot.Full.SetActive(false);
@@ -165,5 +205,66 @@ public class UIManager : MonoBehaviour
     public void SetMaskSprite(Sprite newMask)
     {
         if (maskDisplayImage != null) maskDisplayImage.sprite = newMask;
+    }
+
+    [Header("Keys")]
+    [SerializeField] private TMP_Text keyCountText;
+    [SerializeField] private GameObject keyIcon;
+    private int currentKeys = 0;
+    public int CurrentKeys => currentKeys;
+
+    [Header("Win Screen")]
+    [SerializeField] private GameObject winScreenPanel;
+
+    public void AddKey(int amount = 1)
+    {
+        currentKeys += amount;
+        UpdateKeyUI();
+    }
+
+    public bool TryUseKey()
+    {
+        if (currentKeys > 0)
+        {
+            currentKeys--;
+            UpdateKeyUI();
+            return true;
+        }
+        return false;
+    }
+
+    public void UpdateKeyUI()
+    {
+        if (keyCountText == null)
+        {
+            var foundText = transform.Find("IngamePanel/KeyContainer/KeyCount")
+                         ?? transform.Find("HUD/KeyContainer/KeyCount")
+                         ?? transform.Find("KeyCount");
+            if (foundText != null) keyCountText = foundText.GetComponent<TMP_Text>();
+        }
+
+        if (keyCountText != null)
+        {
+            keyCountText.text = currentKeys.ToString();
+        }
+    }
+
+    public void ShowWinScreen()
+    {
+        if (winScreenPanel == null)
+        {
+            winScreenPanel = transform.Find("WinPanel")?.gameObject
+                          ?? transform.Find("WinScreen")?.gameObject
+                          ?? transform.Find("VictoryPanel")?.gameObject;
+        }
+
+        if (winScreenPanel != null)
+        {
+            winScreenPanel.SetActive(true);
+        }
+        else
+        {
+            Debug.Log("[UIManager] Win Screen activated! The King has fallen.");
+        }
     }
 }

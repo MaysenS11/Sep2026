@@ -77,7 +77,8 @@ namespace Dungeon.Spawning
 
             if (room.Type == RoomType.Boss)
             {
-                SpawnBossRoomContent(room, tileQuery, floorTilemap, parentContainer);
+                // Plan C: Procedural enemy spawning is disabled entirely in RoomType.Boss rooms.
+                // Pre-placed entities from BossRoom.prefab are registered on boss room entry.
                 return;
             }
 

@@ -146,57 +146,217 @@ namespace Infrastructure
                 player.SetFacingDirection(attackDir);
             }
 
+            WeaponType weapon = player.WeaponType;
+
             // 1. Emit player attack lunge visual effect
             emittedEffects.Add(new AttackLungeEffect(player.Id, primaryTarget, attackDir, player.GridPosition));
 
-            // 2. Evaluate target cells and apply immediate simulation mutation
+            // 2. Weapon profile evaluation
             var hitOccupants = new HashSet<TileOccupant>();
-            for (int i = 0; i < targetTiles.Count; i++)
+            var hitTiles = new List<Vector2Int>();
+            var evaluatedTiles = new List<Vector2Int>();
+
+            switch (weapon)
             {
-                Vector2Int cell = targetTiles[i];
-                TileOccupant occupant = Board.GetOccupant(cell);
-                if (occupant == null || !hitOccupants.Add(occupant)) continue;
-
-                if (occupant is EnemyOccupant enemy)
+                case WeaponType.Degen:
                 {
-                    var dmgEffects = enemy.TakeDamage(player.AttackDamage, player);
-                    enemy.SkipNextTurn = true;
-                    emittedEffects.AddRange(dmgEffects);
-
-                    if (enemy.IsDead)
+                    // Degen (Rapier): Single-target strike stopping at first occupant
+                    for (int i = 0; i < targetTiles.Count; i++)
                     {
-                        Board.Remove(enemy);
-                    }
-                }
-                else if (occupant is ChestOccupant chest)
-                {
-                    var chestEffects = chest.TakeDamage(1, player);
-                    emittedEffects.AddRange(chestEffects);
-                    // Chest remains on board as impassable obstacle
-                }
-                else if (occupant is DestructiblePropOccupant prop)
-                {
-                    var propEffects = prop.TakeDamage(player.AttackDamage, player);
-                    emittedEffects.AddRange(propEffects);
+                        Vector2Int cell = targetTiles[i];
+                        evaluatedTiles.Add(cell);
 
-                    if (prop.IsDead)
-                    {
-                        Board.Remove(prop);
-                    }
-                }
-                else
-                {
-                    var otherEffects = occupant.TakeDamage(player.AttackDamage, player);
-                    emittedEffects.AddRange(otherEffects);
+                        if (!Board.IsInBounds(cell) || Board.IsWall(cell))
+                        {
+                            break;
+                        }
 
-                    if (occupant.IsDead)
-                    {
-                        Board.Remove(occupant);
+                        TileOccupant occ = Board.GetOccupant(cell);
+                        if (occ != null)
+                        {
+                            ApplyDamageToOccupant(occ, player, player.AttackDamage, emittedEffects, hitOccupants, hitTiles, cell);
+                            // STOPS at first occupant!
+                            break;
+                        }
                     }
+                    break;
+                }
+
+                case WeaponType.Halberd:
+                {
+                    // Halberd: Sweep cleave stopping at first obstacle
+                    for (int i = 0; i < targetTiles.Count; i++)
+                    {
+                        Vector2Int cell = targetTiles[i];
+                        evaluatedTiles.Add(cell);
+
+                        if (!Board.IsInBounds(cell) || Board.IsWall(cell))
+                        {
+                            // Stops extending past first obstacle along sweep
+                            break;
+                        }
+
+                        TileOccupant occ = Board.GetOccupant(cell);
+                        if (occ is ObstacleOccupant || (occ is ChestOccupant chest && chest.IsOpen))
+                        {
+                            // Impassable obstacle stops sweep
+                            break;
+                        }
+
+                        if (occ != null)
+                        {
+                            ApplyDamageToOccupant(occ, player, player.AttackDamage, emittedEffects, hitOccupants, hitTiles, cell);
+                        }
+                    }
+                    break;
+                }
+
+                case WeaponType.Pistol:
+                {
+                    // Pistol: Cardinal piercing projectile passing through aligned targets with damage degradation per hit
+                    int hitCount = 0;
+                    for (int i = 0; i < targetTiles.Count; i++)
+                    {
+                        Vector2Int cell = targetTiles[i];
+                        evaluatedTiles.Add(cell);
+
+                        if (!Board.IsInBounds(cell) || Board.IsWall(cell))
+                        {
+                            break; // Wall blocks bullet
+                        }
+
+                        TileOccupant occ = Board.GetOccupant(cell);
+                        if (occ is ObstacleOccupant)
+                        {
+                            break; // Solid pillar/obstacle blocks bullet
+                        }
+
+                        if (occ != null)
+                        {
+                            int degradedDamage = Math.Max(1, player.AttackDamage - hitCount);
+                            ApplyDamageToOccupant(occ, player, degradedDamage, emittedEffects, hitOccupants, hitTiles, cell);
+                            hitCount++;
+                        }
+                    }
+                    break;
+                }
+
+                case WeaponType.Flask:
+                {
+                    // Flask (Raven Mask): Thrown projectile arc originating from player and impacting target tile
+                    // Overhead throw: intermediate obstacles/walls do not block the throw
+                    for (int i = 0; i < targetTiles.Count; i++)
+                    {
+                        Vector2Int cell = targetTiles[i];
+                        evaluatedTiles.Add(cell);
+
+                        if (!Board.IsInBounds(cell) || Board.IsWall(cell))
+                        {
+                            continue;
+                        }
+
+                        TileOccupant occ = Board.GetOccupant(cell);
+                        if (occ != null)
+                        {
+                            ApplyDamageToOccupant(occ, player, player.AttackDamage, emittedEffects, hitOccupants, hitTiles, cell);
+                        }
+                    }
+                    break;
                 }
             }
 
+            // 3. Emit dedicated WeaponAttackEffect for presentation layer VFX
+            emittedEffects.Add(new WeaponAttackEffect(
+                player.Id,
+                weapon,
+                player.GridPosition,
+                attackDir,
+                primaryTarget,
+                evaluatedTiles,
+                hitTiles
+            ));
+
             return true;
+        }
+
+        private void ApplyDamageToOccupant(
+            TileOccupant occupant,
+            PlayerOccupant player,
+            int damage,
+            List<BoardEffect> emittedEffects,
+            HashSet<TileOccupant> hitOccupants,
+            List<Vector2Int> hitTiles,
+            Vector2Int cell)
+        {
+            if (occupant == null || !hitOccupants.Add(occupant)) return;
+            hitTiles.Add(cell);
+
+            if (occupant is EnemyOccupant enemy)
+            {
+                if (enemy.ImmuneToDirectAttacks)
+                {
+                    return;
+                }
+
+                var dmgEffects = enemy.TakeDamage(damage, player);
+                enemy.SkipNextTurn = true;
+                emittedEffects.AddRange(dmgEffects);
+
+                if (enemy.IsDead)
+                {
+                    Board.Remove(enemy);
+
+                    // Minion-linked damage to King
+                    if (enemy.Archetype != EnemyArchetype.King)
+                    {
+                        EnemyOccupant king = null;
+                        foreach (var occ in Board.GetOccupantsOfType<EnemyOccupant>())
+                        {
+                            if (occ.Archetype == EnemyArchetype.King && !occ.IsDead)
+                            {
+                                king = occ;
+                                break;
+                            }
+                        }
+
+                        if (king != null)
+                        {
+                            int minionDmg = enemy.AttackDamage > 0 ? enemy.AttackDamage : 1;
+                            var kingEffects = king.TakeDamage(minionDmg, enemy);
+                            emittedEffects.AddRange(kingEffects);
+                            if (king.IsDead)
+                            {
+                                Board.Remove(king);
+                            }
+                        }
+                    }
+                }
+            }
+            else if (occupant is ChestOccupant chest)
+            {
+                var chestEffects = chest.TakeDamage(1, player);
+                emittedEffects.AddRange(chestEffects);
+            }
+            else if (occupant is DestructiblePropOccupant prop)
+            {
+                var propEffects = prop.TakeDamage(damage, player);
+                emittedEffects.AddRange(propEffects);
+
+                if (prop.IsDead)
+                {
+                    Board.Remove(prop);
+                }
+            }
+            else
+            {
+                var otherEffects = occupant.TakeDamage(damage, player);
+                emittedEffects.AddRange(otherEffects);
+
+                if (occupant.IsDead)
+                {
+                    Board.Remove(occupant);
+                }
+            }
         }
 
         /// Executes pure simulation for the entire enemy phase:

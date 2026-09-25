@@ -198,13 +198,16 @@ namespace Presentation.Board
                 case PushDisplacementEffect _:
                 case BlockedPushRecoilEffect _:
                 case AttackLungeEffect _:
-                    return 0; // Movement / displacement / recoil first
+                case WeaponAttackEffect _:
+                    return 0; // Movement / displacement / recoil / weapon attacks first
                 case DamageTakenEffect _:
                     return 1; // Damage feedback second
+                case HeartRestoreEffect _:
+                    return 2; // Heart particle restores
                 case ChestOpenedEffect _:
-                    return 2; // Chest opened
+                    return 3; // Chest opened
                 case OccupantDestroyedEffect _:
-                    return 3; // Death & destruction strictly last
+                    return 4; // Death & destruction strictly last
                 default:
                     return 0;
             }
@@ -277,6 +280,10 @@ namespace Presentation.Board
                     }
                     break;
 
+                case HeartRestoreEffect heart:
+                    yield return StartCoroutine(PlayHeartRestoreRoutine(heart, duration));
+                    break;
+
                 case OccupantDestroyedEffect destroyed:
                     if (targetObj != null)
                     {
@@ -293,9 +300,32 @@ namespace Presentation.Board
                     }
                     break;
 
+                case WeaponAttackEffect weapon:
+                    yield return StartCoroutine(Presentation.Effects.WeaponAttackVFX.PlayAttackRoutine(weapon, duration));
+                    break;
+
                 default:
                     yield break;
             }
+        }
+
+        private IEnumerator PlayHeartRestoreRoutine(HeartRestoreEffect heart, float duration)
+        {
+            Vector3 startWorld = TileObject.GridToWorld(heart.SourcePos);
+            TileObject targetObj = heart.TargetOccupantId != 0 ? GetTileObject(heart.TargetOccupantId) : null;
+            Transform targetTransform = targetObj != null ? targetObj.transform : null;
+
+            if (targetTransform == null)
+            {
+                var playerMovement = UnityEngine.Object.FindAnyObjectByType<PlayerMovement>();
+                if (playerMovement != null) targetTransform = playerMovement.transform;
+            }
+
+            if (targetTransform != null)
+            {
+                Presentation.Effects.FlyingHeartParticle.Spawn(startWorld, targetTransform, null, null, Mathf.Max(0.2f, duration), heart.HealAmount);
+            }
+            yield break;
         }
 
         #endregion

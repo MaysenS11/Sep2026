@@ -69,10 +69,10 @@ MonoBehaviour:
   Path: FMOD/Desktop/Master.strings.bank
   Name: Master.strings
   StudioPath: bank:/Master.strings
-  lastModified: 639257961241431024
+  lastModified: 639259467849938302
   FileSizes:
   - Name: 
-    Value: 2494
+    Value: 2544
   Exists: 1
 --- !u!114 &-7656085967289854956
 MonoBehaviour:
@@ -101,6 +101,33 @@ MonoBehaviour:
   MinDistance: 1
   MaxDistance: 20
   Length: 492
+--- !u!114 &-7243367125457300336
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: ceb653cd98e289a4e8697a1af55201f2, type: 3}
+  m_Name: event:/Music_MainMusic
+  m_EditorClassIdentifier: FMODUnityEditor::FMODUnity.EditorEventRef
+  Path: event:/Music_MainMusic
+  Guid:
+    Data1: 1100072137
+    Data2: 1260856717
+    Data3: -580042073
+    Data4: 1911981519
+  Banks:
+  - {fileID: 8994020168354651884}
+  IsStream: 1
+  Is3D: 0
+  IsOneShot: 1
+  Parameters: []
+  MinDistance: 1
+  MaxDistance: 20
+  Length: 620712
 --- !u!114 &-6989408508939736140
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -447,13 +474,14 @@ MonoBehaviour:
   - {fileID: -8531609663020169452}
   - {fileID: 7443238492093002261}
   - {fileID: -6568239053097860522}
+  - {fileID: -7243367125457300336}
   EditorParameters: []
   MasterBanks:
   - {fileID: 8994020168354651884}
   StringsBanks:
   - {fileID: -8272736750473392735}
   cacheVersion: 131860
-  cacheTime: 639257961241431024
+  cacheTime: 639259467849938302
   SerializableEventsDict:
   - key: event:/Music_CanonInDForTwoRenaissanceHarps
     index: 0
@@ -521,6 +549,8 @@ MonoBehaviour:
     index: 31
   - key: event:/SFX_Character_Musket_Attack
     index: 32
+  - key: event:/Music_MainMusic
+    index: 33
 --- !u!114 &95851280561094563
 MonoBehaviour:
   m_ObjectHideFlags: 0
@@ -1022,7 +1052,7 @@ MonoBehaviour:
   Path: FMOD/Desktop/Master.bank
   Name: Master
   StudioPath: bank:/Master
-  lastModified: 639257961241431024
+  lastModified: 639259467849927919
   FileSizes: []
   Exists: 1
 --- !u!114 &9137320103529174229

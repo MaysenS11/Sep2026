@@ -61,6 +61,19 @@ namespace Core.AI
                 }
             }
 
+            // Dumb Intelligence: Inefficient, erratic path selection when multiple axes are open
+            if (enemy.IntelligenceLevel == EnemySmartness.Dumb && dx != 0 && dy != 0)
+            {
+                // Erratic preference: alternates secondary axis based on position hash
+                bool erratic = ((enemyPos.x * 3 + enemyPos.y * 7 + enemy.Id) % 2) == 0;
+                if (erratic && secondaryStep != Vector2Int.zero && board.CanEnter(enemyPos + secondaryStep))
+                {
+                    var temp = primaryStep;
+                    primaryStep = secondaryStep;
+                    secondaryStep = temp;
+                }
+            }
+
             Vector2Int targetStep = Vector2Int.zero;
             if (board.CanEnter(enemyPos + primaryStep))
             {

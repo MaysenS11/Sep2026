@@ -37,6 +37,9 @@ public class UIAudioManager : MonoBehaviour
     [SerializeField] private EventReference menuMusic;
 
 
+    private FMOD.Studio.EventInstance currentMusicInstance;
+    private EventReference currentMusicRef;
+
     [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]
     private static void Initialize()
     {
@@ -61,6 +64,27 @@ public class UIAudioManager : MonoBehaviour
 
         EnsureDefaultEvents();
         BroadcastSharedAudio();
+        ApplySavedVolumes();
+
+        UnityEngine.SceneManagement.SceneManager.sceneLoaded += OnSceneLoaded;
+        if (UnityEngine.SceneManagement.SceneManager.GetActiveScene().name == "StartMenu")
+        {
+            PlayMusic(menuMusic);
+        }
+    }
+
+    private void OnDestroy()
+    {
+        UnityEngine.SceneManagement.SceneManager.sceneLoaded -= OnSceneLoaded;
+        StopMusic();
+    }
+
+    private void OnSceneLoaded(UnityEngine.SceneManagement.Scene scene, UnityEngine.SceneManagement.LoadSceneMode mode)
+    {
+        if (scene.name == "StartMenu")
+        {
+            PlayMusic(menuMusic);
+        }
     }
 
     private void OnEnable()
@@ -69,6 +93,12 @@ public class UIAudioManager : MonoBehaviour
         EventBus<RequestSharedAudioEvent>.Subscribe(OnRequestSharedAudio);
         EventBus<PropDestroyedEvent>.Subscribe(OnPropDestroyed);
         EventBus<DoorTriggeredEvent>.Subscribe(OnDoorTriggered);
+        EventBus<RoomEnteredEvent>.Subscribe(OnRoomEntered);
+        EventBus<GameWonEvent>.Subscribe(OnGameWon);
+        EventBus<GameOverEvent>.Subscribe(OnGameOver);
+        EventBus<HeartCollectedEvent>.Subscribe(OnHeartCollected);
+        EventBus<KeyCollectedEvent>.Subscribe(OnKeyCollected);
+        EventBus<StatUpgradeAppliedEvent>.Subscribe(OnStatUpgradeApplied);
     }
 
     private void OnDisable()
@@ -77,6 +107,130 @@ public class UIAudioManager : MonoBehaviour
         EventBus<RequestSharedAudioEvent>.Unsubscribe(OnRequestSharedAudio);
         EventBus<PropDestroyedEvent>.Unsubscribe(OnPropDestroyed);
         EventBus<DoorTriggeredEvent>.Unsubscribe(OnDoorTriggered);
+        EventBus<RoomEnteredEvent>.Unsubscribe(OnRoomEntered);
+        EventBus<GameWonEvent>.Unsubscribe(OnGameWon);
+        EventBus<GameOverEvent>.Unsubscribe(OnGameOver);
+        EventBus<HeartCollectedEvent>.Unsubscribe(OnHeartCollected);
+        EventBus<KeyCollectedEvent>.Unsubscribe(OnKeyCollected);
+        EventBus<StatUpgradeAppliedEvent>.Unsubscribe(OnStatUpgradeApplied);
+    }
+
+    private void OnRoomEntered(RoomEnteredEvent evt)
+    {
+        if (evt.Room == null) return;
+
+        switch (evt.Room.Type)
+        {
+            case RoomType.Boss:
+                PlayMusic(bossroomMusic);
+                break;
+            case RoomType.Chest:
+                PlayMusic(chestroomMusic);
+                break;
+            case RoomType.Start:
+            case RoomType.Normal:
+            default:
+                PlayMusic(dungeonMusic);
+                break;
+        }
+    }
+
+    private void OnGameWon(GameWonEvent evt)
+    {
+        PlayMusic(winMusic);
+    }
+
+    private void OnGameOver(GameOverEvent evt)
+    {
+        PlayMusic(gameOverMusic);
+    }
+
+    private void OnHeartCollected(HeartCollectedEvent evt)
+    {
+        if (!healthCollectSound.IsNull)
+        {
+            RuntimeManager.PlayOneShot(healthCollectSound);
+        }
+    }
+
+    private void OnKeyCollected(KeyCollectedEvent evt)
+    {
+        if (!keyCollectSound.IsNull)
+        {
+            RuntimeManager.PlayOneShot(keyCollectSound);
+        }
+    }
+
+    private void OnStatUpgradeApplied(StatUpgradeAppliedEvent evt)
+    {
+        if (!characterUpgrade.IsNull)
+        {
+            RuntimeManager.PlayOneShot(characterUpgrade);
+        }
+    }
+
+    public void PlayMusic(EventReference musicRef)
+    {
+        if (musicRef.IsNull) return;
+
+        if (currentMusicInstance.isValid())
+        {
+            if (musicRef.Guid == currentMusicRef.Guid)
+            {
+                return;
+            }
+
+            currentMusicInstance.stop(FMOD.Studio.STOP_MODE.ALLOWFADEOUT);
+            currentMusicInstance.release();
+        }
+
+        currentMusicRef = musicRef;
+        currentMusicInstance = RuntimeManager.CreateInstance(musicRef);
+        currentMusicInstance.start();
+    }
+
+    public void StopMusic()
+    {
+        if (currentMusicInstance.isValid())
+        {
+            currentMusicInstance.stop(FMOD.Studio.STOP_MODE.ALLOWFADEOUT);
+            currentMusicInstance.release();
+        }
+        currentMusicRef = default;
+    }
+
+    public static void SetMasterVolume(float volume)
+    {
+        try
+        {
+            var bus = RuntimeManager.GetBus("bus:/");
+            bus.setVolume(Mathf.Clamp01(volume));
+        }
+        catch (Exception ex)
+        {
+            Debug.LogWarning($"[UIAudioManager] SetMasterVolume warning: {ex.Message}");
+        }
+    }
+
+    public static void SetSFXVolume(float volume)
+    {
+        try
+        {
+            var bus = RuntimeManager.GetBus("bus:/SFX");
+            bus.setVolume(Mathf.Clamp01(volume));
+        }
+        catch (Exception ex)
+        {
+            Debug.LogWarning($"[UIAudioManager] SetSFXVolume warning: {ex.Message}");
+        }
+    }
+
+    private void ApplySavedVolumes()
+    {
+        float master = PlayerPrefs.GetFloat("FMOD_MasterVolume", 1f);
+        float sfx = PlayerPrefs.GetFloat("FMOD_SFXVolume", 1f);
+        SetMasterVolume(master);
+        SetSFXVolume(sfx);
     }
 
     private void OnRequestSharedAudio(RequestSharedAudioEvent evt)
@@ -152,6 +306,42 @@ public class UIAudioManager : MonoBehaviour
         {
             lowLifeSound = RuntimeManager.PathToEventReference("event:/SFX_Low_Health");
         }
+        if (healthCollectSound.IsNull)
+        {
+            healthCollectSound = RuntimeManager.PathToEventReference("event:/SFX_Heart_Collect");
+        }
+        if (keyCollectSound.IsNull)
+        {
+            keyCollectSound = RuntimeManager.PathToEventReference("event:/SFX_Key_Collect");
+        }
+        if (characterUpgrade.IsNull)
+        {
+            characterUpgrade = RuntimeManager.PathToEventReference("event:/SFX_Character_Upgrade");
+        }
+        if (dungeonMusic.IsNull)
+        {
+            dungeonMusic = RuntimeManager.PathToEventReference("event:/Music_Dungeon");
+        }
+        if (chestroomMusic.IsNull)
+        {
+            chestroomMusic = RuntimeManager.PathToEventReference("event:/Music_ChestRoom");
+        }
+        if (bossroomMusic.IsNull)
+        {
+            bossroomMusic = RuntimeManager.PathToEventReference("event:/Music_BossRoom");
+        }
+        if (winMusic.IsNull)
+        {
+            winMusic = RuntimeManager.PathToEventReference("event:/Music_Win");
+        }
+        if (gameOverMusic.IsNull)
+        {
+            gameOverMusic = RuntimeManager.PathToEventReference("event:/Music_GameOver");
+        }
+        if (menuMusic.IsNull)
+        {
+            menuMusic = RuntimeManager.PathToEventReference("event:/Music_Menu");
+        }
     }
 
     private void OnPlayUISound(PlayUISoundEvent evt)
@@ -177,3 +367,4 @@ public class UIAudioManager : MonoBehaviour
         }
     }
 }
+

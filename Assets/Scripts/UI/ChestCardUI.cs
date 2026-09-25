@@ -22,6 +22,8 @@ namespace Chest
         private bool isSelected;
         private bool isHovered;
         private Action<ChestCardUI> onClickCallback;
+        private Action<ChestCardUI> onHoverEnterCallback;
+        private Action<ChestCardUI> onHoverExitCallback;
         private RectTransform rectTransform;
         private Coroutine revealCoroutine;
         private Vector2 baseAnchoredPosition;
@@ -80,10 +82,12 @@ namespace Chest
             }
         }
 
-        public void Setup(CardRewardItem item, Action<ChestCardUI> onClick)
+        public void Setup(CardRewardItem item, Action<ChestCardUI> onClick, Action<ChestCardUI> onHoverEnter = null, Action<ChestCardUI> onHoverExit = null)
         {
             currentItem = item;
             onClickCallback = onClick;
+            onHoverEnterCallback = onHoverEnter;
+            onHoverExitCallback = onHoverExit;
             isSelected = false;
             isHovered = false;
             targetHoverOffset = 0f;
@@ -179,6 +183,7 @@ namespace Chest
             isHovered = true;
             targetHoverOffset = hoverLiftAmount;
             UpdateHighlightVisual();
+            onHoverEnterCallback?.Invoke(this);
         }
 
         public void OnPointerExit(PointerEventData eventData)
@@ -186,6 +191,7 @@ namespace Chest
             isHovered = false;
             targetHoverOffset = 0f;
             UpdateHighlightVisual();
+            onHoverExitCallback?.Invoke(this);
         }
 
         private void UpdateHighlightVisual()

@@ -23,7 +23,9 @@ namespace Core.Tests
             TestPropDestruction();
             TestRaycasting();
 
-            Debug.Log("[GameBoardTests] All 9 test cases passed successfully!");
+            PlanBTests.RunAllTests();
+
+            Debug.Log("[GameBoardTests] All test cases (including Plan B) passed successfully!");
         }
 
         private static void Assert(bool condition, string testName)

@@ -82,6 +82,15 @@ namespace Chest
 
         public void OpenReward(bool isChestRoom, Vector3 chestWorldPos)
         {
+            if (statDisplayUI == null)
+            {
+                statDisplayUI = GetComponentInChildren<StatsDisplayUI>(true);
+                if (statDisplayUI == null)
+                {
+                    statDisplayUI = Object.FindAnyObjectByType<StatsDisplayUI>(FindObjectsInactive.Include);
+                }
+            }
+
             if (cachedPlayerStats == null)
             {
                 cachedPlayerStats = FindAnyObjectByType<PlayerStats>();
@@ -130,7 +139,7 @@ namespace Chest
                     placeholder.gameObject.SetActive(false);
                 }
 
-                cardUI.Setup(cards[i], OnCardClicked);
+                cardUI.Setup(cards[i], OnCardClicked, OnCardHoverEnter, OnCardHoverExit);
                 cardUI.PrepareForReveal(startScale, startColor);
                 spawnedCards.Add(cardUI);
             }
@@ -142,6 +151,22 @@ namespace Chest
             }
 
             UpdateUIState();
+        }
+
+        private void OnCardHoverEnter(ChestCardUI cardUI)
+        {
+            if (statDisplayUI != null && cardUI != null && !cardUI.CurrentItem.IsHeal)
+            {
+                statDisplayUI.PreviewStat(cardUI.CurrentItem.StatType);
+            }
+        }
+
+        private void OnCardHoverExit(ChestCardUI cardUI)
+        {
+            if (statDisplayUI != null)
+            {
+                statDisplayUI.ClearPreview();
+            }
         }
 
         private void OnCardClicked(ChestCardUI cardUI)
@@ -158,17 +183,11 @@ namespace Chest
 
             if (statDisplayUI != null)
             {
+                statDisplayUI.ClearPreview();
                 statDisplayUI.Refresh();
             }
 
-            if (selectedCards.Count >= maxPicks)
-            {
-                CloseReward();
-            }
-            else
-            {
-                UpdateUIState();
-            }
+            CloseReward();
         }
 
         private void ApplyReward(CardRewardItem item)
@@ -178,7 +197,33 @@ namespace Chest
                 cachedPlayerStats = FindAnyObjectByType<PlayerStats>();
             }
 
-            if (cachedPlayerStats != null)
+            Core.Occupants.PlayerOccupant playerOcc = null;
+            if (cachedPlayerStats != null && cachedPlayerStats.Occupant != null)
+            {
+                playerOcc = cachedPlayerStats.Occupant;
+            }
+            else if (GameManager.Instance != null && GameManager.Instance.Board != null)
+            {
+                playerOcc = GameManager.Instance.Board.FindPlayer();
+            }
+
+            if (playerOcc != null)
+            {
+                if (item.IsHeal)
+                {
+                    playerOcc.ResetHealth();
+                }
+                else
+                {
+                    playerOcc.UpgradeStat(item.StatType);
+                }
+
+                if (cachedPlayerStats != null)
+                {
+                    cachedPlayerStats.SyncFromOccupant();
+                }
+            }
+            else if (cachedPlayerStats != null)
             {
                 if (item.IsHeal)
                 {
@@ -203,6 +248,10 @@ namespace Chest
 
         public void CloseReward()
         {
+            if (statDisplayUI != null)
+            {
+                statDisplayUI.ClearPreview();
+            }
             ClearSpawnedCards();
             if (panelRoot != null && panelRoot != gameObject)
             {

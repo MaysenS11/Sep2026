@@ -40,5 +40,25 @@ namespace Tests.Editor
         {
             IntegrationTurnLoopTests.RunAllTests();
         }
+
+        [Test]
+        public void PlanC_AI_BossRoom_Keys_Pass()
+        {
+            PlanCTests.RunAllTests();
+        }
+
+        [Test]
+        public void PlanD_MultiTilePillarsAndBarrels_Pass()
+        {
+            PlanDTests.RunAllTests();
+        }
+
+        [Test]
+        public void PlanE_UI_HUD_Minimap_AndAudio_Pass()
+        {
+            PlanETests.RunAllTests();
+        }
     }
 }
+// Trigger editor assembly recompile
+

@@ -122,27 +122,77 @@ namespace Dungeon.Spawning
                 targetCount = data.MaxPerRoom;
             }
 
+            Vector2Int propSize = data.Size;
+            if (data.Prefab != null && data.Prefab.TryGetComponent<Presentation.Entities.PillarTileObject>(out var pComp))
+            {
+                propSize = pComp.Size;
+            }
+
             int toSpawn = Mathf.Min(targetCount, _validTilesBuffer.Count);
             for (int i = 0; i < toSpawn; i++)
             {
                 if (_validTilesBuffer.Count == 0) break;
 
-                int pickIndex = Random.Range(0, _validTilesBuffer.Count);
-                Vector2Int spawnTile = _validTilesBuffer[pickIndex];
-                _validTilesBuffer.RemoveAt(pickIndex);
+                // Find a candidate origin where all tiles in propSize footprint are valid and unoccupied
+                Vector2Int spawnTile = Vector2Int.zero;
+                bool foundValidFootprint = false;
 
-                Vector3 worldPos = floorTilemap.GetCellCenterWorld(new Vector3Int(spawnTile.x, spawnTile.y, 0));
+                for (int attempt = 0; attempt < _validTilesBuffer.Count; attempt++)
+                {
+                    int pickIndex = Random.Range(0, _validTilesBuffer.Count);
+                    Vector2Int candidate = _validTilesBuffer[pickIndex];
+
+                    bool fits = true;
+                    for (int dx = 0; dx < propSize.x; dx++)
+                    {
+                        for (int dy = 0; dy < propSize.y; dy++)
+                        {
+                            Vector2Int checkTile = new Vector2Int(candidate.x + dx, candidate.y + dy);
+                            if (!_validTilesBuffer.Contains(checkTile))
+                            {
+                                fits = false;
+                                break;
+                            }
+                        }
+                        if (!fits) break;
+                    }
+
+                    if (fits)
+                    {
+                        spawnTile = candidate;
+                        foundValidFootprint = true;
+                        break;
+                    }
+                }
+
+                if (!foundValidFootprint) break;
+
+                // Remove all footprint tiles from available buffer and mark occupied
+                for (int dx = 0; dx < propSize.x; dx++)
+                {
+                    for (int dy = 0; dy < propSize.y; dy++)
+                    {
+                        Vector2Int tile = new Vector2Int(spawnTile.x + dx, spawnTile.y + dy);
+                        _validTilesBuffer.Remove(tile);
+                        tileQuery.MarkOccupied(tile);
+                    }
+                }
+
+                float worldX = spawnTile.x + (propSize.x * 0.5f);
+                float worldY = spawnTile.y + (propSize.y * 0.5f);
+                Vector3 worldPos = new Vector3(worldX, worldY, floorTilemap.transform.position.z);
+
                 GameObject propObj = Object.Instantiate(data.Prefab, worldPos, Quaternion.identity, parentContainer);
                 _spawnedProps.Add(propObj);
-                tileQuery.MarkOccupied(spawnTile);
 
                 if (GameManager.Instance != null && GameManager.Instance.Board != null)
                 {
                     bool isPillar = (data != null && data.PropName != null && data.PropName.ToLowerInvariant().Contains("pillar")) ||
-                                    (data != null && data.Prefab != null && data.Prefab.name.ToLowerInvariant().Contains("pillar"));
+                                    (data != null && data.Prefab != null && data.Prefab.name.ToLowerInvariant().Contains("pillar")) ||
+                                    propObj.GetComponent<Presentation.Entities.PillarTileObject>() != null;
                     if (isPillar)
                     {
-                        Infrastructure.BoardEntityFactory.CreateObstacle(propObj, spawnTile, GameManager.Instance.Board, Core.Occupants.ObstacleType.Pillar, Presentation.Board.EffectsQueueRunner.Instance);
+                        Infrastructure.BoardEntityFactory.CreatePillar(propObj, spawnTile, propSize, GameManager.Instance.Board, Presentation.Board.EffectsQueueRunner.Instance);
                     }
                     else
                     {

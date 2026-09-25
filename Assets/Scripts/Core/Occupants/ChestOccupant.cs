@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using Core.Board;
 using Core.Effects;
 using UnityEngine;
 
@@ -25,19 +26,23 @@ namespace Core.Occupants
             IsPushable = false;
         }
 
+        public override bool IsDead => false;
+
         /// Attacking a chest opens it.
-        /// Once opened, it remains on the board indefinitely as an impassable obstacle.
+        /// Once opened, it remains on the board indefinitely as a permanent solid blocking obstacle.
         public override List<BoardEffect> TakeDamage(int damage, TileOccupant source = null)
         {
             var effects = new List<BoardEffect>();
             if (IsOpen || damage <= 0) return effects;
 
             IsOpen = true;
-            CurrentHealth = 0;
 
-            effects.Add(new ChestOpenedEffect(Id, GridPosition));
+            effects.Add(new ChestOpenedEffect(Id, GridPosition, isChestRoom: IsChestRoom));
 
             OnOpened?.Invoke(this);
+
+            Vector3 worldPos = BoardCoordinate.GridToWorldCenter(GridPosition);
+            EventBus<ChestOpenedEvent>.Raise(new ChestOpenedEvent(worldPos, IsChestRoom));
 
             return effects;
         }

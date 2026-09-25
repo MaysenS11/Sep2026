@@ -55,6 +55,7 @@ public class GameManager : MonoBehaviour
 
         public bool HasSpecialChestRoom;
         public int SpecialChestRoomIndex = -1;
+        public bool IsLocked = false;
         [SerializeField] private bool hasSpecialExitDoorPosition;
         [SerializeField] private Vector3 specialExitDoorPositionValue;
         [SerializeField] private bool hasSpecialEntryDoorPosition;

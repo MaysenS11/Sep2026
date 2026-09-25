@@ -15,7 +15,8 @@ namespace Core.AI
             { EnemyArchetype.Knight, new KnightAI() },
             { EnemyArchetype.Bishop, new BishopAI() },
             { EnemyArchetype.Rook, new RookAI() },
-            { EnemyArchetype.Queen, new QueenAI() }
+            { EnemyArchetype.Queen, new QueenAI() },
+            { EnemyArchetype.King, new KingAI() }
         };
 
         /// Retrieves the AI strategy implementation for a given piece archetype.

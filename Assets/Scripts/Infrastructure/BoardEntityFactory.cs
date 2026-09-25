@@ -1,4 +1,5 @@
 using System;
+using System.Collections.Generic;
 using UnityEngine;
 using Core.Board;
 using Core.Occupants;
@@ -102,6 +103,17 @@ namespace Infrastructure
             presenter.OccupantId = id;
             presenter.SnapToGrid(gridPos);
 
+            if (go.TryGetComponent<PlayerMovement>(out var pMove) && pMove.CharacterDefinition != null)
+            {
+                occupant.InitializeFromCharacter(pMove.CharacterDefinition, maxHealth);
+            }
+
+            if (go.TryGetComponent<PlayerStats>(out var pStats))
+            {
+                pStats.Occupant = occupant;
+                pStats.SyncFromOccupant();
+            }
+
             board.ForcePlace(occupant, gridPos);
 
             var activeRunner = runner != null ? runner : EffectsQueueRunner.Instance;
@@ -135,12 +147,16 @@ namespace Infrastructure
 
             int id = GetNextOccupantId();
 
-            int maxHealth = data != null ? data.MaxHealth : 4;
-            int attackDamage = data != null ? data.AttackDamage : 1;
+            int maxHealth = data != null ? data.MaxHealth : (archetype == EnemyArchetype.King ? 20 : 4);
+            int attackDamage = data != null ? data.AttackDamage : (archetype == EnemyArchetype.King ? 0 : 1);
             int movePriority = data != null ? data.MovePriority : 0;
             int detectionRange = data != null ? Math.Max(12, data.DetectionRange) : 12;
             int maxLineSteps = data != null ? data.MaxLineSteps : 3;
             bool usesDiagonalAttack = (archetype == EnemyArchetype.Pawn) || (data != null && data.UsesDiagonalAttack);
+
+            EnemySmartness? smartness = data != null ? data.Smartness : (EnemySmartness?)null;
+            bool isImmobile = archetype == EnemyArchetype.King || (data is KingData kd && kd.IsImmobile);
+            bool immuneDirect = archetype == EnemyArchetype.King || (data is KingData kd2 && kd2.ImmuneToDirectAttacks);
 
             var occupant = new EnemyOccupant(
                 archetype: archetype,
@@ -152,7 +168,10 @@ namespace Infrastructure
                 usesDiagonalAttack: usesDiagonalAttack,
                 initialPosition: gridPos,
                 id: id,
-                name: data != null ? data.EnemyName : archetype.ToString()
+                name: data != null ? data.EnemyName : archetype.ToString(),
+                intelligenceLevel: smartness,
+                isImmobile: isImmobile,
+                immuneToDirectAttacks: immuneDirect
             );
 
             presenter.OccupantId = id;
@@ -253,6 +272,66 @@ namespace Infrastructure
             return occupant;
         }
 
+        /// Instantiates and binds a multi-tile Pillar to a GameObject and PillarTileObject presenter.
+        /// Registers each individual occupied grid cell as a separate blocking PillarOccupant on the GameBoard
+        /// while maintaining a single unified visual GameObject.
+        public static List<PillarOccupant> CreatePillar(
+            GameObject go,
+            Vector2Int origin,
+            Vector2Int size,
+            GameBoard board,
+            EffectsQueueRunner runner = null)
+        {
+            if (go == null) throw new ArgumentNullException(nameof(go));
+            if (board == null) throw new ArgumentNullException(nameof(board));
+
+            StripPhysicsComponents(go);
+
+            PillarTileObject presenter = go.GetComponent<PillarTileObject>();
+            if (presenter == null)
+            {
+                presenter = go.AddComponent<PillarTileObject>();
+            }
+
+            Vector2Int footprintSize = new Vector2Int(Mathf.Max(1, size.x), Mathf.Max(1, size.y));
+            presenter.Initialize(origin, footprintSize, board);
+
+            var activeRunner = runner != null ? runner : EffectsQueueRunner.Instance;
+            presenter.ClearOccupantIds();
+
+            var occupants = new List<PillarOccupant>();
+
+            for (int dx = 0; dx < footprintSize.x; dx++)
+            {
+                for (int dy = 0; dy < footprintSize.y; dy++)
+                {
+                    Vector2Int cellPos = new Vector2Int(origin.x + dx, origin.y + dy);
+                    int id = GetNextOccupantId();
+
+                    var occ = new PillarOccupant(
+                        gridPosition: cellPos,
+                        footprintOrigin: origin,
+                        footprintSize: footprintSize,
+                        id: id,
+                        name: $"Pillar_{footprintSize.x}x{footprintSize.y}_({cellPos.x},{cellPos.y})",
+                        visualRoot: go
+                    );
+
+                    board.ForcePlace(occ, cellPos);
+                    presenter.RegisterOccupantId(id);
+
+                    if (activeRunner != null)
+                    {
+                        activeRunner.RegisterTileObject(id, presenter);
+                    }
+
+                    occupants.Add(occ);
+                }
+            }
+
+            return occupants;
+        }
+
         /// Instantiates and binds an ObstacleOccupant to an Obstacle GameObject (e.g. Pillar).
         public static ObstacleOccupant CreateObstacle(
             GameObject go,
@@ -263,6 +342,17 @@ namespace Infrastructure
         {
             if (go == null) throw new ArgumentNullException(nameof(go));
             if (board == null) throw new ArgumentNullException(nameof(board));
+
+            if (obstacleType == ObstacleType.Pillar)
+            {
+                Vector2Int pillarSize = Vector2Int.one;
+                if (go.TryGetComponent<PillarTileObject>(out var pObj))
+                {
+                    pillarSize = pObj.Size;
+                }
+                var pillars = CreatePillar(go, gridPos, pillarSize, board, runner);
+                return pillars.Count > 0 ? pillars[0] : null;
+            }
 
             StripPhysicsComponents(go);
 
@@ -347,8 +437,25 @@ namespace Infrastructure
 
                 Vector2Int pos = BoardCoordinate.WorldToGrid(t.position);
 
+                // Multi-Tile Pillars
+                if (lower.Contains("pillar") || t.GetComponent<PillarTileObject>() != null)
+                {
+                    bool isAlreadyRegistered = t.TryGetComponent<PillarTileObject>(out var presenter) &&
+                                               presenter.OccupantId != 0 &&
+                                               board.GetOccupantById(presenter.OccupantId) != null;
+                    if (!isAlreadyRegistered)
+                    {
+                        Vector2Int pSize = presenter != null ? presenter.Size : Vector2Int.one;
+                        if (presenter == null)
+                        {
+                            if (lower.Contains("2x2")) pSize = new Vector2Int(2, 2);
+                            else if (lower.Contains("1x2")) pSize = new Vector2Int(1, 2);
+                        }
+                        CreatePillar(t.gameObject, pos, pSize, board, activeRunner);
+                    }
+                }
                 // Enemies
-                if (lower.Contains("pawn") || lower.Contains("knight") || lower.Contains("bishop") ||
+                else if (lower.Contains("pawn") || lower.Contains("knight") || lower.Contains("bishop") ||
                     lower.Contains("rook") || lower.Contains("queen") || lower.Contains("king") ||
                     lower.Contains("enemy") || t.GetComponent<EntityStats>() != null || t.GetComponent<EnemyTileObject>() != null)
                 {
@@ -358,10 +465,11 @@ namespace Infrastructure
                     if (!isAlreadyRegistered)
                     {
                         EnemyArchetype archetype = EnemyArchetype.Pawn;
-                        if (lower.Contains("knight")) archetype = EnemyArchetype.Knight;
+                        if (lower.Contains("king") || (t.TryGetComponent<EnemyBase>(out var ebKing) && ebKing.Data is KingData)) archetype = EnemyArchetype.King;
+                        else if (lower.Contains("knight")) archetype = EnemyArchetype.Knight;
                         else if (lower.Contains("bishop")) archetype = EnemyArchetype.Bishop;
                         else if (lower.Contains("rook")) archetype = EnemyArchetype.Rook;
-                        else if (lower.Contains("queen") || lower.Contains("king")) archetype = EnemyArchetype.Queen;
+                        else if (lower.Contains("queen")) archetype = EnemyArchetype.Queen;
 
                         EnemyData data = t.TryGetComponent<EnemyBase>(out var eb) ? eb.Data : null;
                         CreateEnemy(t.gameObject, pos, board, archetype, data, activeRunner);

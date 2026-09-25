@@ -9,17 +9,20 @@ namespace Core.Effects
         public int ChestOccupantId => OccupantId;
         public Vector2Int TilePos { get; }
         public string LootInfo { get; }
+        public bool IsChestRoom { get; }
 
         public ChestOpenedEffect(
             int chestOccupantId,
             Vector2Int tilePos,
             string lootInfo = null,
+            bool isChestRoom = false,
             float timestamp = 0f,
             int sequenceIndex = 0)
             : base(chestOccupantId, timestamp, sequenceIndex)
         {
             TilePos = tilePos;
             LootInfo = lootInfo ?? string.Empty;
+            IsChestRoom = isChestRoom;
         }
 
         public override string ToString()

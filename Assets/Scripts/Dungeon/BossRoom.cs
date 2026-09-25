@@ -275,5 +275,70 @@ namespace Dungeon
 
             return bossObj;
         }
+
+        private bool _isRegistered = false;
+
+        /// <summary>
+        /// Scans pre-placed entities inside this BossRoom and registers them into GameBoard.
+        /// Stationary King is registered with King archetype (immobile, no combat actions).
+        /// </summary>
+        public void ScanAndRegisterBossEntities(Vector2Int worldOriginTile, Core.Board.GameBoard board, Presentation.Board.EffectsQueueRunner effectsRunner, int roomIndex)
+        {
+            if (_isRegistered || board == null) return;
+            _isRegistered = true;
+
+            var enemies = GetComponentsInChildren<EnemyBase>(true);
+            for (int i = 0; i < enemies.Length; i++)
+            {
+                var enemy = enemies[i];
+                if (enemy == null) continue;
+
+                if (!enemy.gameObject.activeSelf)
+                {
+                    enemy.gameObject.SetActive(true);
+                }
+
+                enemy.CurrentRoomIndex = roomIndex;
+
+                Vector2Int tile = worldOriginTile + new Vector2Int(
+                    Mathf.RoundToInt(enemy.transform.localPosition.x),
+                    Mathf.RoundToInt(enemy.transform.localPosition.y)
+                );
+
+                Core.Occupants.EnemyArchetype archetype = Core.Occupants.EnemyArchetype.Pawn;
+                bool isKing = enemy.Data is KingData || enemy.name.ToLower().Contains("king");
+                if (isKing)
+                {
+                    archetype = Core.Occupants.EnemyArchetype.King;
+                }
+                else if (enemy.Data != null)
+                {
+                    switch (enemy.Data.MovementPattern)
+                    {
+                        case EnemyMovementPattern.SingleMove: archetype = Core.Occupants.EnemyArchetype.Pawn; break;
+                        case EnemyMovementPattern.KnightMove: archetype = Core.Occupants.EnemyArchetype.Knight; break;
+                        case EnemyMovementPattern.BishopMove: archetype = Core.Occupants.EnemyArchetype.Bishop; break;
+                        case EnemyMovementPattern.RookMove: archetype = Core.Occupants.EnemyArchetype.Rook; break;
+                        case EnemyMovementPattern.QueenMove: archetype = Core.Occupants.EnemyArchetype.Queen; break;
+                    }
+                }
+                else
+                {
+                    string lower = enemy.name.ToLower();
+                    if (lower.Contains("knight")) archetype = Core.Occupants.EnemyArchetype.Knight;
+                    else if (lower.Contains("bishop")) archetype = Core.Occupants.EnemyArchetype.Bishop;
+                    else if (lower.Contains("rook")) archetype = Core.Occupants.EnemyArchetype.Rook;
+                    else if (lower.Contains("queen")) archetype = Core.Occupants.EnemyArchetype.Queen;
+                }
+
+                Infrastructure.BoardEntityFactory.CreateEnemy(enemy.gameObject, tile, board, archetype, enemy.Data, effectsRunner);
+
+                if (GameManager.Instance != null)
+                {
+                    GameManager.Instance.RegisterEnemy(enemy);
+                }
+                EventBus<EnemyRegisteredEvent>.Raise(new EnemyRegisteredEvent(enemy));
+            }
+        }
     }
 }

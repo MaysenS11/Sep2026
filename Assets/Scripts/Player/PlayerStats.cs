@@ -31,22 +31,51 @@ public class PlayerStats : MonoBehaviour
 
     private readonly System.Collections.Generic.Dictionary<Chest.StatType, int> upgradeTiers = new System.Collections.Generic.Dictionary<Chest.StatType, int>();
 
-    public int MaxHealth => maxHealth;
-    public int CurrentHealth => currentHealth;
-    public int TotalAttackDamage => Mathf.Max(0, baseAttackDamage + bonusAttackDamage);
-    public AttackPatternData CurrentAttackPattern => currentAttackPattern != null ? currentAttackPattern : defaultAttackPattern;
-    public int CurrentPatternIndex => currentPatternIndex;
-    public int Defence => defence;
+    private Core.Occupants.PlayerOccupant _cachedOccupant;
+    public Core.Occupants.PlayerOccupant Occupant
+    {
+        get
+        {
+            if (_cachedOccupant == null && GameManager.Instance != null && GameManager.Instance.Board != null)
+            {
+                _cachedOccupant = GameManager.Instance.Board.FindPlayer();
+            }
+            return _cachedOccupant;
+        }
+        set => _cachedOccupant = value;
+    }
+
+    public CharacterDefinition CharacterDefinition => characterDefinition;
+    public int MaxHealth => Occupant != null ? Occupant.MaxHealth : maxHealth;
+    public int CurrentHealth => Occupant != null ? Occupant.CurrentHealth : currentHealth;
+    public int TotalAttackDamage => Occupant != null ? Occupant.TotalAttackDamage : Mathf.Max(0, baseAttackDamage + bonusAttackDamage);
+    public AttackPatternData CurrentAttackPattern => (Occupant != null && Occupant.CurrentAttackPattern != null) ? Occupant.CurrentAttackPattern : (currentAttackPattern != null ? currentAttackPattern : defaultAttackPattern);
+    public int CurrentPatternIndex => Occupant != null ? Occupant.CurrentPatternIndex : currentPatternIndex;
+    public int Defence => Occupant != null ? Occupant.Defence : defence;
     public int Speed => speed;
-    public bool IsDead => currentHealth <= 0;
+    public bool IsDead => Occupant != null ? Occupant.IsDead : currentHealth <= 0;
+
+    public void SyncFromOccupant()
+    {
+        if (Occupant != null)
+        {
+            currentHealth = Occupant.CurrentHealth;
+            maxHealth = Occupant.MaxHealth;
+            baseAttackDamage = Occupant.AttackDamage;
+            defence = Occupant.Defence;
+        }
+    }
 
     public bool CanUpgrade(Chest.StatType statType)
     {
+        if (Occupant != null) return Occupant.CanUpgrade(statType);
+        if (statType == Chest.StatType.Speed) return false;
         return GetUpgradeTier(statType) < 2;
     }
 
     public int GetUpgradeTier(Chest.StatType statType)
     {
+        if (Occupant != null) return Occupant.GetUpgradeTier(statType);
         if (upgradeTiers.TryGetValue(statType, out int tier))
         {
             return tier;
@@ -56,6 +85,11 @@ public class PlayerStats : MonoBehaviour
 
     public int[] GetTierValues(Chest.StatType statType)
     {
+        if (Occupant != null)
+        {
+            var tierVals = Occupant.GetTierValues(statType);
+            if (tierVals != null) return tierVals;
+        }
         switch (statType)
         {
             case Chest.StatType.AttackDamage:
@@ -75,6 +109,7 @@ public class PlayerStats : MonoBehaviour
 
     public int GetCurrentStatValue(Chest.StatType statType)
     {
+        if (Occupant != null) return Occupant.GetCurrentStatValue(statType);
         int tier = Mathf.Clamp(GetUpgradeTier(statType), 0, 2);
         int[] values = GetTierValues(statType);
         if (values != null && tier < values.Length)
@@ -86,6 +121,13 @@ public class PlayerStats : MonoBehaviour
 
     public void UpgradeStat(Chest.StatType statType)
     {
+        if (Occupant != null)
+        {
+            Occupant.UpgradeStat(statType);
+            SyncFromOccupant();
+            return;
+        }
+
         int currentTier = GetUpgradeTier(statType);
         if (currentTier >= 2) return;
 
@@ -208,6 +250,12 @@ public class PlayerStats : MonoBehaviour
             }
         }
 
+        if (Occupant != null)
+        {
+            Occupant.InitializeFromCharacter(definition, defaultStartHealth);
+            SyncFromOccupant();
+        }
+
         EventBus<PlayerHealthChangedEvent>.Raise(new PlayerHealthChangedEvent(currentHealth, maxHealth));
     }
 
@@ -215,17 +263,32 @@ public class PlayerStats : MonoBehaviour
     {
         currentAttackPattern = pattern;
         currentPatternIndex = index;
+        if (Occupant != null)
+        {
+            Occupant.SetAttackPattern(pattern, index);
+        }
     }
 
     public void AddBonusDamage(int amount)
     {
         bonusAttackDamage += amount;
+        if (Occupant != null)
+        {
+            Occupant.BonusAttackDamage += amount;
+        }
     }
 
     private bool hasPlayedLowLifeSound = false;
 
     public void IncreaseMaxHealth(int amount, bool healAmount = true)
     {
+        if (Occupant != null)
+        {
+            Occupant.IncreaseMaxHealth(amount, healAmount);
+            SyncFromOccupant();
+            return;
+        }
+
         maxHealth += amount;
         if (healAmount)
         {
@@ -241,6 +304,13 @@ public class PlayerStats : MonoBehaviour
     public void Heal(int amount)
     {
         if (IsDead) return;
+        if (Occupant != null)
+        {
+            Occupant.Heal(amount);
+            SyncFromOccupant();
+            return;
+        }
+
         currentHealth = Mathf.Min(maxHealth, currentHealth + amount);
         if (currentHealth > 4)
         {
@@ -253,10 +323,19 @@ public class PlayerStats : MonoBehaviour
     {
         if (IsDead) return;
 
-        int actualDamage = Mathf.Max(1, amount - defence);
-        currentHealth = Mathf.Max(0, currentHealth - actualDamage);
-        EventBus<EntityDamagedEvent>.Raise(new EntityDamagedEvent(gameObject, source, actualDamage, currentHealth));
-        EventBus<PlayerHealthChangedEvent>.Raise(new PlayerHealthChangedEvent(currentHealth, maxHealth));
+        if (Occupant != null)
+        {
+            Occupant.TakeDamage(amount);
+            SyncFromOccupant();
+            EventBus<EntityDamagedEvent>.Raise(new EntityDamagedEvent(gameObject, source, Mathf.Max(1, amount - defence), currentHealth));
+        }
+        else
+        {
+            int actualDamage = Mathf.Max(1, amount - defence);
+            currentHealth = Mathf.Max(0, currentHealth - actualDamage);
+            EventBus<EntityDamagedEvent>.Raise(new EntityDamagedEvent(gameObject, source, actualDamage, currentHealth));
+            EventBus<PlayerHealthChangedEvent>.Raise(new PlayerHealthChangedEvent(currentHealth, maxHealth));
+        }
 
         if (!IsDead && currentHealth <= 4)
         {
@@ -288,6 +367,14 @@ public class PlayerStats : MonoBehaviour
 
     public void ResetHealth()
     {
+        if (Occupant != null)
+        {
+            Occupant.ResetHealth();
+            SyncFromOccupant();
+            hasPlayedLowLifeSound = false;
+            return;
+        }
+
         currentHealth = maxHealth;
         hasPlayedLowLifeSound = false;
         EventBus<PlayerHealthChangedEvent>.Raise(new PlayerHealthChangedEvent(currentHealth, maxHealth));

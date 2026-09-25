@@ -97,8 +97,11 @@ public class CharacterSlotUI : MonoBehaviour, IPointerEnterHandler, IPointerExit
     private void ApplyDefinition()
     {
         if (characterDefinition == null) return;
-
-        isLocked = characterDefinition.LockedByDefault;
+        string maskId = !string.IsNullOrEmpty(characterDefinition.CharacterName) 
+            ? characterDefinition.CharacterName 
+            : characterDefinition.name;
+        bool isSavedUnlocked = PlayerPrefs.GetInt($"mask_unlocked_{maskId}", 0) == 1;
+        isLocked = characterDefinition.LockedByDefault && !isSavedUnlocked;
 
         if (maskImage != null)
         {
@@ -231,6 +234,14 @@ public class CharacterSlotUI : MonoBehaviour, IPointerEnterHandler, IPointerExit
     public void Unlock()
     {
         isLocked = false;
+        if (characterDefinition != null)
+        {
+            string maskId = !string.IsNullOrEmpty(characterDefinition.CharacterName) 
+                ? characterDefinition.CharacterName 
+                : characterDefinition.name;
+            PlayerPrefs.SetInt($"mask_unlocked_{maskId}", 1);
+            PlayerPrefs.Save();
+        }
         if (maskImage != null && characterDefinition != null)
         {
             maskImage.color = Color.white;

@@ -20,6 +20,17 @@ namespace Core.Occupants
     {
         public DestructiblePropType PropType { get; }
 
+        /// <summary>
+        /// Whether destroying this prop triggers a direct heart restore to the player without a ground drop.
+        /// Guaranteed true for Barrels by default.
+        /// </summary>
+        public bool RestoresHeartOnDestruction { get; set; }
+
+        /// <summary>
+        /// Drop chance for heart restore on destruction (0.0 to 1.0). Default 1.0f (guaranteed).
+        /// </summary>
+        public float HeartDropChance { get; set; } = 1.0f;
+
         public event Action<DestructiblePropOccupant> OnPropDestroyed;
 
         public DestructiblePropOccupant(
@@ -32,6 +43,8 @@ namespace Core.Occupants
         {
             PropType = propType;
             IsPushable = false;
+            // Barrels restore hearts on destruction by default
+            RestoresHeartOnDestruction = (propType == DestructiblePropType.Barrel);
         }
 
         public override List<BoardEffect> TakeDamage(int damage, TileOccupant source = null)
@@ -40,6 +53,19 @@ namespace Core.Occupants
 
             if (IsDead)
             {
+                if (RestoresHeartOnDestruction && (HeartDropChance >= 1.0f || UnityEngine.Random.value <= HeartDropChance))
+                {
+                    if (source is PlayerOccupant player)
+                    {
+                        player.Heal(1);
+                        effects.Add(new HeartRestoreEffect(Id, GridPosition, player.GridPosition, 1, player.Id));
+                    }
+                    else
+                    {
+                        effects.Add(new HeartRestoreEffect(Id, GridPosition, GridPosition, 1, 0));
+                    }
+                }
+
                 OnPropDestroyed?.Invoke(this);
             }
 

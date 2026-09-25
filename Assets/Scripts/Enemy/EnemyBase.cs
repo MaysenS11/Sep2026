@@ -229,15 +229,21 @@ public class EnemyBase : MonoBehaviour
         }
     }
 
+    protected static readonly int decapitateHash = Animator.StringToHash("Decapitate");
+
     protected virtual void OnEntityDied(EntityDiedEvent evt)
     {
         if (evt.Entity != gameObject)
         {
-            if (!hasDied && enemyData is KingData && currentRoomIndex >= 0)
+            if (!hasDied && (enemyData is KingData || gameObject.name.Contains("King")) && currentRoomIndex >= 0)
             {
-                if (evt.Entity != null && evt.Entity.TryGetComponent<EnemyBase>(out var deadEnemy) && deadEnemy.CurrentRoomIndex == currentRoomIndex)
+                if (evt.Entity != null && evt.Entity.TryGetComponent<EnemyBase>(out var deadEnemy) && (deadEnemy.CurrentRoomIndex == currentRoomIndex || deadEnemy.CurrentRoomIndex < 0))
                 {
                     int dmg = 1;
+                    if (deadEnemy.Data != null && deadEnemy.Data.AttackDamage > 0)
+                    {
+                        dmg = deadEnemy.Data.AttackDamage;
+                    }
                     var dm = Dungeon.DungeonManager.Instance != null ? Dungeon.DungeonManager.Instance : FindAnyObjectByType<Dungeon.DungeonManager>();
                     if (dm != null && dm.BossRoomPrefab != null)
                     {
@@ -266,9 +272,22 @@ public class EnemyBase : MonoBehaviour
             col.enabled = false;
         }
 
-        if (enemyData is KingData kingDataOnDeath && !kingDataOnDeath.DeathSound.IsNull)
+        if (enemyData is KingData || gameObject.name.Contains("King"))
         {
-            RuntimeManager.PlayOneShot(kingDataOnDeath.DeathSound);
+            if (animator != null)
+            {
+                animator.ResetTrigger(damageHash);
+                animator.SetTrigger(dieHash);
+                animator.SetTrigger(decapitateHash);
+            }
+
+            if (enemyData is KingData kingDataOnDeath && !kingDataOnDeath.DeathSound.IsNull)
+            {
+                RuntimeManager.PlayOneShot(kingDataOnDeath.DeathSound);
+            }
+
+            StartCoroutine(KingDefeatSequence());
+            return;
         }
 
         if (animator != null)
@@ -278,6 +297,40 @@ public class EnemyBase : MonoBehaviour
         }
 
         Destroy(gameObject, destroyDelayAfterDeath);
+    }
+
+    private System.Collections.IEnumerator KingDefeatSequence()
+    {
+        yield return new WaitForSeconds(destroyDelayAfterDeath > 0 ? destroyDelayAfterDeath : 1.0f);
+
+        float runTime = UIManager.Instance != null ? UIManager.Instance.ElapsedTime : 0f;
+        string maskId = "Default";
+        if (CharacterSelectData.SelectedCharacter != null)
+        {
+            maskId = !string.IsNullOrEmpty(CharacterSelectData.SelectedCharacter.CharacterName)
+                ? CharacterSelectData.SelectedCharacter.CharacterName
+                : CharacterSelectData.SelectedCharacter.name;
+        }
+
+        string defeatKey = $"first_king_defeat_{maskId}";
+        bool isFirstDefeat = PlayerPrefs.GetInt(defeatKey, 0) == 0;
+        if (isFirstDefeat)
+        {
+            PlayerPrefs.SetInt(defeatKey, 1);
+            int currentKeys = PlayerPrefs.GetInt("MaskKeys", 0) + 1;
+            PlayerPrefs.SetInt("MaskKeys", currentKeys);
+            PlayerPrefs.Save();
+        }
+
+        EventBus<GameWonEvent>.Raise(new GameWonEvent(runTime, maskId, isFirstDefeat));
+        EventBus<GameStateChangedEvent>.Raise(new GameStateChangedEvent(GameState.Gameplay, GameState.GameOver));
+
+        if (UIManager.Instance != null)
+        {
+            UIManager.Instance.ShowWinScreen();
+        }
+
+        Destroy(gameObject, 0.5f);
     }
 
     public virtual void SetData(EnemyData data)

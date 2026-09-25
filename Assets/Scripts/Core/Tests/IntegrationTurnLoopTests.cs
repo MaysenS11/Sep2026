@@ -198,6 +198,7 @@ namespace Core.Tests
             Assert(player.GridPosition == new Vector2Int(5, 5), "Player position must NOT move when push is blocked");
             Assert(knight.GridPosition == new Vector2Int(6, 7), "Knight must rebound back to origin tile (6, 7)");
             Assert(knight.CurrentHealth == 3, "Knight must take 1 recoil damage");
+            Assert(player.CurrentHealth == 4, "Player must take 2 incoming attack damage from Knight");
         }
 
         private static void TestBoardEntityFactory_PhysicsStrippingAndPresenterBinding()
