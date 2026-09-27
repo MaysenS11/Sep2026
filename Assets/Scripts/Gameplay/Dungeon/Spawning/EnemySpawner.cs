@@ -235,7 +235,8 @@ namespace Dungeon.Spawning
             GameObject enemyObj = Object.Instantiate(data.Prefab, worldPos, Quaternion.identity, parentContainer);
             _spawnedEnemies.Add(enemyObj);
 
-            if (enemyObj.TryGetComponent<EnemyBase>(out var enemyBase))
+            var enemyBase = enemyObj.GetComponentInChildren<EnemyBase>();
+            if (enemyBase != null)
             {
                 enemyBase.SetData(data);
                 enemyBase.CurrentRoomIndex = roomIndex;
@@ -257,7 +258,8 @@ namespace Dungeon.Spawning
             _spawnedEnemies.Add(enemyObj);
 
             EnemyData data = null;
-            if (enemyObj.TryGetComponent<EnemyBase>(out var enemyBase))
+            var enemyBase = enemyObj.GetComponentInChildren<EnemyBase>();
+            if (enemyBase != null)
             {
                 enemyBase.CurrentRoomIndex = roomIndex;
                 data = enemyBase.Data;

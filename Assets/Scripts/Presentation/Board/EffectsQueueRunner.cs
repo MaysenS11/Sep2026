@@ -276,6 +276,7 @@ namespace Presentation.Board
                 case DamageTakenEffect damage:
                     if (targetObj != null)
                     {
+                        EventBus<EntityDamagedEvent>.Raise(new EntityDamagedEvent(targetObj.gameObject, null, damage.DamageAmount, damage.RemainingHealth));
                         yield return StartCoroutine(targetObj.AnimateDamageRoutine(damage.DamageAmount));
                     }
                     break;
@@ -287,6 +288,7 @@ namespace Presentation.Board
                 case OccupantDestroyedEffect destroyed:
                     if (targetObj != null)
                     {
+                        EventBus<EntityDiedEvent>.Raise(new EntityDiedEvent(targetObj.gameObject));
                         yield return StartCoroutine(targetObj.AnimateDeathRoutine());
                         UnregisterTileObject(destroyed.OccupantId);
                     }

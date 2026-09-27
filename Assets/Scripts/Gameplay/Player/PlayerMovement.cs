@@ -240,8 +240,29 @@ public class PlayerMovement : MonoBehaviour
                 }
             }
 
-            // Case C: Walkable and free cell -> Execute 1 tile advance via TurnCoordinator
-            if (GameManager.Instance.TurnCoordinator != null)
+            // Case C: Walkable cell -> Check if it is a locked chest room door
+            if (GameManager.Instance != null && GameManager.Instance.TryResolveDoorAtTile(targetGrid, out DoorType targetDoorType))
+            {
+                if (targetDoorType == DoorType.SpecialExitDoor)
+                {
+                    if (GameManager.Instance.DungeonDictionary.TryGetValue(GameManager.Instance.CurrentRoomIndex, out var curRoom))
+                    {
+                        if (GameManager.Instance.DungeonDictionary.TryGetValue(curRoom.SpecialChestRoomIndex, out var chestRoom) && chestRoom.IsLocked)
+                        {
+                            int pKeys = PlayerOccupant != null ? PlayerOccupant.Keys : 0;
+                            int uKeys = UIManager.Instance != null ? UIManager.Instance.CurrentKeys : 0;
+                            if (pKeys <= 0 && uKeys <= 0)
+                            {
+                                PlayBumpDeniedRecoil(targetGrid);
+                                return;
+                            }
+                        }
+                    }
+                }
+            }
+
+            // Execute 1 tile advance via TurnCoordinator
+            if (GameManager.Instance != null && GameManager.Instance.TurnCoordinator != null)
             {
                 canTakeTurn = false;
                 bool moved = GameManager.Instance.TurnCoordinator.TryExecutePlayerMove(inputDirInt, this, () =>

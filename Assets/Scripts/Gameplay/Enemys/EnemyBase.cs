@@ -145,7 +145,7 @@ public class EnemyBase : MonoBehaviour
 
     protected virtual void OnEntityDamaged(EntityDamagedEvent evt)
     {
-        if (evt.Target != gameObject) return;
+        if (evt.Target != gameObject && (evt.Target == null || (!evt.Target.transform.IsChildOf(transform) && !transform.IsChildOf(evt.Target.transform)))) return;
 
         bool isKing = (enemyData != null && enemyData.IsBoss) || gameObject.name.Contains("King");
         if (isKing && enemyData != null && !enemyData.DamageSound.IsNull)
@@ -226,7 +226,7 @@ public class EnemyBase : MonoBehaviour
 
     protected virtual void OnEntityDied(EntityDiedEvent evt)
     {
-        if (evt.Entity != gameObject)
+        if (evt.Entity != gameObject && (evt.Entity == null || (!evt.Entity.transform.IsChildOf(transform) && !transform.IsChildOf(evt.Entity.transform))))
         {
             return;
         }

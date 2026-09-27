@@ -145,9 +145,32 @@ namespace Dungeon
 
                 if (!selectedChestMacro.HasValue) break;
 
-                int parentIdx = Random.Range(0, _candidateParentRoomsBuffer.Count);
+                // Prefer parent rooms adjacent to selectedChestMacro (Manhattan distance == 1)
+                int parentIdx = -1;
+                var adjacentIndices = new List<int>();
+                for (int i = 0; i < _candidateParentRoomsBuffer.Count; i++)
+                {
+                    Vector2Int diff = _candidateParentRoomsBuffer[i].MacroPos - selectedChestMacro.Value;
+                    if (Mathf.Abs(diff.x) + Mathf.Abs(diff.y) == 1)
+                    {
+                        adjacentIndices.Add(i);
+                    }
+                }
+
+                if (adjacentIndices.Count > 0)
+                {
+                    parentIdx = adjacentIndices[Random.Range(0, adjacentIndices.Count)];
+                }
+                else
+                {
+                    parentIdx = Random.Range(0, _candidateParentRoomsBuffer.Count);
+                }
+
                 GameManager.RoomData parentRoom = _candidateParentRoomsBuffer[parentIdx];
                 _candidateParentRoomsBuffer.RemoveAt(parentIdx);
+
+                parentRoom.HasSpecialChestRoom = true;
+                parentRoom.SpecialChestRoomIndex = rooms.Count;
 
                 Vector2Int padding = macroCellSize - fixedChestRoomSize;
                 Vector2Int centeredOffset = new Vector2Int(padding.x / 2, padding.y / 2);
@@ -156,6 +179,9 @@ namespace Dungeon
                 {
                     RoomIndex = rooms.Count,
                     ParentRoomIndex = parentRoom.RoomIndex,
+                    HasSpecialChestRoom = true,
+                    SpecialChestRoomIndex = parentRoom.RoomIndex,
+                    IsLocked = true,
                     MacroPos = selectedChestMacro.Value,
                     Type = RoomType.Chest,
                     Shape = RoomShape.Rectangle,

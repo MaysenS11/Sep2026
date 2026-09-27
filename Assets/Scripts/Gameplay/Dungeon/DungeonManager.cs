@@ -174,6 +174,7 @@ namespace Dungeon
                 PublishDungeonData();
                 PositionPlayerAtStartRoom();
                 RegisterSceneEntitiesOnBoard();
+                AssignChildChestRoomKeyholders();
                 CameraBounds cameraBounds = Object.FindAnyObjectByType<CameraBounds>();
                 if (cameraBounds != null)
                 {
@@ -411,10 +412,31 @@ namespace Dungeon
             var chestRooms = GeneratedRooms.FindAll(r => r.Type == RoomType.Chest);
             if (chestRooms.Count == 0) return;
 
-            var allEnemies = new List<EnemyBase>(GetComponentsInChildren<EnemyBase>(true));
-            if (allEnemies.Count == 0)
+            var enemySet = new HashSet<EnemyBase>(GetComponentsInChildren<EnemyBase>(true));
+            foreach (var eb in Object.FindObjectsByType<EnemyBase>(FindObjectsSortMode.None))
             {
-                allEnemies.AddRange(Object.FindObjectsByType<EnemyBase>(FindObjectsSortMode.None));
+                if (eb != null) enemySet.Add(eb);
+            }
+            var allEnemies = new List<EnemyBase>(enemySet);
+
+            // Ensure CurrentRoomIndex is populated from grid position if unassigned (-1)
+            for (int eIdx = 0; eIdx < allEnemies.Count; eIdx++)
+            {
+                EnemyBase e = allEnemies[eIdx];
+                if (e != null && e.CurrentRoomIndex < 0)
+                {
+                    Vector2Int pos = e.GetGridPosition();
+                    for (int r = 0; r < GeneratedRooms.Count; r++)
+                    {
+                        var rm = GeneratedRooms[r];
+                        if (pos.x >= rm.WorldOriginTile.x && pos.x < rm.WorldOriginTile.x + rm.Size.x &&
+                            pos.y >= rm.WorldOriginTile.y && pos.y < rm.WorldOriginTile.y + rm.Size.y)
+                        {
+                            e.CurrentRoomIndex = rm.RoomIndex;
+                            break;
+                        }
+                    }
+                }
             }
 
             for (int i = 0; i < chestRooms.Count; i++)
@@ -427,6 +449,7 @@ namespace Dungeon
                     e != null &&
                     !e.name.ToLower().Contains("king") &&
                     e.GetComponent<Keyholder>() == null &&
+                    e.GetComponentInParent<Keyholder>() == null &&
                     (parentIdx == -1 || Mathf.Abs(e.CurrentRoomIndex - parentIdx) <= 1));
 
                 if (candidates.Count == 0)
@@ -434,14 +457,19 @@ namespace Dungeon
                     candidates = allEnemies.FindAll(e =>
                         e != null &&
                         !e.name.ToLower().Contains("king") &&
-                        e.GetComponent<Keyholder>() == null);
+                        e.GetComponent<Keyholder>() == null &&
+                        e.GetComponentInParent<Keyholder>() == null);
                 }
 
                 if (candidates.Count > 0)
                 {
                     int pick = Random.Range(0, candidates.Count);
                     EnemyBase selected = candidates[pick];
-                    Keyholder kh = selected.gameObject.AddComponent<Keyholder>();
+                    Keyholder kh = selected.GetComponent<Keyholder>();
+                    if (kh == null)
+                    {
+                        kh = selected.gameObject.AddComponent<Keyholder>();
+                    }
                     kh.Initialize(chestRoom.RoomIndex);
                 }
             }
@@ -526,6 +554,14 @@ namespace Dungeon
 
                 room.EntryDoorPosition = GetWorldPosition(room.EntranceDoorTile);
                 room.ExitDoorPosition = GetWorldPosition(room.ExitDoorTile);
+                if (room.SpecialExitDoorTile.HasValue)
+                {
+                    room.SpecialExitDoorPosition = GetWorldPosition(room.SpecialExitDoorTile);
+                }
+                if (room.Type == RoomType.Chest && room.EntranceDoorTile.HasValue)
+                {
+                    room.SpecialEntryDoorPosition = GetWorldPosition(room.EntranceDoorTile);
+                }
 
                 room.CenterPosition = new Vector3(
                     room.WorldOriginTile.x + (room.Size.x / 2f),
@@ -544,11 +580,22 @@ namespace Dungeon
                     room.HasSpecialChestRoom = true;
                     room.SpecialChestRoomIndex = parentRoom.RoomIndex;
                     room.SpecialEntryDoorPosition = GetWorldPosition(room.EntranceDoorTile);
-                    room.SpecialExitDoorPosition = GetWorldPosition(parentRoom.ExitDoorTile);
 
                     parentRoom.HasSpecialChestRoom = true;
                     parentRoom.SpecialChestRoomIndex = room.RoomIndex;
-                    parentRoom.SpecialExitDoorPosition = GetWorldPosition(parentRoom.ExitDoorTile);
+
+                    if (parentRoom.SpecialExitDoorTile.HasValue)
+                    {
+                        Vector3? specialDoorWorld = GetWorldPosition(parentRoom.SpecialExitDoorTile);
+                        parentRoom.SpecialExitDoorPosition = specialDoorWorld;
+                        room.SpecialExitDoorPosition = specialDoorWorld;
+                    }
+                    else if (parentRoom.SpecialExitDoorPosition.HasValue)
+                    {
+                        room.SpecialExitDoorPosition = parentRoom.SpecialExitDoorPosition;
+                    }
+
+                    GameManager.Instance.DungeonDictionary[parentRoom.RoomIndex] = parentRoom;
                 }
 
                 GameManager.Instance.DungeonDictionary[room.RoomIndex] = room;

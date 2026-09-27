@@ -88,23 +88,20 @@ namespace Infrastructure
                     }
                 }
 
-                // Ensure door connection tiles and their landing areas are walkable floors
+                // Ensure door connection tiles are walkable floors
                 if (r.EntranceDoorTile.HasValue)
                 {
                     board.SetCell(r.EntranceDoorTile.Value, TerrainType.Floor);
-                    board.SetCell(new Vector2Int(r.EntranceDoorTile.Value.x, r.EntranceDoorTile.Value.y - 1), TerrainType.Floor);
-                    board.SetCell(new Vector2Int(r.EntranceDoorTile.Value.x, r.EntranceDoorTile.Value.y + 1), TerrainType.Floor);
-                    board.SetCell(new Vector2Int(r.EntranceDoorTile.Value.x - 1, r.EntranceDoorTile.Value.y), TerrainType.Floor);
-                    board.SetCell(new Vector2Int(r.EntranceDoorTile.Value.x + 1, r.EntranceDoorTile.Value.y), TerrainType.Floor);
                 }
 
                 if (r.ExitDoorTile.HasValue)
                 {
                     board.SetCell(r.ExitDoorTile.Value, TerrainType.Floor);
-                    board.SetCell(new Vector2Int(r.ExitDoorTile.Value.x, r.ExitDoorTile.Value.y - 1), TerrainType.Floor);
-                    board.SetCell(new Vector2Int(r.ExitDoorTile.Value.x, r.ExitDoorTile.Value.y + 1), TerrainType.Floor);
-                    board.SetCell(new Vector2Int(r.ExitDoorTile.Value.x - 1, r.ExitDoorTile.Value.y), TerrainType.Floor);
-                    board.SetCell(new Vector2Int(r.ExitDoorTile.Value.x + 1, r.ExitDoorTile.Value.y), TerrainType.Floor);
+                }
+
+                if (r.SpecialExitDoorTile.HasValue)
+                {
+                    board.SetCell(r.SpecialExitDoorTile.Value, TerrainType.Floor);
                 }
             }
 

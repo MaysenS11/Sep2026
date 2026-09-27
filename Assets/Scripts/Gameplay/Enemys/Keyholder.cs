@@ -80,7 +80,7 @@ namespace Dungeon
 
         private void OnEntityDied(EntityDiedEvent evt)
         {
-            if (evt.Entity == gameObject)
+            if (evt.Entity == gameObject || (evt.Entity != null && (evt.Entity.transform.IsChildOf(transform) || transform.IsChildOf(evt.Entity.transform))))
             {
                 EmitKeyToPlayer();
             }

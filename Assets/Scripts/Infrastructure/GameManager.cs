@@ -56,6 +56,8 @@ public class GameManager : MonoBehaviour
         public bool HasSpecialChestRoom;
         public int SpecialChestRoomIndex = -1;
         public bool IsLocked = false;
+        [SerializeField] private bool hasSpecialExitDoorTile;
+        [SerializeField] private Vector2Int specialExitDoorTileValue;
         [SerializeField] private bool hasSpecialExitDoorPosition;
         [SerializeField] private Vector3 specialExitDoorPositionValue;
         [SerializeField] private bool hasSpecialEntryDoorPosition;
@@ -64,6 +66,16 @@ public class GameManager : MonoBehaviour
         public Vector2Int CenterTile;
         public Vector3 CenterPosition;
         public Vector3 CenterTilePosition;
+
+        public Vector2Int? SpecialExitDoorTile
+        {
+            get => hasSpecialExitDoorTile ? specialExitDoorTileValue : (Vector2Int?)null;
+            set
+            {
+                hasSpecialExitDoorTile = value.HasValue;
+                specialExitDoorTileValue = value ?? Vector2Int.zero;
+            }
+        }
 
         public Vector2Int? EntranceDoorTile
         {
@@ -298,16 +310,35 @@ public class GameManager : MonoBehaviour
     {
         doorType = default;
 
+        if (DungeonDictionary != null && DungeonDictionary.TryGetValue(CurrentRoomIndex, out var currentRoom))
+        {
+            Vector2Int grid = new Vector2Int(cell.x, cell.y);
+            if (currentRoom.SpecialExitDoorTile.HasValue && currentRoom.SpecialExitDoorTile.Value == grid)
+            {
+                doorType = DoorType.SpecialExitDoor;
+                return true;
+            }
+            if (currentRoom.EntranceDoorTile.HasValue && currentRoom.EntranceDoorTile.Value == grid)
+            {
+                doorType = (currentRoom.Type == RoomType.Chest || currentRoom.ParentRoomIndex != -1) ? DoorType.SpecialEntryDoor : DoorType.EntryDoor;
+                return true;
+            }
+            if (currentRoom.ExitDoorTile.HasValue && currentRoom.ExitDoorTile.Value == grid)
+            {
+                doorType = (currentRoom.ParentRoomIndex != -1 && currentRoom.Type == RoomType.Chest) ? DoorType.SpecialEntryDoor : DoorType.ExitDoor;
+                return true;
+            }
+        }
+
         if (doorTilemap != null)
         {
             TileBase tile = doorTilemap.GetTile(cell);
             if (tile != null)
             {
+                bool isChest = DungeonDictionary != null && DungeonDictionary.TryGetValue(CurrentRoomIndex, out var r) && r.Type == RoomType.Chest;
                 if (tile == entranceDoorTile)
                 {
-                    doorType = (DungeonDictionary.TryGetValue(CurrentRoomIndex, out var r) && r.Type == RoomType.Chest)
-                        ? DoorType.SpecialEntryDoor
-                        : DoorType.EntryDoor;
+                    doorType = isChest ? DoorType.SpecialEntryDoor : DoorType.EntryDoor;
                     return true;
                 }
                 if (tile == exitDoorTile)
@@ -315,31 +346,11 @@ public class GameManager : MonoBehaviour
                     doorType = DoorType.ExitDoor;
                     return true;
                 }
-                if (tile == specialExitDoorTile)
+                if (tile == specialExitDoorTile || tile == specialEntranceDoorTile)
                 {
-                    doorType = DoorType.SpecialExitDoor;
+                    doorType = isChest ? DoorType.SpecialEntryDoor : DoorType.SpecialExitDoor;
                     return true;
                 }
-                if (tile == specialEntranceDoorTile)
-                {
-                    doorType = DoorType.SpecialEntryDoor;
-                    return true;
-                }
-            }
-        }
-
-        if (DungeonDictionary != null && DungeonDictionary.TryGetValue(CurrentRoomIndex, out var currentRoom))
-        {
-            Vector2Int grid = new Vector2Int(cell.x, cell.y);
-            if (currentRoom.ExitDoorTile.HasValue && currentRoom.ExitDoorTile.Value == grid)
-            {
-                doorType = (currentRoom.ParentRoomIndex != -1) ? DoorType.SpecialExitDoor : DoorType.ExitDoor;
-                return true;
-            }
-            if (currentRoom.EntranceDoorTile.HasValue && currentRoom.EntranceDoorTile.Value == grid)
-            {
-                doorType = (currentRoom.Type == RoomType.Chest) ? DoorType.SpecialEntryDoor : DoorType.EntryDoor;
-                return true;
             }
         }
 
@@ -395,6 +406,26 @@ public class GameManager : MonoBehaviour
         else if (doorType == DoorType.SpecialExitDoor)
         {
             nextRoomIndex = currentRoom.SpecialChestRoomIndex;
+            if (DungeonDictionary.TryGetValue(nextRoomIndex, out RoomData targetRoom) && targetRoom.IsLocked)
+            {
+                var playerOcc = Board != null ? Board.FindPlayer() : null;
+                int playerKeys = playerOcc != null ? playerOcc.Keys : 0;
+                int uiKeys = UIManager.Instance != null ? UIManager.Instance.CurrentKeys : 0;
+
+                if (playerKeys > 0 || uiKeys > 0)
+                {
+                    if (playerOcc != null && playerOcc.Keys > 0) playerOcc.Keys--;
+                    if (UIManager.Instance != null) UIManager.Instance.TryUseKey();
+
+                    targetRoom.IsLocked = false;
+                    currentRoom.IsLocked = false;
+                }
+                else
+                {
+                    doorTriggerBlockedUntil = 0f;
+                    return;
+                }
+            }
             targetDoor = GetSpecialEntryDoor(nextRoomIndex);
         }
         else
@@ -495,6 +526,7 @@ public class GameManager : MonoBehaviour
         if (DungeonDictionary.TryGetValue(roomIndex, out RoomData room))
         {
             if (room.SpecialExitDoorPosition.HasValue) return room.SpecialExitDoorPosition.Value;
+            if (room.SpecialExitDoorTile.HasValue) return BoardCoordinate.GridToWorldCenter(room.SpecialExitDoorTile.Value);
             if (room.ExitDoorTile.HasValue) return BoardCoordinate.GridToWorldCenter(room.ExitDoorTile.Value);
             return BoardCoordinate.GridToWorldCenter(room.CenterTile);
         }

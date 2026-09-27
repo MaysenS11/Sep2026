@@ -153,24 +153,74 @@ namespace Dungeon.Spawning
                 tileQuery.MarkOccupied(chosenExit);
             }
 
+            // Spawn SpecialExitDoorTile in parent room leading to child chest room
+            if (room.HasSpecialChestRoom && room.SpecialChestRoomIndex >= 0 && room.Type != RoomType.Chest)
+            {
+                var specialDoorCandidates = new List<Vector2Int>();
+                for (int t = 0; t < _validFloorTilesBuffer.Count; t++)
+                {
+                    Vector2Int tile = _validFloorTilesBuffer[t];
+                    if (tileQuery.IsOccupied(tile)) continue;
+                    if (room.EntranceDoorTile.HasValue && (tile - room.EntranceDoorTile.Value).sqrMagnitude < 4) continue;
+                    if (room.ExitDoorTile.HasValue && (tile - room.ExitDoorTile.Value).sqrMagnitude < 4) continue;
+                    specialDoorCandidates.Add(tile);
+                }
+
+                Vector2Int chosenSpecialDoor = Vector2Int.zero;
+                bool foundSpecial = false;
+                if (specialDoorCandidates.Count > 0)
+                {
+                    chosenSpecialDoor = specialDoorCandidates[Random.Range(0, specialDoorCandidates.Count)];
+                    foundSpecial = true;
+                }
+                else
+                {
+                    for (int t = 0; t < _validFloorTilesBuffer.Count; t++)
+                    {
+                        Vector2Int tile = _validFloorTilesBuffer[t];
+                        if (!tileQuery.IsOccupied(tile))
+                        {
+                            chosenSpecialDoor = tile;
+                            foundSpecial = true;
+                            break;
+                        }
+                    }
+                }
+
+                if (foundSpecial)
+                {
+                    room.SpecialExitDoorTile = chosenSpecialDoor;
+                    tileQuery.MarkOccupied(chosenSpecialDoor);
+                }
+            }
+
             if (_objectTilemap == null || floorTilemap == null) return;
 
-            TileBase inTile = room.Type == RoomType.Chest && specialEntranceDoorTile != null ? specialEntranceDoorTile : entranceDoorTile;
-            TileBase outTile = room.ParentRoomIndex != -1 && specialExitDoorTile != null ? specialExitDoorTile : exitDoorTile;
+            TileBase specialTile = specialExitDoorTile != null ? specialExitDoorTile : (specialEntranceDoorTile != null ? specialEntranceDoorTile : exitDoorTile);
 
-            if (room.Type != RoomType.Start && room.EntranceDoorTile.HasValue && inTile != null)
+            if (room.Type != RoomType.Start && room.EntranceDoorTile.HasValue)
             {
-                Vector3Int pos = new Vector3Int(room.EntranceDoorTile.Value.x, room.EntranceDoorTile.Value.y, 0);
-                if (_fillFloorRuleTile != null) floorTilemap.SetTile(pos, _fillFloorRuleTile);
-                _objectTilemap.SetTile(pos, inTile);
+                // In chest room, the entrance/exit door connecting to the parent room uses the special door tile
+                TileBase inTile = (room.Type == RoomType.Chest) ? specialTile : entranceDoorTile;
+                if (inTile != null)
+                {
+                    Vector3Int pos = new Vector3Int(room.EntranceDoorTile.Value.x, room.EntranceDoorTile.Value.y, 0);
+                    _objectTilemap.SetTile(pos, inTile);
+                    _placedDoorPositions.Add(pos);
+                }
+            }
+
+            if (room.ExitDoorTile.HasValue && exitDoorTile != null)
+            {
+                Vector3Int pos = new Vector3Int(room.ExitDoorTile.Value.x, room.ExitDoorTile.Value.y, 0);
+                _objectTilemap.SetTile(pos, exitDoorTile);
                 _placedDoorPositions.Add(pos);
             }
 
-            if (room.ExitDoorTile.HasValue && outTile != null)
+            if (room.SpecialExitDoorTile.HasValue && specialTile != null)
             {
-                Vector3Int pos = new Vector3Int(room.ExitDoorTile.Value.x, room.ExitDoorTile.Value.y, 0);
-                if (_fillFloorRuleTile != null) floorTilemap.SetTile(pos, _fillFloorRuleTile);
-                _objectTilemap.SetTile(pos, outTile);
+                Vector3Int pos = new Vector3Int(room.SpecialExitDoorTile.Value.x, room.SpecialExitDoorTile.Value.y, 0);
+                _objectTilemap.SetTile(pos, specialTile);
                 _placedDoorPositions.Add(pos);
             }
         }
