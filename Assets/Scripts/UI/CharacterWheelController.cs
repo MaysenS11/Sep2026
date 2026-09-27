@@ -123,6 +123,25 @@ public class CharacterWheelController : MonoBehaviour
             new CharacterSelectedEvent(currentSlot.CharacterDefinition));
     }
 
+    public void RotateNext() => Rotate(1);
+    public void RotatePrevious() => Rotate(-1);
+
+    public CharacterSlotUI CurrentSlot => (slots != null && selectedIndex >= 0 && selectedIndex < slots.Length) ? slots[selectedIndex] : null;
+
+    public void SelectCurrent()
+    {
+        if (totalSlots == 0) return;
+
+        CharacterSlotUI currentSlot = slots[selectedIndex];
+        if (currentSlot == null || currentSlot.IsLocked || currentSlot.CharacterDefinition == null)
+        {
+            return;
+        }
+
+        EventBus<CharacterSelectedEvent>.Raise(
+            new CharacterSelectedEvent(currentSlot.CharacterDefinition));
+    }
+
     private void Rotate(int diff)
     {
         if (totalSlots == 0) return;

@@ -15,13 +15,9 @@ public class CharacterDefinition : ScriptableObject
 
     [Header("Stats Configuration")]
     [SerializeField] private int[] attackTierValues;
-
     [SerializeField] private int[] defenceTierValues;
-
     [SerializeField] private int[] healthTierValues;
-
     [SerializeField] private int[] rangeTierValues;
-
     [SerializeField] private int[] speedTierValues;
 
     
