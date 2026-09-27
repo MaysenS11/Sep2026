@@ -24,28 +24,14 @@ namespace Dungeon.Editor
             }
 
             SerializedObject so = new SerializedObject(dm);
-            SerializedProperty borderProp = so.FindProperty("borderFloorTilemap");
-            SerializedProperty fillProp = so.FindProperty("fillFloorTilemap");
+            SerializedProperty floorProp = so.FindProperty("floorTilemap");
 
-            Tilemap borderTilemap = borderProp?.objectReferenceValue as Tilemap;
-            Tilemap fillTilemap = fillProp?.objectReferenceValue as Tilemap;
+            Tilemap floorTilemap = floorProp?.objectReferenceValue as Tilemap;
 
             int updated = 0;
-            if (borderTilemap != null)
+            if (floorTilemap != null)
             {
-                var tr = borderTilemap.GetComponent<TilemapRenderer>();
-                if (tr != null)
-                {
-                    Undo.RecordObject(tr, "Apply Checkerboard Material");
-                    tr.sharedMaterial = mat;
-                    EditorUtility.SetDirty(tr);
-                    updated++;
-                }
-            }
-
-            if (fillTilemap != null)
-            {
-                var tr = fillTilemap.GetComponent<TilemapRenderer>();
+                var tr = floorTilemap.GetComponent<TilemapRenderer>();
                 if (tr != null)
                 {
                     Undo.RecordObject(tr, "Apply Checkerboard Material");

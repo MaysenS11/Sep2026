@@ -433,6 +433,11 @@ namespace Infrastructure
                 // Multi-Tile Pillars
                 if (lower.Contains("pillar") || t.GetComponent<PillarTileObject>() != null)
                 {
+                    if (t.childCount > 0 && t.GetComponent<SpriteRenderer>() == null)
+                    {
+                        continue;
+                    }
+
                     bool isAlreadyRegistered = t.TryGetComponent<PillarTileObject>(out var presenter) &&
                                                presenter.OccupantId != 0 &&
                                                board.GetOccupantById(presenter.OccupantId) != null;
@@ -441,10 +446,15 @@ namespace Infrastructure
                         Vector2Int pSize = presenter != null ? presenter.Size : Vector2Int.one;
                         if (presenter == null)
                         {
-                            if (lower.Contains("2x2")) pSize = new Vector2Int(2, 2);
+                            if (lower.Contains("4x2")) pSize = new Vector2Int(4, 2);
+                            else if (lower.Contains("2x2")) pSize = new Vector2Int(2, 2);
                             else if (lower.Contains("1x2")) pSize = new Vector2Int(1, 2);
                         }
-                        CreatePillar(t.gameObject, pos, pSize, board, activeRunner);
+                        Vector2Int pillarOrigin = new Vector2Int(
+                            Mathf.RoundToInt(t.position.x - (pSize.x * 0.5f)),
+                            Mathf.RoundToInt(t.position.y - (pSize.y * 0.5f))
+                        );
+                        CreatePillar(t.gameObject, pillarOrigin, pSize, board, activeRunner);
                     }
                 }
                 // Enemies

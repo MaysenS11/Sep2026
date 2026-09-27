@@ -146,6 +146,9 @@ public class GameManager : MonoBehaviour
     private TileBase exitDoorTile;
     private TileBase specialEntranceDoorTile;
     private TileBase specialExitDoorTile;
+    private TileBase specialLockedDoorTile;
+    private TileBase specialUnlockedDoorTile;
+    private TileBase specialRoomExitDoorTile;
 
     public Tilemap DoorTilemap => doorTilemap;
 
@@ -286,13 +289,24 @@ public class GameManager : MonoBehaviour
         }
     }
 
-    public void ConfigureDoorTiles(Tilemap tilemap, TileBase entryTile, TileBase exitTile, TileBase specialEntryTile, TileBase specialExitTile)
+    public void ConfigureDoorTiles(
+        Tilemap tilemap,
+        TileBase entryTile,
+        TileBase exitTile,
+        TileBase specialEntryTile,
+        TileBase specialExitTile,
+        TileBase lockedSpecialTile = null,
+        TileBase unlockedSpecialTile = null,
+        TileBase roomExitSpecialTile = null)
     {
         doorTilemap = tilemap;
         entranceDoorTile = entryTile;
         exitDoorTile = exitTile;
         specialEntranceDoorTile = specialEntryTile;
         specialExitDoorTile = specialExitTile;
+        specialLockedDoorTile = lockedSpecialTile;
+        specialUnlockedDoorTile = unlockedSpecialTile;
+        specialRoomExitDoorTile = roomExitSpecialTile;
     }
 
     public bool TryResolveDoor(Vector3Int cell, out DoorType doorType)
@@ -335,7 +349,9 @@ public class GameManager : MonoBehaviour
                     doorType = DoorType.ExitDoor;
                     return true;
                 }
-                if (tile == specialExitDoorTile || tile == specialEntranceDoorTile)
+                if (tile == specialExitDoorTile || tile == specialEntranceDoorTile ||
+                    tile == specialLockedDoorTile || tile == specialUnlockedDoorTile ||
+                    tile == specialRoomExitDoorTile)
                 {
                     doorType = isChest ? DoorType.SpecialEntryDoor : DoorType.SpecialExitDoor;
                     return true;
@@ -408,6 +424,16 @@ public class GameManager : MonoBehaviour
 
                     targetRoom.IsLocked = false;
                     currentRoom.IsLocked = false;
+
+                    if (doorTilemap != null && currentRoom.SpecialExitDoorTile.HasValue)
+                    {
+                        TileBase unlockedTile = specialUnlockedDoorTile != null ? specialUnlockedDoorTile : (specialExitDoorTile != null ? specialExitDoorTile : specialEntranceDoorTile);
+                        if (unlockedTile != null)
+                        {
+                            Vector3Int pos = new Vector3Int(currentRoom.SpecialExitDoorTile.Value.x, currentRoom.SpecialExitDoorTile.Value.y, 0);
+                            doorTilemap.SetTile(pos, unlockedTile);
+                        }
+                    }
                 }
                 else
                 {

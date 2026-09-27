@@ -174,12 +174,21 @@ namespace Chest
             selectedCards.Add(cardUI);
             cardUI.SetSelected(true);
 
-            ApplyReward(cardUI.CurrentItem);
+            StartCoroutine(ApplyRewardAndCloseRoutine(cardUI.CurrentItem));
+        }
+
+        private System.Collections.IEnumerator ApplyRewardAndCloseRoutine(CardRewardItem item)
+        {
+            ApplyReward(item);
 
             if (statDisplayUI != null)
             {
                 statDisplayUI.ClearPreview();
-                statDisplayUI.Refresh();
+                yield return StartCoroutine(statDisplayUI.FlashUpgradedRowRoutine(item.StatType, 0.8f));
+            }
+            else
+            {
+                yield return new WaitForSeconds(0.4f);
             }
 
             CloseReward();

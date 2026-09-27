@@ -28,7 +28,6 @@ public class StatsDisplayUI : MonoBehaviour
             var statDefs = new (string label, StatType type)[]
             {
                 ("RANGE", StatType.AttackRange),
-                ("SPEED", StatType.Speed),
                 ("ATTACK", StatType.AttackDamage),
                 ("DEFENCE", StatType.Defence),
                 ("HEALTH", StatType.Health)
@@ -118,8 +117,6 @@ public class StatsDisplayUI : MonoBehaviour
                 return (character.HealthTierValues != null && character.HealthTierValues.Length > 0) ? character.HealthTierValues[0] : 6;
             case StatType.AttackRange:
                 return (character.RangeTierValues != null && character.RangeTierValues.Length > 0) ? character.RangeTierValues[0] : 1;
-            case StatType.Speed:
-                return (character.SpeedTierValues != null && character.SpeedTierValues.Length > 0) ? character.SpeedTierValues[0] : 1;
             default:
                 return 1;
         }
@@ -205,6 +202,49 @@ public class StatsDisplayUI : MonoBehaviour
             if (isActive)
             {
                 row.pips[i].color = normalColor;
+            }
+        }
+    }
+
+    public System.Collections.IEnumerator FlashUpgradedRowRoutine(StatType statType, float duration = 0.8f)
+    {
+        Refresh();
+        if (rows == null) yield break;
+
+        StatRow targetRow = null;
+        for (int i = 0; i < rows.Length; i++)
+        {
+            if (rows[i] != null && rows[i].statType == statType)
+            {
+                targetRow = rows[i];
+                break;
+            }
+        }
+
+        if (targetRow == null || targetRow.pips == null) yield break;
+
+        float elapsed = 0f;
+        while (elapsed < duration)
+        {
+            elapsed += Time.unscaledDeltaTime;
+            float pulse = Mathf.PingPong(elapsed * 6f, 1f);
+            Color c = Color.Lerp(normalColor, previewColor, pulse);
+
+            for (int p = 0; p < targetRow.pips.Length; p++)
+            {
+                if (targetRow.pips[p] != null && targetRow.pips[p].gameObject.activeSelf)
+                {
+                    targetRow.pips[p].color = c;
+                }
+            }
+            yield return null;
+        }
+
+        for (int p = 0; p < targetRow.pips.Length; p++)
+        {
+            if (targetRow.pips[p] != null && targetRow.pips[p].gameObject.activeSelf)
+            {
+                targetRow.pips[p].color = normalColor;
             }
         }
     }

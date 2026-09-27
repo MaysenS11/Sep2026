@@ -26,7 +26,7 @@ MonoBehaviour:
     Path: event:/SFX_Character_Halberd_Attack
   attackTierValues: 010000000200000004000000
   defenceTierValues: 010000000300000004000000
-  healthTierValues: 030000000400000005000000
+  healthTierValues: 06000000080000000a000000
   rangeTierValues: 020000000400000005000000
   speedTierValues: 010000000200000003000000
   attackPatterns:

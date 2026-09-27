@@ -202,8 +202,7 @@ public class PlayerMovement : MonoBehaviour
             PlayerOccupant?.SetFacingDirection(inputDirInt);
             NotifyTargetingChanged();
 
-            // Debounce input to allow single-tap turns without immediate accidental step
-            nextAllowedInputTime = Time.time + 0.12f;
+            nextAllowedInputTime = Time.time + 0.08f;
             return;
         }
 
@@ -274,7 +273,7 @@ public class PlayerMovement : MonoBehaviour
                 if (moved)
                 {
                     if (!moveSound.IsNull) RuntimeManager.PlayOneShot(moveSound);
-                    nextAllowedInputTime = Time.time + 0.05f;
+                    nextAllowedInputTime = Time.time + 0.02f;
                 }
                 else
                 {

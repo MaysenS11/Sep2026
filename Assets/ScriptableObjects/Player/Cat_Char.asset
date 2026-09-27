@@ -26,7 +26,7 @@ MonoBehaviour:
     Path: event:/SFX_Character_Degen_Attack
   attackTierValues: 010000000300000005000000
   defenceTierValues: 010000000200000003000000
-  healthTierValues: 030000000400000005000000
+  healthTierValues: 040000000600000008000000
   rangeTierValues: 010000000200000003000000
   speedTierValues: 010000000300000004000000
   attackPatterns:

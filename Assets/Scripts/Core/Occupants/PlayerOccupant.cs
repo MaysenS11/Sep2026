@@ -179,7 +179,7 @@ namespace Core.Occupants
                     if (newTier < _healthValues.Length)
                     {
                         int diff = _healthValues[newTier] - _healthValues[currentTier];
-                        IncreaseMaxHealth(Mathf.Max(1, diff));
+                        IncreaseMaxHealth(Mathf.Max(2, diff));
                     }
                     break;
             }
@@ -216,7 +216,7 @@ namespace Core.Occupants
             var effects = new List<BoardEffect>();
             if (IsDead || damage <= 0) return effects;
 
-            int actualDamage = System.Math.Max(1, damage - Defence);
+            int actualDamage = System.Math.Max(0, damage - Defence);
             effects = base.TakeDamage(actualDamage, source);
 
             EventBus<PlayerHealthChangedEvent>.Raise(new PlayerHealthChangedEvent(CurrentHealth, MaxHealth));

@@ -122,11 +122,23 @@ namespace Chest.Editor
             var statDefs = new (string label, StatType type)[]
             {
                 ("RANGE", StatType.AttackRange),
-                ("SPEED", StatType.Speed),
                 ("ATTACK", StatType.AttackDamage),
                 ("DEFENCE", StatType.Defence),
                 ("HEALTH", StatType.Health)
             };
+
+            var validRowNames = new System.Collections.Generic.HashSet<string>();
+            for (int i = 0; i < statDefs.Length; i++) validRowNames.Add($"Row_{statDefs[i].label}");
+
+            for (int i = statsPanelGo.transform.childCount - 1; i >= 0; i--)
+            {
+                var ch = statsPanelGo.transform.GetChild(i);
+                if (!validRowNames.Contains(ch.name))
+                {
+                    if (Application.isPlaying) Object.Destroy(ch.gameObject);
+                    else Object.DestroyImmediate(ch.gameObject);
+                }
+            }
 
             var rowsProp = displaySo.FindProperty("rows");
             rowsProp.arraySize = statDefs.Length;

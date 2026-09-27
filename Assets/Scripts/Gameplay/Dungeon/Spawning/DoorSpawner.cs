@@ -12,12 +12,15 @@ namespace Dungeon.Spawning
         [SerializeField] private TileBase exitDoorTile;
         [SerializeField] private TileBase specialEntranceDoorTile;
         [SerializeField] private TileBase specialExitDoorTile;
+        [SerializeField] private TileBase specialLockedDoorTile;
+        [SerializeField] private TileBase specialUnlockedDoorTile;
+        [SerializeField] private TileBase specialRoomExitDoorTile;
 
         [Header("Placement Settings")]
         [SerializeField] private float minDoorDistance = 5.0f;
 
         private Tilemap _objectTilemap;
-        private TileBase _fillFloorRuleTile;
+        private TileBase _floorRuleTile;
         private BossRoom _bossRoom;
 
         private readonly List<Vector2Int> _validFloorTilesBuffer = new List<Vector2Int>(256);
@@ -28,13 +31,16 @@ namespace Dungeon.Spawning
         public TileBase ExitDoorTile { get => exitDoorTile; set => exitDoorTile = value; }
         public TileBase SpecialEntranceDoorTile { get => specialEntranceDoorTile; set => specialEntranceDoorTile = value; }
         public TileBase SpecialExitDoorTile { get => specialExitDoorTile; set => specialExitDoorTile = value; }
+        public TileBase SpecialLockedDoorTile { get => specialLockedDoorTile; set => specialLockedDoorTile = value; }
+        public TileBase SpecialUnlockedDoorTile { get => specialUnlockedDoorTile; set => specialUnlockedDoorTile = value; }
+        public TileBase SpecialRoomExitDoorTile { get => specialRoomExitDoorTile; set => specialRoomExitDoorTile = value; }
         public float MinDoorDistance { get => minDoorDistance; set => minDoorDistance = value; }
         public BossRoom BossRoom { get => _bossRoom; set => _bossRoom = value; }
 
-        public void Initialize(Tilemap objectTilemap, TileBase fillFloorRuleTile, BossRoom bossRoom = null)
+        public void Initialize(Tilemap objectTilemap, TileBase floorRuleTile, BossRoom bossRoom = null)
         {
             _objectTilemap = objectTilemap;
-            _fillFloorRuleTile = fillFloorRuleTile;
+            _floorRuleTile = floorRuleTile;
             _bossRoom = bossRoom;
         }
 
@@ -69,13 +75,10 @@ namespace Dungeon.Spawning
             }
             else if (room.Type == RoomType.Chest)
             {
-                if (_validFloorTilesBuffer.Count > 0)
-                {
-                    Vector2Int entrance = _validFloorTilesBuffer[Random.Range(0, _validFloorTilesBuffer.Count)];
-                    room.EntranceDoorTile = entrance;
-                    room.ExitDoorTile = null;
-                    tileQuery.MarkOccupied(entrance);
-                }
+                Vector2Int entrance = new Vector2Int(room.CenterTile.x, room.CenterTile.y - 4);
+                room.EntranceDoorTile = entrance;
+                room.ExitDoorTile = null;
+                tileQuery.MarkOccupied(entrance);
             }
             else if (room.Type == RoomType.Start)
             {
@@ -200,8 +203,16 @@ namespace Dungeon.Spawning
 
             if (room.Type != RoomType.Start && room.EntranceDoorTile.HasValue)
             {
-                // In chest room, the entrance/exit door connecting to the parent room uses the special door tile
-                TileBase inTile = (room.Type == RoomType.Chest) ? specialTile : entranceDoorTile;
+                TileBase inTile;
+                if (room.Type == RoomType.Chest)
+                {
+                    inTile = specialRoomExitDoorTile != null ? specialRoomExitDoorTile : specialTile;
+                }
+                else
+                {
+                    inTile = entranceDoorTile;
+                }
+
                 if (inTile != null)
                 {
                     Vector3Int pos = new Vector3Int(room.EntranceDoorTile.Value.x, room.EntranceDoorTile.Value.y, 0);
@@ -217,11 +228,34 @@ namespace Dungeon.Spawning
                 _placedDoorPositions.Add(pos);
             }
 
-            if (room.SpecialExitDoorTile.HasValue && specialTile != null)
+            if (room.SpecialExitDoorTile.HasValue)
             {
-                Vector3Int pos = new Vector3Int(room.SpecialExitDoorTile.Value.x, room.SpecialExitDoorTile.Value.y, 0);
-                _objectTilemap.SetTile(pos, specialTile);
-                _placedDoorPositions.Add(pos);
+                TileBase parentSpecialTile = specialTile;
+                bool isTargetLocked = true;
+                if (room.HasSpecialChestRoom && room.SpecialChestRoomIndex >= 0)
+                {
+                    if (GameManager.Instance != null && GameManager.Instance.DungeonDictionary != null &&
+                        GameManager.Instance.DungeonDictionary.TryGetValue(room.SpecialChestRoomIndex, out var childRoom))
+                    {
+                        isTargetLocked = childRoom.IsLocked;
+                    }
+                }
+
+                if (isTargetLocked && specialLockedDoorTile != null)
+                {
+                    parentSpecialTile = specialLockedDoorTile;
+                }
+                else if (!isTargetLocked && specialUnlockedDoorTile != null)
+                {
+                    parentSpecialTile = specialUnlockedDoorTile;
+                }
+
+                if (parentSpecialTile != null)
+                {
+                    Vector3Int pos = new Vector3Int(room.SpecialExitDoorTile.Value.x, room.SpecialExitDoorTile.Value.y, 0);
+                    _objectTilemap.SetTile(pos, parentSpecialTile);
+                    _placedDoorPositions.Add(pos);
+                }
             }
         }
 

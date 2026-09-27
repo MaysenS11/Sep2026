@@ -15,6 +15,7 @@ namespace Dungeon.Spawning
         [SerializeField] private GameObject chestFrontPrefab;
         [SerializeField] private GameObject chestLeftPrefab;
         [SerializeField] private GameObject chestRightPrefab;
+        [SerializeField] private GameObject specialChestPrefab;
 
         [Header("Spawn Settings")]
         [SerializeField] private int totalDungeonChests = 3;
@@ -41,6 +42,12 @@ namespace Dungeon.Spawning
         {
             get => chestRightPrefab;
             set => chestRightPrefab = value;
+        }
+
+        public GameObject SpecialChestPrefab
+        {
+            get => specialChestPrefab;
+            set => specialChestPrefab = value;
         }
 
         public int TotalDungeonChests
@@ -98,9 +105,13 @@ namespace Dungeon.Spawning
         {
             if (floorTilemap == null) return;
 
-            if (room.Type == RoomType.Chest && chestFrontPrefab != null)
+            if (room.Type == RoomType.Chest)
             {
-                SpawnChestAt(chestFrontPrefab, room.CenterTile, room, tileQuery, floorTilemap, parentContainer, "Chest Room Center");
+                GameObject prefab = specialChestPrefab != null ? specialChestPrefab : chestFrontPrefab;
+                if (prefab != null)
+                {
+                    SpawnChestAt(prefab, room.CenterTile, room, tileQuery, floorTilemap, parentContainer, "Chest Room Center");
+                }
                 return;
             }
 

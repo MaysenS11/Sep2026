@@ -15,30 +15,38 @@ namespace Dungeon
         public static DungeonManager Instance { get; private set; }
 
         [Header("Layer Tilemaps")]
-        [SerializeField] private Tilemap roofTilemap;
         [SerializeField] private Tilemap wallTilemap;
-        [SerializeField] private Tilemap borderFloorTilemap;
-        [SerializeField] private Tilemap fillFloorTilemap;
+        [SerializeField] private Tilemap floorTilemap;
         [SerializeField] private Tilemap objectTilemap;
         [SerializeField] private Tilemap debugTilemap;
 
         [Header("Rule Tile Assets")]
-        [SerializeField] private TileBase roofRuleTile;
         [SerializeField] private TileBase wallRuleTile;
-        [SerializeField] private TileBase borderFloorRuleTile;
-        [SerializeField] private TileBase fillFloorRuleTile;
+        [SerializeField] private TileBase floorRuleTile;
+
+        [Header("Override Rule Tile Assets (Chest Rooms)")]
+        [SerializeField] private TileBase wallOverrideRuleTile;
+        [SerializeField] private TileBase floorOverrideRuleTile;
 
         [Header("Door Assets (Legacy Reference)")]
         [SerializeField] private TileBase entranceDoorTile;
         [SerializeField] private TileBase exitDoorTile;
         [SerializeField] private TileBase specialEntranceDoorTile;
         [SerializeField] private TileBase specialExitDoorTile;
+        [SerializeField] private TileBase specialLockedDoorTile;
+        [SerializeField] private TileBase specialUnlockedDoorTile;
+        [SerializeField] private TileBase specialRoomExitDoorTile;
 
         public Tilemap DoorTilemap => objectTilemap;
+        public TileBase WallOverrideRuleTile { get => wallOverrideRuleTile; set => wallOverrideRuleTile = value; }
+        public TileBase FloorOverrideRuleTile { get => floorOverrideRuleTile; set => floorOverrideRuleTile = value; }
         public TileBase EntranceDoorTile => doorSpawner.EntranceDoorTile;
         public TileBase ExitDoorTile => doorSpawner.ExitDoorTile;
         public TileBase SpecialEntranceDoorTile => doorSpawner.SpecialEntranceDoorTile;
         public TileBase SpecialExitDoorTile => doorSpawner.SpecialExitDoorTile;
+        public TileBase SpecialLockedDoorTile => doorSpawner.SpecialLockedDoorTile;
+        public TileBase SpecialUnlockedDoorTile => doorSpawner.SpecialUnlockedDoorTile;
+        public TileBase SpecialRoomExitDoorTile => doorSpawner.SpecialRoomExitDoorTile;
 
         [Header("Debug Settings")]
         [SerializeField] private TileBase debugPathTile;
@@ -155,7 +163,10 @@ namespace Dungeon
                     doorSpawner.EntranceDoorTile,
                     doorSpawner.ExitDoorTile,
                     doorSpawner.SpecialEntranceDoorTile,
-                    doorSpawner.SpecialExitDoorTile
+                    doorSpawner.SpecialExitDoorTile,
+                    doorSpawner.SpecialLockedDoorTile,
+                    doorSpawner.SpecialUnlockedDoorTile,
+                    doorSpawner.SpecialRoomExitDoorTile
                 );
             }
 
@@ -168,7 +179,7 @@ namespace Dungeon
             {
                 if (GameManager.Instance != null)
                 {
-                    var newBoard = Infrastructure.DungeonBridge.BuildBoardFromDungeon(generatedRooms, 10, fillFloorTilemap, borderFloorTilemap);
+                    var newBoard = Infrastructure.DungeonBridge.BuildBoardFromDungeon(generatedRooms, 10, floorTilemap);
                     GameManager.Instance.InitializeBoard(newBoard);
                 }
                 PublishDungeonData();
@@ -208,6 +219,9 @@ namespace Dungeon
             if (exitDoorTile != null && doorSpawner.ExitDoorTile == null) doorSpawner.ExitDoorTile = exitDoorTile;
             if (specialEntranceDoorTile != null && doorSpawner.SpecialEntranceDoorTile == null) doorSpawner.SpecialEntranceDoorTile = specialEntranceDoorTile;
             if (specialExitDoorTile != null && doorSpawner.SpecialExitDoorTile == null) doorSpawner.SpecialExitDoorTile = specialExitDoorTile;
+            if (specialLockedDoorTile != null && doorSpawner.SpecialLockedDoorTile == null) doorSpawner.SpecialLockedDoorTile = specialLockedDoorTile;
+            if (specialUnlockedDoorTile != null && doorSpawner.SpecialUnlockedDoorTile == null) doorSpawner.SpecialUnlockedDoorTile = specialUnlockedDoorTile;
+            if (specialRoomExitDoorTile != null && doorSpawner.SpecialRoomExitDoorTile == null) doorSpawner.SpecialRoomExitDoorTile = specialRoomExitDoorTile;
             doorSpawner.MinDoorDistance = minDoorDistance;
         }
 
@@ -232,7 +246,7 @@ namespace Dungeon
             }
 
             _spawners.Clear();
-            doorSpawner.Initialize(objectTilemap, fillFloorRuleTile, bossRoomPrefab);
+            doorSpawner.Initialize(objectTilemap, floorRuleTile, bossRoomPrefab);
             _spawners.Add(doorSpawner);
             _spawners.Add(propSpawner);
             _spawners.Add(enemySpawner);
@@ -250,9 +264,9 @@ namespace Dungeon
         [ContextMenu("Generate Dungeon in Editor")]
         public void GenerateAndBuildDungeon()
         {
-            if (roofTilemap == null || wallTilemap == null || borderFloorTilemap == null || fillFloorTilemap == null)
+            if (wallTilemap == null || floorTilemap == null)
             {
-                Debug.LogWarning("Assign all four layer tilemaps in the Inspector!");
+                Debug.LogWarning("Assign wall and floor layer tilemaps in the Inspector!");
                 return;
             }
 
@@ -266,7 +280,10 @@ namespace Dungeon
                 doorSpawner.EntranceDoorTile,
                 doorSpawner.ExitDoorTile,
                 doorSpawner.SpecialEntranceDoorTile,
-                doorSpawner.SpecialExitDoorTile
+                doorSpawner.SpecialExitDoorTile,
+                doorSpawner.SpecialLockedDoorTile,
+                doorSpawner.SpecialUnlockedDoorTile,
+                doorSpawner.SpecialRoomExitDoorTile
             );
 
             ClearDungeonTiles();
@@ -284,22 +301,20 @@ namespace Dungeon
 
             _tilemapRenderer.RenderRooms(
                 generatedRooms,
-                roofTilemap,
                 wallTilemap,
-                borderFloorTilemap,
-                fillFloorTilemap,
-                roofRuleTile,
+                floorTilemap,
                 wallRuleTile,
-                borderFloorRuleTile,
-                fillFloorRuleTile,
-                bossRoomPrefab
+                floorRuleTile,
+                bossRoomPrefab,
+                wallOverrideRuleTile,
+                floorOverrideRuleTile
             );
 
             GameManager.RoomData bossRoomData = generatedRooms != null ? generatedRooms.Find(r => r.Type == RoomType.Boss) : null;
             if (bossRoomData != null && bossRoomPrefab != null && activeBossRoomInstance == null)
             {
-                Vector3 bossPos = fillFloorTilemap != null
-                    ? fillFloorTilemap.GetCellCenterWorld(new Vector3Int(bossRoomData.WorldOriginTile.x, bossRoomData.WorldOriginTile.y, 0))
+                Vector3 bossPos = floorTilemap != null
+                    ? floorTilemap.CellToWorld(new Vector3Int(bossRoomData.WorldOriginTile.x, bossRoomData.WorldOriginTile.y, 0))
                     : new Vector3(bossRoomData.WorldOriginTile.x, bossRoomData.WorldOriginTile.y, 0f);
                 activeBossRoomInstance = Object.Instantiate(bossRoomPrefab, bossPos, Quaternion.identity, transform);
                 activeBossRoomInstance.name = "BossRoom_Instance";
@@ -313,7 +328,7 @@ namespace Dungeon
 
             if (GameManager.Instance != null)
             {
-                var newBoard = Infrastructure.DungeonBridge.BuildBoardFromDungeon(generatedRooms, 10, fillFloorTilemap, borderFloorTilemap);
+                var newBoard = Infrastructure.DungeonBridge.BuildBoardFromDungeon(generatedRooms, 10, floorTilemap);
                 GameManager.Instance.InitializeBoard(newBoard);
             }
 
@@ -395,7 +410,7 @@ namespace Dungeon
                 GameManager.RoomData room = GeneratedRooms[r];
                 for (int s = 0; s < _spawners.Count; s++)
                 {
-                    _spawners[s].SpawnContent(room, _tileQuery, fillFloorTilemap, transform);
+                    _spawners[s].SpawnContent(room, _tileQuery, floorTilemap, transform);
                 }
             }
 
@@ -478,10 +493,8 @@ namespace Dungeon
         [ContextMenu("Clear Dungeon Tiles")]
         public void ClearDungeonTiles()
         {
-            if (roofTilemap != null) roofTilemap.ClearAllTiles();
             if (wallTilemap != null) wallTilemap.ClearAllTiles();
-            if (borderFloorTilemap != null) borderFloorTilemap.ClearAllTiles();
-            if (fillFloorTilemap != null) fillFloorTilemap.ClearAllTiles();
+            if (floorTilemap != null) floorTilemap.ClearAllTiles();
             if (debugTilemap != null) debugTilemap.ClearAllTiles();
             if (objectTilemap != null) objectTilemap.ClearAllTiles();
 
@@ -610,15 +623,15 @@ namespace Dungeon
 
         private Vector3 GetWorldPosition(Vector2Int tilePosition)
         {
-            return fillFloorTilemap.GetCellCenterWorld(new Vector3Int(tilePosition.x, tilePosition.y, 0));
+            return floorTilemap.GetCellCenterWorld(new Vector3Int(tilePosition.x, tilePosition.y, 0));
         }
 
         private Vector3? GetWorldPosition(Vector2Int? tilePosition)
         {
-            if (!tilePosition.HasValue || fillFloorTilemap == null) return null;
+            if (!tilePosition.HasValue || floorTilemap == null) return null;
 
             Vector2Int position = tilePosition.Value;
-            return fillFloorTilemap.GetCellCenterWorld(new Vector3Int(position.x, position.y, 0));
+            return floorTilemap.GetCellCenterWorld(new Vector3Int(position.x, position.y, 0));
         }
 
         private void MarkTilemapsDirtyInEditor()
@@ -627,14 +640,31 @@ namespace Dungeon
             if (!Application.isPlaying)
             {
                 EditorUtility.SetDirty(this);
-                if (roofTilemap != null) EditorUtility.SetDirty(roofTilemap);
                 if (wallTilemap != null) EditorUtility.SetDirty(wallTilemap);
-                if (borderFloorTilemap != null) EditorUtility.SetDirty(borderFloorTilemap);
-                if (fillFloorTilemap != null) EditorUtility.SetDirty(fillFloorTilemap);
+                if (floorTilemap != null) EditorUtility.SetDirty(floorTilemap);
                 if (objectTilemap != null) EditorUtility.SetDirty(objectTilemap);
                 if (debugTilemap != null) EditorUtility.SetDirty(debugTilemap);
             }
 #endif
+        }
+
+        public void UnlockParentChestDoor(int chestRoomIndex)
+        {
+            if (generatedRooms == null || objectTilemap == null) return;
+            for (int i = 0; i < generatedRooms.Count; i++)
+            {
+                var room = generatedRooms[i];
+                if (room.HasSpecialChestRoom && room.SpecialChestRoomIndex == chestRoomIndex && room.SpecialExitDoorTile.HasValue)
+                {
+                    TileBase unlockedTile = doorSpawner.SpecialUnlockedDoorTile != null ? doorSpawner.SpecialUnlockedDoorTile : doorSpawner.SpecialExitDoorTile;
+                    if (unlockedTile != null)
+                    {
+                        Vector3Int pos = new Vector3Int(room.SpecialExitDoorTile.Value.x, room.SpecialExitDoorTile.Value.y, 0);
+                        objectTilemap.SetTile(pos, unlockedTile);
+                    }
+                    break;
+                }
+            }
         }
     }
 }

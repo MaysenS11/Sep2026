@@ -33,15 +33,13 @@ namespace Dungeon
 
         public void RenderRooms(
             List<GameManager.RoomData> rooms,
-            Tilemap roofTilemap,
             Tilemap wallTilemap,
-            Tilemap borderFloorTilemap,
-            Tilemap fillFloorTilemap,
-            TileBase roofRuleTile,
+            Tilemap floorTilemap,
             TileBase wallRuleTile,
-            TileBase borderFloorRuleTile,
-            TileBase fillFloorRuleTile,
-            BossRoom bossRoom = null)
+            TileBase floorRuleTile,
+            BossRoom bossRoom = null,
+            TileBase wallOverrideRuleTile = null,
+            TileBase floorOverrideRuleTile = null)
         {
             for (int i = 0; i < rooms.Count; i++)
             {
@@ -51,24 +49,21 @@ namespace Dungeon
                 {
                     bossRoom.CopyTilesTo(
                         room.WorldOriginTile,
-                        fillFloorTilemap,
-                        borderFloorTilemap,
-                        wallTilemap,
-                        roofTilemap
+                        floorTilemap,
+                        wallTilemap
                     );
                     continue;
                 }
 
-                DrawDecomposedLayer(room, fillFloorTilemap, fillFloorRuleTile, -2);
-                DrawDecomposedLayer(room, borderFloorTilemap, borderFloorRuleTile, 0);
-                DrawDecomposedLayer(room, wallTilemap, wallRuleTile, 2);
-                DrawDecomposedLayer(room, roofTilemap, roofRuleTile, 4);
+                TileBase floorTileToUse = (room.Type == RoomType.Chest && floorOverrideRuleTile != null) ? floorOverrideRuleTile : floorRuleTile;
+                TileBase wallTileToUse = (room.Type == RoomType.Chest && wallOverrideRuleTile != null) ? wallOverrideRuleTile : wallRuleTile;
+
+                DrawDecomposedLayer(room, floorTilemap, floorTileToUse, 0);
+                DrawDecomposedLayer(room, wallTilemap, wallTileToUse, 2);
             }
 
-            roofTilemap.RefreshAllTiles();
+            floorTilemap.RefreshAllTiles();
             wallTilemap.RefreshAllTiles();
-            borderFloorTilemap.RefreshAllTiles();
-            fillFloorTilemap.RefreshAllTiles();
         }
 
         public void DrawDebugConnections(

@@ -26,7 +26,7 @@ MonoBehaviour:
     Path: event:/SFX_ThrowingFlaskImpact
   attackTierValues: 020000000300000004000000
   defenceTierValues: 010000000200000003000000
-  healthTierValues: 020000000300000004000000
+  healthTierValues: 040000000600000008000000
   rangeTierValues: 010000000300000005000000
   speedTierValues: 010000000200000003000000
   attackPatterns:
