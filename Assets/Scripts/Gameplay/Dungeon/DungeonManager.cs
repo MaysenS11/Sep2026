@@ -233,8 +233,8 @@ namespace Dungeon
             _spawners.Clear();
             doorSpawner.Initialize(objectTilemap, fillFloorRuleTile, bossRoomPrefab);
             _spawners.Add(doorSpawner);
-            _spawners.Add(enemySpawner);
             _spawners.Add(propSpawner);
+            _spawners.Add(enemySpawner);
             _spawners.Add(chestSpawner);
         }
 
@@ -491,6 +491,22 @@ namespace Dungeon
                     else
                     {
                         DestroyImmediate(destructibles[i].gameObject);
+                    }
+                }
+            }
+
+            var pillars = GetComponentsInChildren<Presentation.Entities.PillarTileObject>(true);
+            for (int i = 0; i < pillars.Length; i++)
+            {
+                if (pillars[i] != null)
+                {
+                    if (Application.isPlaying)
+                    {
+                        Destroy(pillars[i].gameObject);
+                    }
+                    else
+                    {
+                        DestroyImmediate(pillars[i].gameObject);
                     }
                 }
             }

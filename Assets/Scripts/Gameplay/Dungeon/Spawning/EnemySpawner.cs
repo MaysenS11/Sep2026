@@ -91,9 +91,21 @@ namespace Dungeon.Spawning
                     Mathf.Abs(t.y - room.CenterTile.y) <= 1);
             }
 
+            if (room.EntranceDoorTile.HasValue)
+            {
+                Vector2Int d = room.EntranceDoorTile.Value;
+                _validTilesBuffer.Remove(d);
+                _validTilesBuffer.Remove(new Vector2Int(d.x, d.y - 1));
+            }
+            if (room.ExitDoorTile.HasValue)
+            {
+                Vector2Int d = room.ExitDoorTile.Value;
+                _validTilesBuffer.Remove(d);
+                _validTilesBuffer.Remove(new Vector2Int(d.x, d.y - 1));
+            }
+
             if (_validTilesBuffer.Count == 0) return;
 
-            // 0% room density means explicitly 0 enemies spawned
             if (roomDensity <= 0f) return;
 
             int targetCount = Mathf.RoundToInt(roomDensity * _validTilesBuffer.Count);
@@ -121,6 +133,8 @@ namespace Dungeon.Spawning
                 int pickIndex = Random.Range(0, _validTilesBuffer.Count);
                 Vector2Int spawnTile = _validTilesBuffer[pickIndex];
                 _validTilesBuffer.RemoveAt(pickIndex);
+
+                if (tileQuery.IsOccupied(spawnTile)) continue;
 
                 SpawnEnemyAt(chosenPrefab, spawnTile, floorTilemap, parentContainer, room.RoomIndex);
                 tileQuery.MarkOccupied(spawnTile);

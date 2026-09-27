@@ -13,16 +13,35 @@ MonoBehaviour:
   m_Name: PillarSpawnData
   m_EditorClassIdentifier: Assembly-CSharp::Dungeon.Spawning.PillarSpawnData
   propName: Prop
-  prefab: {fileID: 1866264966231486302, guid: 24f0502c2961d37409b98ce636d17c6a, type: 3}
-  size: {x: 3, y: 3}
-  spawnDensity: 0.385
-  minPerRoom: 1
+  prefab: {fileID: 0}
+  size: {x: 0, y: 0}
+  spawnDensity: 0.979
+  minPerRoom: 2
   maxPerRoom: 3
   allowInNormalRooms: 1
   allowInChestRooms: 0
   allowInBossRooms: 0
   avoidDoorTiles: 1
   avoidRoomCenter: 1
-  pillars: []
+  allowInOrNearHallways: 0
+  pillars:
+  - prefab: {fileID: 1866264966231486302, guid: 236f0e8d16e1ff848b9cbe923250c4b7, type: 3}
+    size: {x: 2, y: 2}
+    allowInOrNearHallways: 1
+  - prefab: {fileID: 1866264966231486302, guid: adc0426c4ea76ab42aa1e00e55187dbf, type: 3}
+    size: {x: 2, y: 3}
+    allowInOrNearHallways: 1
+  - prefab: {fileID: 1866264966231486302, guid: ec90a4937a4eae84cb8058b16448f17e, type: 3}
+    size: {x: 2, y: 4}
+    allowInOrNearHallways: 0
+  - prefab: {fileID: 1866264966231486302, guid: 427c0b171f6bb0a48ad08ba39f7ae299, type: 3}
+    size: {x: 3, y: 2}
+    allowInOrNearHallways: 1
+  - prefab: {fileID: 1866264966231486302, guid: 24f0502c2961d37409b98ce636d17c6a, type: 3}
+    size: {x: 3, y: 3}
+    allowInOrNearHallways: 0
+  - prefab: {fileID: 1866264966231486302, guid: 37d5120b3f986ff41b7e58396022a075, type: 3}
+    size: {x: 4, y: 2}
+    allowInOrNearHallways: 0
   minDistanceToWalls: 2
   minDistanceToDoors: 4

@@ -51,14 +51,14 @@ namespace Dungeon.Spawning
         {
             if (floorTilemap == null) return;
 
-            if (barrelSpawnData != null)
-            {
-                SpawnConfiguredProp(barrelSpawnData, room, tileQuery, floorTilemap, parentContainer);
-            }
-
             if (pillarSpawnData != null)
             {
                 SpawnPillars(pillarSpawnData, room, tileQuery, floorTilemap, parentContainer);
+            }
+
+            if (barrelSpawnData != null)
+            {
+                SpawnConfiguredProp(barrelSpawnData, room, tileQuery, floorTilemap, parentContainer);
             }
 
             if (additionalPropData != null)
@@ -68,14 +68,7 @@ namespace Dungeon.Spawning
                     PropSpawnData data = additionalPropData[i];
                     if (data != null)
                     {
-                        if (data is PillarSpawnData pData)
-                        {
-                            SpawnPillars(pData, room, tileQuery, floorTilemap, parentContainer);
-                        }
-                        else
-                        {
-                            SpawnConfiguredProp(data, room, tileQuery, floorTilemap, parentContainer);
-                        }
+                        SpawnConfiguredProp(data, room, tileQuery, floorTilemap, parentContainer);
                     }
                 }
             }
@@ -89,11 +82,6 @@ namespace Dungeon.Spawning
             Transform parentContainer)
         {
             if (data == null || data.Prefab == null) return;
-            if (data is PillarSpawnData pData)
-            {
-                SpawnPillars(pData, room, tileQuery, floorTilemap, parentContainer);
-                return;
-            }
 
             if (room.Type == RoomType.Normal && !data.AllowInNormalRooms) return;
             if (room.Type == RoomType.Chest && !data.AllowInChestRooms) return;
@@ -294,26 +282,35 @@ namespace Dungeon.Spawning
                 targetCount = pillarData.MaxPerRoom;
             }
 
+            var deck = new List<PillarConfig>();
+            void RefillDeck()
+            {
+                deck.Clear();
+                deck.AddRange(availableVariants);
+                Shuffle(deck);
+            }
+            RefillDeck();
+
             int toSpawn = Mathf.Min(targetCount, _validTilesBuffer.Count);
             for (int i = 0; i < toSpawn; i++)
             {
                 if (_validTilesBuffer.Count == 0) break;
 
-                var tryOrder = new List<PillarConfig>(availableVariants);
-                Shuffle(tryOrder);
+                if (deck.Count == 0)
+                {
+                    RefillDeck();
+                }
 
                 bool placed = false;
-                for (int v = 0; v < tryOrder.Count; v++)
+                for (int attempt = 0; attempt < deck.Count; attempt++)
                 {
-                    var config = tryOrder[v];
+                    var config = deck[attempt];
                     Vector2Int propSize = config.Size;
-                    if (config.Prefab.TryGetComponent<Presentation.Entities.PillarTileObject>(out var pComp))
-                    {
-                        propSize = pComp.Size;
-                    }
 
                     if (TryFindValidOrigin(config, propSize, room, pillarData, out Vector2Int spawnTile))
                     {
+                        deck.RemoveAt(attempt);
+
                         for (int dx = 0; dx < propSize.x; dx++)
                         {
                             for (int dy = 0; dy < propSize.y; dy++)
@@ -346,7 +343,47 @@ namespace Dungeon.Spawning
 
                 if (!placed)
                 {
-                    break;
+                    for (int v = 0; v < availableVariants.Count; v++)
+                    {
+                        var config = availableVariants[v];
+                        Vector2Int propSize = config.Size;
+
+                        if (TryFindValidOrigin(config, propSize, room, pillarData, out Vector2Int spawnTile))
+                        {
+                            for (int dx = 0; dx < propSize.x; dx++)
+                            {
+                                for (int dy = 0; dy < propSize.y; dy++)
+                                {
+                                    Vector2Int tile = new Vector2Int(spawnTile.x + dx, spawnTile.y + dy);
+                                    _validTilesBuffer.Remove(tile);
+                                    tileQuery.MarkOccupied(tile);
+                                }
+                            }
+
+                            float worldX = spawnTile.x + (propSize.x * 0.5f);
+                            float worldY = spawnTile.y + (propSize.y * 0.5f);
+                            Vector3 worldPos = new Vector3(worldX, worldY, floorTilemap.transform.position.z);
+
+                            GameObject propObj = Object.Instantiate(config.Prefab, worldPos, Quaternion.identity, parentContainer);
+                            _spawnedProps.Add(propObj);
+
+                            if (GameManager.Instance != null && GameManager.Instance.Board != null)
+                            {
+                                Infrastructure.BoardEntityFactory.CreatePillar(propObj, spawnTile, propSize, GameManager.Instance.Board, Presentation.Board.EffectsQueueRunner.Instance);
+                            }
+
+                            EventBus<PropSpawnedEvent>.Raise(new PropSpawnedEvent(propObj, spawnTile, room));
+                            RegisterUndoInEditor(propObj, config.Prefab.name);
+
+                            placed = true;
+                            break;
+                        }
+                    }
+
+                    if (!placed)
+                    {
+                        break;
+                    }
                 }
             }
         }
@@ -458,6 +495,26 @@ namespace Dungeon.Spawning
                 }
             }
             _spawnedProps.Clear();
+
+            var dm = DungeonManager.Instance != null ? DungeonManager.Instance : Object.FindAnyObjectByType<DungeonManager>();
+            if (dm != null)
+            {
+                var pillars = dm.GetComponentsInChildren<Presentation.Entities.PillarTileObject>(true);
+                for (int i = 0; i < pillars.Length; i++)
+                {
+                    if (pillars[i] != null)
+                    {
+                        if (Application.isPlaying)
+                        {
+                            Object.Destroy(pillars[i].gameObject);
+                        }
+                        else
+                        {
+                            Object.DestroyImmediate(pillars[i].gameObject);
+                        }
+                    }
+                }
+            }
         }
 
         private static void RegisterUndoInEditor(GameObject obj, string name)

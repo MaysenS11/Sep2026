@@ -211,5 +211,86 @@ namespace Dungeon.EditorTests
             Object.DestroyImmediate(floorGo);
             Object.DestroyImmediate(parent.gameObject);
         }
+
+        [Test]
+        public void Test_Spawners_NoOverlap_PillarsBarrelsAndEnemies()
+        {
+            var pillarPrefab = new GameObject("PillarPrefab");
+            var barrelPrefab = new GameObject("BarrelPrefab");
+            var enemyPrefab = new GameObject("EnemyPrefab");
+
+            var pillarData = ScriptableObject.CreateInstance<PillarSpawnData>();
+            pillarData.AddPillar(new PillarConfig(pillarPrefab, new Vector2Int(2, 2), false));
+            pillarData.SetMinDistanceToWalls(1);
+            pillarData.SetDensity(1f);
+
+            var barrelData = ScriptableObject.CreateInstance<PropSpawnData>();
+            barrelData.SetSize(Vector2Int.one);
+            barrelData.SetDensity(1f);
+            var barrelField = typeof(PropSpawnData).GetField("prefab", System.Reflection.BindingFlags.NonPublic | System.Reflection.BindingFlags.Instance);
+            if (barrelField != null) barrelField.SetValue(barrelData, barrelPrefab);
+
+            var propSpawner = new PropSpawner();
+            propSpawner.PillarSpawnData = pillarData;
+            propSpawner.BarrelSpawnData = barrelData;
+            propSpawner.PropDensity = 1f;
+
+            var enemySpawner = new EnemySpawner();
+            enemySpawner.RoomDensity = 1f;
+            enemySpawner.PawnPrefab = enemyPrefab;
+
+            var room = new GameManager.RoomData
+            {
+                Shape = RoomShape.Rectangle,
+                Size = new Vector2Int(10, 10),
+                WorldOriginTile = Vector2Int.zero,
+                Type = RoomType.Normal
+            };
+
+            var tileQuery = new RoomTileQuery();
+            var gridGo = new GameObject("Grid");
+            gridGo.AddComponent<Grid>();
+            var floorGo = new GameObject("FloorMap");
+            floorGo.transform.SetParent(gridGo.transform);
+            var tilemap = floorGo.AddComponent<UnityEngine.Tilemaps.Tilemap>();
+            var parent = new GameObject("Container").transform;
+
+            propSpawner.SpawnContent(room, tileQuery, tilemap, parent);
+            enemySpawner.SpawnContent(room, tileQuery, tilemap, parent);
+
+            HashSet<Vector2Int> allOccupiedTiles = new HashSet<Vector2Int>();
+            for (int i = 0; i < parent.childCount; i++)
+            {
+                var child = parent.GetChild(i);
+                Vector2Int size = Vector2Int.one;
+                if (child.name.Contains("Pillar"))
+                {
+                    size = new Vector2Int(2, 2);
+                }
+                Vector2Int origin = child.name.Contains("Pillar")
+                    ? new Vector2Int(Mathf.RoundToInt(child.position.x - size.x * 0.5f), Mathf.RoundToInt(child.position.y - size.y * 0.5f))
+                    : BoardCoordinate.WorldToGrid(child.position);
+
+                for (int dx = 0; dx < size.x; dx++)
+                {
+                    for (int dy = 0; dy < size.y; dy++)
+                    {
+                        Vector2Int tile = new Vector2Int(origin.x + dx, origin.y + dy);
+                        Assert.IsFalse(allOccupiedTiles.Contains(tile));
+                        allOccupiedTiles.Add(tile);
+                    }
+                }
+            }
+
+            propSpawner.ClearSpawnedContent();
+            enemySpawner.ClearSpawnedContent();
+
+            Object.DestroyImmediate(pillarPrefab);
+            Object.DestroyImmediate(barrelPrefab);
+            Object.DestroyImmediate(enemyPrefab);
+            Object.DestroyImmediate(floorGo);
+            Object.DestroyImmediate(gridGo);
+            Object.DestroyImmediate(parent.gameObject);
+        }
     }
 }

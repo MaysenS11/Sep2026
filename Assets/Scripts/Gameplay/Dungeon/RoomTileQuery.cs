@@ -29,6 +29,17 @@ namespace Dungeon
             _occupiedTiles.Add(tile);
         }
 
+        public void MarkOccupied(Vector2Int origin, Vector2Int size)
+        {
+            for (int x = 0; x < size.x; x++)
+            {
+                for (int y = 0; y < size.y; y++)
+                {
+                    _occupiedTiles.Add(new Vector2Int(origin.x + x, origin.y + y));
+                }
+            }
+        }
+
         public void MarkOccupied(Vector2Int tile, int radius)
         {
             for (int x = -radius; x <= radius; x++)

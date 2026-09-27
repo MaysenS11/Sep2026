@@ -11,7 +11,7 @@ GameObject:
   - component: {fileID: 4114690888951731552}
   - component: {fileID: 6822327044332601084}
   - component: {fileID: 8457912548244146607}
-  m_Layer: 0
+  m_Layer: 6
   m_Name: Pillar2x2
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -78,8 +78,8 @@ SpriteRenderer:
   m_AutoUVMaxAngle: 89
   m_LightmapParameters: {fileID: 0}
   m_GlobalIlluminationMeshLod: 0
-  m_SortingLayerID: 0
-  m_SortingLayer: 0
+  m_SortingLayerID: 1996167327
+  m_SortingLayer: 1
   m_SortingOrder: 6
   m_MaskInteraction: 0
   m_Sprite: {fileID: -3467620682460023848, guid: 31aaec5c98c27d74cab5f3c2ae125454, type: 3}
