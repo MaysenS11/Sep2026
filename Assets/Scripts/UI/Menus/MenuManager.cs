@@ -31,10 +31,20 @@ public class MenuManager : MonoBehaviour
     [SerializeField] private UnityEngine.UI.Button optionsButton;
     [SerializeField] private UnityEngine.UI.Button quitButton;
 
+    public static bool ShowGameOverOnStart { get; set; } = false;
+
     private void Awake()
     {
         AutoWireElements();
-        ShowStartMenu();
+        if (ShowGameOverOnStart)
+        {
+            ShowGameOverOnStart = false;
+            ShowGameOver();
+        }
+        else
+        {
+            ShowStartMenu();
+        }
     }
 
     private void AutoWireElements()

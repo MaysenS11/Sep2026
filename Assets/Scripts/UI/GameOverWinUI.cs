@@ -198,6 +198,13 @@ namespace UI
                     : $"Best ({maskId}): --:--";
             }
 
+            if (SceneManager.GetActiveScene().name != "StartMenu")
+            {
+                MenuManager.ShowGameOverOnStart = true;
+                SceneManager.LoadScene("StartMenu");
+                return;
+            }
+
             if (gameOverPanel != null)
             {
                 gameOverPanel.SetActive(true);

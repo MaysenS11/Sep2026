@@ -288,9 +288,17 @@ namespace Presentation.Board
                 case OccupantDestroyedEffect destroyed:
                     if (targetObj != null)
                     {
+                        bool isPlayer = targetObj is PlayerTileObject || targetObj.GetComponent<PlayerMovement>() != null;
                         EventBus<EntityDiedEvent>.Raise(new EntityDiedEvent(targetObj.gameObject));
                         yield return StartCoroutine(targetObj.AnimateDeathRoutine());
                         UnregisterTileObject(destroyed.OccupantId);
+
+                        if (isPlayer)
+                        {
+                            EventBus<GameOverEvent>.Raise(new GameOverEvent(Time.timeSinceLevelLoad, "Player"));
+                            MenuManager.ShowGameOverOnStart = true;
+                            UnityEngine.SceneManagement.SceneManager.LoadScene("StartMenu");
+                        }
                     }
                     break;
 
