@@ -75,7 +75,7 @@ namespace Dungeon.Spawning
             }
             else if (room.Type == RoomType.Chest)
             {
-                Vector2Int entrance = new Vector2Int(room.CenterTile.x, room.CenterTile.y - 4);
+                Vector2Int entrance = new Vector2Int(room.CenterTile.x, room.WorldOriginTile.y + 1);
                 room.EntranceDoorTile = entrance;
                 room.ExitDoorTile = null;
                 tileQuery.MarkOccupied(entrance);

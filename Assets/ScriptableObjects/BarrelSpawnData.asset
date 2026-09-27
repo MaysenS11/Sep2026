@@ -14,7 +14,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::Dungeon.Spawning.PropSpawnData
   propName: Barrel
   prefab: {fileID: 1228558132822369691, guid: 3f210e08ec862524499086022990d672, type: 3}
-  spawnDensity: 0.08
+  size: {x: 1, y: 1}
+  spawnDensity: 0.268
   minPerRoom: 1
   maxPerRoom: 5
   allowInNormalRooms: 1

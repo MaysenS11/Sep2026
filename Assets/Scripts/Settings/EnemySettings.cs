@@ -8,7 +8,7 @@ public class EnemySettings : ScriptableObject
     [SerializeField] private Sprite heartEmptySprite;
 
     [Header("Turn & Movement Timing")]
-    [SerializeField] private float enemyMoveDuration = 0.25f;
+    [SerializeField] private float enemyMoveDuration = 0.3f;
 
     public Sprite HeartFullSprite => heartFullSprite;
     public Sprite HeartEmptySprite => heartEmptySprite;

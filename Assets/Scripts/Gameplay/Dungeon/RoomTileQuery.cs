@@ -136,20 +136,19 @@ namespace Dungeon
             {
                 for (int y = 0; y < room.Size.y; y++)
                 {
-                    if (!IsInsideBorderFloor(room, x, y)) continue;
-                    if (IsInsideRoomFloor(room, x, y)) continue;
+                    if (!IsInsideRoomFloor(room, x, y)) continue;
 
                     bool isBorder = false;
                     switch (edge)
                     {
                         case RoomEdge.Top:
-                            isBorder = !IsInsideBorderFloor(room, x, y + 1);
+                            isBorder = !IsInsideRoomFloor(room, x, y + 1);
                             break;
                         case RoomEdge.Left:
-                            isBorder = !IsInsideBorderFloor(room, x - 1, y);
+                            isBorder = !IsInsideRoomFloor(room, x - 1, y);
                             break;
                         case RoomEdge.Right:
-                            isBorder = !IsInsideBorderFloor(room, x + 1, y);
+                            isBorder = !IsInsideRoomFloor(room, x + 1, y);
                             break;
                     }
 

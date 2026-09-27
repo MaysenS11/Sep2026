@@ -21,9 +21,9 @@ namespace Infrastructure
         public TurnBatchScheduler BatchScheduler { get; private set; }
         public EffectsQueueRunner EffectsRunner { get; set; }
 
-        public float PlayerMoveDuration { get; set; } = 0.15f;
+        public float PlayerMoveDuration { get; set; } = 0.18f;
         public float PlayerAttackDuration { get; set; } = 0.18f;
-        public float EnemyTurnTotalDuration { get; set; } = 0.15f;
+        public float EnemyTurnTotalDuration { get; set; } = 0.18f;
         public EnemySettings EnemySettings { get; set; }
 
         public bool IsTurnInProgress { get; private set; }

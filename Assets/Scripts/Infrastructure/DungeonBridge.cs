@@ -71,7 +71,7 @@ namespace Infrastructure
                 }
             }
 
-            // 1. Carve floor cells for each room's walkable area (both fill and border floor)
+            // 1. Carve floor cells for each room's walkable area
             for (int i = 0; i < rooms.Count; i++)
             {
                 var r = rooms[i];
@@ -81,7 +81,7 @@ namespace Infrastructure
                     {
                         int localX = rx - r.WorldOriginTile.x;
                         int localY = ry - r.WorldOriginTile.y;
-                        if (Dungeon.RoomTileQuery.IsInsideBorderFloor(r, localX, localY))
+                        if (Dungeon.RoomTileQuery.IsInsideRoomFloor(r, localX, localY))
                         {
                             board.SetCell(new Vector2Int(rx, ry), TerrainType.Floor);
                         }
@@ -112,18 +112,17 @@ namespace Infrastructure
                 {
                     if (floorTilemap.HasTile(pos))
                     {
-                        board.SetCell(new Vector2Int(pos.x, pos.y), TerrainType.Floor);
-                    }
-                }
-            }
-
-            if (borderFloorTilemap != null)
-            {
-                foreach (var pos in borderFloorTilemap.cellBounds.allPositionsWithin)
-                {
-                    if (borderFloorTilemap.HasTile(pos))
-                    {
-                        board.SetCell(new Vector2Int(pos.x, pos.y), TerrainType.Floor);
+                        for (int i = 0; i < rooms.Count; i++)
+                        {
+                            var r = rooms[i];
+                            int lx = pos.x - r.WorldOriginTile.x;
+                            int ly = pos.y - r.WorldOriginTile.y;
+                            if (Dungeon.RoomTileQuery.IsInsideRoomFloor(r, lx, ly))
+                            {
+                                board.SetCell(new Vector2Int(pos.x, pos.y), TerrainType.Floor);
+                                break;
+                            }
+                        }
                     }
                 }
             }
