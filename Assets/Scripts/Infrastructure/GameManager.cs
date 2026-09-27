@@ -258,17 +258,6 @@ public class GameManager : MonoBehaviour
         {
             UnregisterEnemy(enemy);
         }
-
-        if (evt.Entity != null && evt.Entity.GetComponent<PlayerMovement>() != null)
-        {
-            StartCoroutine(HandlePlayerDeathSequence());
-        }
-    }
-
-    private System.Collections.IEnumerator HandlePlayerDeathSequence()
-    {
-        yield return new WaitForSeconds(0.95f);
-        EventBus<GenerateDungeonEvent>.Raise(new GenerateDungeonEvent());
     }
 
     private void OnPlayerActionCompleted(PlayerActionCompletedEvent evt)

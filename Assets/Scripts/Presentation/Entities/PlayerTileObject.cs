@@ -124,7 +124,6 @@ namespace Presentation.Entities
         public override IEnumerator AnimateDeathRoutine()
         {
             SetAnimatorTrigger(DieHash);
-            EventBus<GameOverEvent>.Raise(new GameOverEvent(Time.timeSinceLevelLoad, "Player"));
             yield return base.AnimateDeathRoutine();
         }
 
