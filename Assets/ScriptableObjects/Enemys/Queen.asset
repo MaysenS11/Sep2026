@@ -14,11 +14,12 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::EnemyData
   prefab: {fileID: 1228558132822369691, guid: 5a428a17024c1d4418ec0834fbe6a6c6, type: 3}
   archetype: 4
-  maxHealth: 7
-  attackDamage: 7
+  maxHealth: 6
+  attackDamage: 6
   smartness: 2
   maxLineSteps: 7
   movePriority: 4
+  movesInterval: 1
   populationPercentage: 0.05
   attackSound:
     Guid:
@@ -27,3 +28,18 @@ MonoBehaviour:
       Data3: 23213976
       Data4: -1005532945
     Path: event:/SFX_Enemy_Queen_Attack
+  damageSound:
+    Guid:
+      Data1: 0
+      Data2: 0
+      Data3: 0
+      Data4: 0
+    Path: 
+  deathSound:
+    Guid:
+      Data1: 0
+      Data2: 0
+      Data3: 0
+      Data4: 0
+    Path: 
+  isBoss: 0

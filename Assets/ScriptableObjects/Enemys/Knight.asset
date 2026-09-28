@@ -19,6 +19,7 @@ MonoBehaviour:
   smartness: 1
   maxLineSteps: 3
   movePriority: 2
+  movesInterval: 1
   populationPercentage: 0.15
   attackSound:
     Guid:
@@ -27,3 +28,18 @@ MonoBehaviour:
       Data3: -1542795134
       Data4: -2073942234
     Path: event:/SFX_Enemy_Knight_Attack
+  damageSound:
+    Guid:
+      Data1: 0
+      Data2: 0
+      Data3: 0
+      Data4: 0
+    Path: 
+  deathSound:
+    Guid:
+      Data1: 0
+      Data2: 0
+      Data3: 0
+      Data4: 0
+    Path: 
+  isBoss: 0
