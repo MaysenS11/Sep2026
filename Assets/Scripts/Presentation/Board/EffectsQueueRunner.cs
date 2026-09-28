@@ -276,7 +276,14 @@ namespace Presentation.Board
                 case DamageTakenEffect damage:
                     if (targetObj != null)
                     {
-                        EventBus<EntityDamagedEvent>.Raise(new EntityDamagedEvent(targetObj.gameObject, null, damage.DamageAmount, damage.RemainingHealth));
+                        TileObject sourceObj = damage.SourceOccupantId != 0 ? GetTileObject(damage.SourceOccupantId) : null;
+                        GameObject sourceGo = sourceObj != null ? sourceObj.gameObject : null;
+                        if (sourceGo == null)
+                        {
+                            var playerMovement = UnityEngine.Object.FindAnyObjectByType<PlayerMovement>();
+                            if (playerMovement != null) sourceGo = playerMovement.gameObject;
+                        }
+                        EventBus<EntityDamagedEvent>.Raise(new EntityDamagedEvent(targetObj.gameObject, sourceGo, damage.DamageAmount, damage.RemainingHealth));
                         yield return StartCoroutine(targetObj.AnimateDamageRoutine(damage.DamageAmount));
                     }
                     break;
@@ -296,8 +303,16 @@ namespace Presentation.Board
                         if (isPlayer)
                         {
                             EventBus<GameOverEvent>.Raise(new GameOverEvent(Time.timeSinceLevelLoad, "Player"));
-                            MenuManager.ShowGameOverOnStart = true;
-                            UnityEngine.SceneManagement.SceneManager.LoadScene("StartMenu");
+                            EventBus<GameStateChangedEvent>.Raise(new GameStateChangedEvent(GameState.Gameplay, GameState.GameOver));
+                            if (UIManager.Instance != null)
+                            {
+                                UIManager.Instance.ShowGameOverScreen();
+                            }
+                            else
+                            {
+                                MenuManager.ShowGameOverOnStart = true;
+                                UnityEngine.SceneManagement.SceneManager.LoadScene("StartMenu");
+                            }
                         }
                     }
                     break;

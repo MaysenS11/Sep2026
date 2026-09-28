@@ -5,7 +5,6 @@ using UnityEngine;
 
 namespace Core.AI
 {
-    /// Type of turn action intended by an enemy unit.
     public enum IntentType
     {
         Wait,
@@ -15,29 +14,18 @@ namespace Core.AI
         BlockedPush
     }
 
-    /// Authoritative decision data model output by enemy AI during turn calculation.
-    /// Contains the acting enemy, intent type, target coordinates, path waypoints,
-    /// attack push direction, and the concrete executable IBoardAction.
     public class EnemyIntent
     {
-        /// The acting enemy occupant.
         public EnemyOccupant Enemy { get; }
 
-        /// The category of action planned.
         public IntentType IntentType { get; }
 
-        /// The primary destination tile of the action.
         public Vector2Int TargetPosition { get; }
 
-        /// Full sequence of tiles traversed by the occupant during this action.
-        /// For straight-line pieces, contains start, intermediate, and destination tiles.
-        /// For Knights, contains only start and destination tiles.
         public List<Vector2Int> Path { get; }
 
-        /// The direction the player will be pushed if this intent is an attack.
         public Vector2Int PushDirection { get; }
 
-        /// The concrete simulation action ready to be executed on the GameBoard.
         public IBoardAction GeneratedAction { get; }
 
         public EnemyIntent(
@@ -56,7 +44,6 @@ namespace Core.AI
             GeneratedAction = generatedAction;
         }
 
-        /// Creates a Wait intent where the enemy remains stationary and performs no action.
         public static EnemyIntent CreateWait(EnemyOccupant enemy)
         {
             Vector2Int pos = enemy != null ? enemy.GridPosition : Vector2Int.zero;

@@ -143,6 +143,16 @@ namespace Player
                     }
                 }
 
+                if (enemy.SkipNextTurn || enemy.IsImmobile)
+                {
+                    continue;
+                }
+
+                if (enemy.MovesInterval > 1 && ((enemy.MoveTurnCounter + 1) % enemy.MovesInterval) != 0)
+                {
+                    continue;
+                }
+
                 CalculateIndividualEnemyThreat(board, enemy, player, outMoveTiles, outAttackTiles);
             }
         }

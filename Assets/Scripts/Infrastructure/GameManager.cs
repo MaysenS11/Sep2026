@@ -31,6 +31,71 @@ public class GameManager : MonoBehaviour
     public BoardTurnCoordinator TurnCoordinator { get; private set; }
     public GameBoard Board => TurnCoordinator?.Board;
 
+    [Header("Turn & Movement Timing")]
+    [SerializeField] private float playerMoveDuration = 0.18f;
+    [SerializeField] private float playerAttackDuration = 0.18f;
+    [SerializeField] private float enemyTurnTotalDuration = 0.18f;
+    [SerializeField] private EnemySettings enemySettings;
+
+    public float PlayerMoveDuration
+    {
+        get => playerMoveDuration;
+        set
+        {
+            playerMoveDuration = value;
+            if (TurnCoordinator != null) TurnCoordinator.PlayerMoveDuration = value;
+        }
+    }
+
+    public float PlayerAttackDuration
+    {
+        get => playerAttackDuration;
+        set
+        {
+            playerAttackDuration = value;
+            if (TurnCoordinator != null) TurnCoordinator.PlayerAttackDuration = value;
+        }
+    }
+
+    public float EnemyTurnTotalDuration
+    {
+        get => enemyTurnTotalDuration;
+        set
+        {
+            enemyTurnTotalDuration = value;
+            if (TurnCoordinator != null) TurnCoordinator.EnemyTurnTotalDuration = value;
+        }
+    }
+
+    public EnemySettings EnemySettings
+    {
+        get => enemySettings;
+        set
+        {
+            enemySettings = value;
+            if (TurnCoordinator != null) TurnCoordinator.EnemySettings = value;
+        }
+    }
+
+    public void ApplySpeedSettings()
+    {
+        if (TurnCoordinator != null)
+        {
+            TurnCoordinator.PlayerMoveDuration = playerMoveDuration;
+            TurnCoordinator.PlayerAttackDuration = playerAttackDuration;
+            TurnCoordinator.EnemyTurnTotalDuration = enemyTurnTotalDuration;
+            if (enemySettings != null)
+            {
+                TurnCoordinator.EnemySettings = enemySettings;
+            }
+        }
+    }
+
+    private void OnValidate()
+    {
+        ApplySpeedSettings();
+    }
+
     [System.Serializable]
     public class RoomData
     {
@@ -168,6 +233,7 @@ public class GameManager : MonoBehaviour
         }
 
         TurnCoordinator = new BoardTurnCoordinator(new GameBoard(60, 60, new Vector2Int(-30, -30)), new TurnBatchScheduler(), runner);
+        ApplySpeedSettings();
     }
 
     public void InitializeBoard(GameBoard newBoard)
@@ -177,10 +243,12 @@ public class GameManager : MonoBehaviour
             EffectsQueueRunner runner = Object.FindAnyObjectByType<EffectsQueueRunner>();
             if (runner == null) runner = gameObject.AddComponent<EffectsQueueRunner>();
             TurnCoordinator = new BoardTurnCoordinator(newBoard, new TurnBatchScheduler(), runner);
+            ApplySpeedSettings();
         }
         else
         {
             TurnCoordinator.SetBoard(newBoard);
+            ApplySpeedSettings();
         }
     }
 
@@ -382,10 +450,25 @@ public class GameManager : MonoBehaviour
     }
 
     private float doorTriggerBlockedUntil;
+    private Vector2Int? doorTriggerBlockedTile;
+
+    public bool IsDoorTriggerBlocked(Vector2Int gridPos)
+    {
+        if (doorTriggerBlockedTile.HasValue)
+        {
+            if (gridPos == doorTriggerBlockedTile.Value)
+            {
+                return true;
+            }
+            doorTriggerBlockedTile = null;
+        }
+        return false;
+    }
 
     private void OnDoorTriggered(DoorTriggeredEvent evt)
     {
         if (ScreenFadeTransition.Instance != null && ScreenFadeTransition.Instance.IsTransitioning) return;
+        if (IsDoorTriggerBlocked(evt.DoorTilePosition)) return;
         if (Time.time < doorTriggerBlockedUntil) return;
 
         doorTriggerBlockedUntil = Time.time + 2.0f;
@@ -488,6 +571,7 @@ public class GameManager : MonoBehaviour
                 BoardEntityFactory.RegisterSceneEntities(Board, TurnCoordinator?.EffectsRunner);
             }
 
+            doorTriggerBlockedTile = newGrid;
             doorTriggerBlockedUntil = Time.time + 1.0f;
             TurnCoordinator?.ResetTurnState();
             player?.NotifyTargetingChanged();

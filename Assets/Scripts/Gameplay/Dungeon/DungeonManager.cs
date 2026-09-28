@@ -427,6 +427,16 @@ namespace Dungeon
             var chestRooms = GeneratedRooms.FindAll(r => r.Type == RoomType.Chest);
             if (chestRooms.Count == 0) return;
 
+            var existingKeyholders = GetComponentsInChildren<Keyholder>(true);
+            for (int k = 0; k < existingKeyholders.Length; k++)
+            {
+                if (existingKeyholders[k] != null)
+                {
+                    if (Application.isPlaying) Destroy(existingKeyholders[k]);
+                    else DestroyImmediate(existingKeyholders[k]);
+                }
+            }
+
             var enemySet = new HashSet<EnemyBase>(GetComponentsInChildren<EnemyBase>(true));
             foreach (var eb in Object.FindObjectsByType<EnemyBase>(FindObjectsSortMode.None))
             {

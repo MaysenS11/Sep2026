@@ -6,10 +6,6 @@ using UnityEngine;
 
 namespace Core.AI
 {
-    /// AI strategy for Knight archetype.
-    /// Can leap over intervening obstacles and units.
-    /// Evaluates 8 L-shaped jump offsets to attack or move closest to player.
-    /// Rebounds to start tile on blocked push attack.
     public class KnightAI : BaseEnemyAI
     {
         protected override EnemyIntent DecideIntent(GameBoard board, EnemyOccupant enemy, PlayerOccupant player)

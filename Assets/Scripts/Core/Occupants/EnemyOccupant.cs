@@ -42,7 +42,25 @@ namespace Core.Occupants
             set => IsBoss = value;
         }
 
+        public event Action<bool> OnStunChanged;
+
+        private bool _isStunned;
+        public bool IsStunned
+        {
+            get => _isStunned;
+            set
+            {
+                if (_isStunned != value)
+                {
+                    _isStunned = value;
+                    OnStunChanged?.Invoke(_isStunned);
+                }
+            }
+        }
+
         public bool SkipNextTurn { get; set; }
+        public int MovesInterval { get; set; }
+        public int MoveTurnCounter { get; set; }
 
         public EnemyOccupant(
             EnemyArchetype archetype,
@@ -56,7 +74,8 @@ namespace Core.Occupants
             EnemySmartness intelligenceLevel = EnemySmartness.Mid,
             bool isBoss = false,
             bool isImmobile = false,
-            bool immuneToDirectAttacks = false)
+            bool immuneToDirectAttacks = false,
+            int movesInterval = -1)
             : base(maxHealth, initialPosition, id, name ?? archetype.ToString())
         {
             Archetype = archetype;
@@ -66,6 +85,8 @@ namespace Core.Occupants
             SkipNextTurn = false;
             IntelligenceLevel = intelligenceLevel;
             IsBoss = isBoss || isImmobile || immuneToDirectAttacks;
+            MovesInterval = movesInterval >= 1 ? movesInterval : (archetype == EnemyArchetype.Knight ? 2 : 1);
+            MoveTurnCounter = 0;
 
             IsPushable = false;
         }
@@ -78,6 +99,12 @@ namespace Core.Occupants
             if (!IsDead)
             {
                 SkipNextTurn = true;
+                IsStunned = true;
+            }
+            else
+            {
+                SkipNextTurn = false;
+                IsStunned = false;
             }
 
             return effects;

@@ -130,6 +130,14 @@ namespace Dungeon
                 if (kingDamageSound.IsNull) kingDamageSound = kingEnemy.Data.DamageSound;
                 if (kingDeathSound.IsNull) kingDeathSound = kingEnemy.Data.DeathSound;
             }
+            if (kingDamageSound.IsNull && UIAudioManager.Instance != null)
+            {
+                kingDamageSound = UIAudioManager.Instance.HitSound;
+            }
+            if (kingDeathSound.IsNull && UIAudioManager.Instance != null)
+            {
+                kingDeathSound = UIAudioManager.Instance.DeathSound;
+            }
         }
 
         public void CopyTilesTo(
@@ -339,7 +347,7 @@ namespace Dungeon
             if (currentBossHealth <= 0)
             {
                 isDefeated = true;
-                StartCoroutine(KingDefeatSequence());
+                ExecuteKingDefeat();
             }
         }
 
@@ -386,18 +394,14 @@ namespace Dungeon
             }
         }
 
-        private IEnumerator KingDefeatSequence()
+        private void ExecuteKingDefeat()
         {
             if (kingAnimator != null)
             {
                 kingAnimator.ResetTrigger("TakeDamage");
-                kingAnimator.SetTrigger("Die");
-                kingAnimator.SetTrigger("Decapitate");
             }
 
             PlaySound(kingDeathSound);
-
-            yield return new WaitForSeconds(1.0f);
 
             string maskId = "Default";
             if (CharacterSelectData.SelectedCharacter != null)
@@ -429,15 +433,21 @@ namespace Dungeon
 
         private void PlaySound(EventReference sound)
         {
-            if (sound.IsNull) return;
-            try
+            if (UIAudioManager.Instance != null)
             {
-                if (Application.isPlaying)
-                {
-                    RuntimeManager.PlayOneShot(sound);
-                }
+                UIAudioManager.Instance.PlayAudioOneShot(sound);
             }
-            catch { }
+            else if (!sound.IsNull)
+            {
+                try
+                {
+                    if (Application.isPlaying)
+                    {
+                        RuntimeManager.PlayOneShot(sound);
+                    }
+                }
+                catch { }
+            }
         }
     }
 }

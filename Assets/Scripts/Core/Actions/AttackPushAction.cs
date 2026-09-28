@@ -7,9 +7,6 @@ using UnityEngine;
 
 namespace Core.Actions
 {
-    /// Handles an enemy attacking the player when the push destination behind the player is clear.
-    /// Pushes the player to the clear destination, inflicts attack damage, and moves the attacking
-    /// enemy into the player's former tile.
     public class AttackPushAction : IBoardAction
     {
         public TileOccupant Attacker { get; }

@@ -186,7 +186,7 @@ namespace Core.Tests
             board.Place(player, new Vector2Int(5, 5));
 
             // Knight at (6, 7) - L-shape jump to (5, 5) with push direction South (0, -1) to (5, 4) which is wall
-            var knight = new EnemyOccupant(EnemyArchetype.Knight, maxHealth: 4, attackDamage: 2, movePriority: 0, initialPosition: new Vector2Int(6, 7), id: 3);
+            var knight = new EnemyOccupant(EnemyArchetype.Knight, maxHealth: 4, attackDamage: 2, movePriority: 0, initialPosition: new Vector2Int(6, 7), id: 3, movesInterval: 1);
             board.Place(knight, new Vector2Int(6, 7));
 
             // Run enemy turn

@@ -7,7 +7,6 @@ namespace Core.Effects
     /// Used for standard movement (Pawns, Rooks, Bishops, Queens, and Player).
     public class MoveEffect : BoardEffect
     {
-        /// Sequence of discrete grid coordinates forming the movement trajectory.
         public Vector2Int[] Path { get; }
 
         public Vector2Int StartPos => Path != null && Path.Length > 0 ? Path[0] : Vector2Int.zero;

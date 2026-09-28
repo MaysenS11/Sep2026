@@ -5,6 +5,7 @@ using FMODUnity;
 public class UIAudioManager : MonoBehaviour
 {
     private static UIAudioManager instance;
+    public static UIAudioManager Instance => instance;
 
     [Header("UI Events")]
     [SerializeField] private EventReference clickSound;
@@ -14,19 +15,37 @@ public class UIAudioManager : MonoBehaviour
     [SerializeField] private EventReference keyCollectSound;
     [SerializeField] private EventReference characterUpgrade;
 
+    public EventReference ClickSound => clickSound;
+    public EventReference HoverSound => hoverSound;
+    public EventReference CircleMenuSound => circleMenuSound;
+    public EventReference HealthCollectSound => healthCollectSound;
+    public EventReference KeyCollectSound => keyCollectSound;
+    public EventReference CharacterUpgrade => characterUpgrade;
+
     [Header("Environment Events")]
     [SerializeField] private EventReference openChestSound = default;
     [SerializeField] private EventReference destroyBarrelSound = default;
     [SerializeField] private EventReference openLockSound = default;
+
+    public EventReference OpenChestSound => openChestSound;
+    public EventReference DestroyBarrelSound => destroyBarrelSound;
+    public EventReference OpenLockSound => openLockSound;
 
     [Header("Shared Entity Sounds")]
     [SerializeField] private EventReference moveSound = default;
     [SerializeField] private EventReference hitSound = default;
     [SerializeField] private EventReference deathSound = default;
 
+    public EventReference MoveSound => moveSound;
+    public EventReference HitSound => hitSound;
+    public EventReference DeathSound => deathSound;
+
     [Header("Shared Player Sounds")]
     [SerializeField] private EventReference lowLifeSound = default;
     [SerializeField] private EventReference stairsSound = default;
+
+    public EventReference LowLifeSound => lowLifeSound;
+    public EventReference StairsSound => stairsSound;
     
     [Header("Music Events")]
     [SerializeField] private EventReference bossroomMusic;
@@ -36,20 +55,18 @@ public class UIAudioManager : MonoBehaviour
     [SerializeField] private EventReference gameOverMusic;
     [SerializeField] private EventReference menuMusic;
 
+    public EventReference BossroomMusic => bossroomMusic;
+    public EventReference ChestroomMusic => chestroomMusic;
+    public EventReference DungeonMusic => dungeonMusic;
+    public EventReference WinMusic => winMusic;
+    public EventReference GameOverMusic => gameOverMusic;
+    public EventReference MenuMusic => menuMusic;
+
 
     private FMOD.Studio.EventInstance currentMusicInstance;
     private EventReference currentMusicRef;
 
-    [RuntimeInitializeOnLoadMethod(RuntimeInitializeLoadType.BeforeSceneLoad)]
-    private static void Initialize()
-    {
-        if (instance == null)
-        {
-            var go = new GameObject("UIAudioManager");
-            instance = go.AddComponent<UIAudioManager>();
-            DontDestroyOnLoad(go);
-        }
-    }
+
 
     private void Awake()
     {
@@ -185,8 +202,31 @@ public class UIAudioManager : MonoBehaviour
         }
 
         currentMusicRef = musicRef;
-        currentMusicInstance = RuntimeManager.CreateInstance(musicRef);
-        currentMusicInstance.start();
+        try
+        {
+            currentMusicInstance = RuntimeManager.CreateInstance(musicRef);
+            currentMusicInstance.start();
+        }
+        catch (Exception ex)
+        {
+            Debug.LogWarning($"[UIAudioManager] PlayMusic exception: {ex.Message}");
+        }
+    }
+
+    public void PlayAudioOneShot(EventReference soundRef)
+    {
+        if (soundRef.IsNull) return;
+        try
+        {
+            if (Application.isPlaying)
+            {
+                RuntimeManager.PlayOneShot(soundRef);
+            }
+        }
+        catch (Exception ex)
+        {
+            Debug.LogWarning($"[UIAudioManager] PlayAudioOneShot exception: {ex.Message}");
+        }
     }
 
     public void StopMusic()
@@ -275,78 +315,6 @@ public class UIAudioManager : MonoBehaviour
 
     private void EnsureDefaultEvents()
     {
-        if (destroyBarrelSound.IsNull)
-        {
-            destroyBarrelSound = RuntimeManager.PathToEventReference("event:/SFX_Chest_Destroy");
-        }
-        if (stairsSound.IsNull)
-        {
-            stairsSound = RuntimeManager.PathToEventReference("event:/SFX_Footsteps_Stairs");
-        }
-        if (clickSound.IsNull)
-        {
-            clickSound = RuntimeManager.PathToEventReference("event:/UI_Click");
-        }
-        if (hoverSound.IsNull)
-        {
-            hoverSound = RuntimeManager.PathToEventReference("event:/UI_Hover");
-        }
-        if (circleMenuSound.IsNull)
-        {
-            circleMenuSound = RuntimeManager.PathToEventReference("event:/UI_Circle_Menu");
-        }
-        if (moveSound.IsNull)
-        {
-            moveSound = RuntimeManager.PathToEventReference("event:/SFX_Caracter_Movement");
-        }
-        if (hitSound.IsNull)
-        {
-            hitSound = RuntimeManager.PathToEventReference("event:/SFX_EnemyHitFeedback");
-        }
-        if (deathSound.IsNull)
-        {
-            deathSound = RuntimeManager.PathToEventReference("event:/SFX_Enemy_Destroy");
-        }
-        if (lowLifeSound.IsNull)
-        {
-            lowLifeSound = RuntimeManager.PathToEventReference("event:/SFX_Low_Health");
-        }
-        if (healthCollectSound.IsNull)
-        {
-            healthCollectSound = RuntimeManager.PathToEventReference("event:/SFX_Heart_Collect");
-        }
-        if (keyCollectSound.IsNull)
-        {
-            keyCollectSound = RuntimeManager.PathToEventReference("event:/SFX_Key_Collect");
-        }
-        if (characterUpgrade.IsNull)
-        {
-            characterUpgrade = RuntimeManager.PathToEventReference("event:/SFX_Character_Upgrade");
-        }
-        if (dungeonMusic.IsNull)
-        {
-            dungeonMusic = RuntimeManager.PathToEventReference("event:/Music_Dungeon");
-        }
-        if (chestroomMusic.IsNull)
-        {
-            chestroomMusic = RuntimeManager.PathToEventReference("event:/Music_ChestRoom");
-        }
-        if (bossroomMusic.IsNull)
-        {
-            bossroomMusic = RuntimeManager.PathToEventReference("event:/Music_BossRoom");
-        }
-        if (winMusic.IsNull)
-        {
-            winMusic = RuntimeManager.PathToEventReference("event:/Music_Win");
-        }
-        if (gameOverMusic.IsNull)
-        {
-            gameOverMusic = RuntimeManager.PathToEventReference("event:/Music_GameOver");
-        }
-        if (menuMusic.IsNull)
-        {
-            menuMusic = RuntimeManager.PathToEventReference("event:/Music_Menu");
-        }
     }
 
     private void OnPlayUISound(PlayUISoundEvent evt)

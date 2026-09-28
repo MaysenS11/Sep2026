@@ -13,8 +13,6 @@ namespace Core.Occupants
         Statue
     }
 
-    /// Pure C# authoritative data model for permanent, indestructible obstacles (e.g. pillars, internal stone blocks).
-    /// Cannot be destroyed, cannot be pushed, cannot be traversed.
     public class ObstacleOccupant : TileOccupant
     {
         public ObstacleType ObstacleType { get; }
@@ -32,7 +30,6 @@ namespace Core.Occupants
             IsPushable = false;
         }
 
-        /// Obstacles are indestructible; attacks inflict no damage.
         public override List<BoardEffect> TakeDamage(int damage, TileOccupant source = null)
         {
             // Indestructible: absorbs attacks with no effect

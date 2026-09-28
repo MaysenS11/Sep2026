@@ -5,9 +5,6 @@ using UnityEngine;
 
 namespace Core.Board
 {
-    /// Pure authoritative C# 2D simulation board.
-    /// Manages grid boundaries, terrain cells, and spatial tile occupancy.
-    /// Free of MonoBehaviours, Rigidbodies, colliders, or Unity Physics2D.
     public class GameBoard
     {
         public int Width { get; }
@@ -19,19 +16,16 @@ namespace Core.Board
         private readonly Dictionary<Vector2Int, TileOccupant> _occupants = new Dictionary<Vector2Int, TileOccupant>();
         private readonly Dictionary<int, TileOccupant> _occupantsById = new Dictionary<int, TileOccupant>();
 
-        // Simulation board events
         public event Action<TileOccupant, Vector2Int> OnOccupantPlaced;
         public event Action<TileOccupant, Vector2Int> OnOccupantRemoved;
         public event Action<TileOccupant, Vector2Int, Vector2Int> OnOccupantMoved;
 
-        /// Creates a GameBoard with specified width and height, starting at (0, 0) or custom origin.
         public GameBoard(int width, int height, Vector2Int origin = default)
         {
             Width = Math.Max(1, width);
             Height = Math.Max(1, height);
             Origin = origin;
 
-            // Initialize default floor cells
             for (int x = Origin.x; x < Origin.x + Width; x++)
             {
                 for (int y = Origin.y; y < Origin.y + Height; y++)
@@ -44,14 +38,12 @@ namespace Core.Board
 
         #region Bounds & Terrain Queries
 
-        /// Checks whether a coordinate is within the board's configured rectangular boundaries.
         public bool IsInBounds(Vector2Int pos)
         {
             return pos.x >= Origin.x && pos.x < Origin.x + Width &&
                    pos.y >= Origin.y && pos.y < Origin.y + Height;
         }
 
-        /// Checks whether a tile is a solid wall or impassable terrain (including out of bounds and void).
         public bool IsWall(Vector2Int pos)
         {
             if (!IsInBounds(pos)) return true;
@@ -65,7 +57,6 @@ namespace Core.Board
             return false;
         }
 
-        /// Sets the terrain type of a cell at the specified coordinate.
         public void SetCell(Vector2Int pos, TerrainType terrain)
         {
             if (_cells.TryGetValue(pos, out var cell))
@@ -87,13 +78,11 @@ namespace Core.Board
             }
         }
 
-        /// Convenience method to mark or unmark a tile as a wall.
         public void SetWall(Vector2Int pos, bool isWall)
         {
             SetCell(pos, isWall ? TerrainType.Wall : TerrainType.Floor);
         }
 
-        /// Gets the BoardCell metadata at a position, or null if uninitialized.
         public BoardCell GetCell(Vector2Int pos)
         {
             _cells.TryGetValue(pos, out var cell);
@@ -104,26 +93,22 @@ namespace Core.Board
 
         #region Spatial Occupancy Queries
 
-        /// Checks if a tile currently contains an active occupant.
         public bool IsOccupied(Vector2Int pos)
         {
             return _occupants.ContainsKey(pos) && _occupants[pos] != null;
         }
 
-        /// Checks if a cell is free to enter (in-bounds, not a wall/void, not occupied).
         public bool CanEnter(Vector2Int pos)
         {
             return IsInBounds(pos) && !IsWall(pos) && !IsOccupied(pos);
         }
 
-        /// Retrieves the occupant residing at a tile, or null if the tile is vacant.
         public TileOccupant GetOccupant(Vector2Int pos)
         {
             _occupants.TryGetValue(pos, out var occupant);
             return occupant;
         }
 
-        /// Attempts to retrieve an occupant of a specific concrete type at the given tile.
         public bool TryGetOccupant<T>(Vector2Int pos, out T occupant) where T : TileOccupant
         {
             if (_occupants.TryGetValue(pos, out var raw) && raw is T typed)
@@ -135,20 +120,17 @@ namespace Core.Board
             return false;
         }
 
-        /// Retrieves an occupant by its unique ID.
         public TileOccupant GetOccupantById(int id)
         {
             _occupantsById.TryGetValue(id, out var occupant);
             return occupant;
         }
 
-        /// Returns all active occupants currently placed on the board.
         public IReadOnlyCollection<TileOccupant> GetAllOccupants()
         {
             return _occupants.Values;
         }
 
-        /// Returns all occupants of the specified type currently on the board.
         public IEnumerable<T> GetOccupantsOfType<T>() where T : TileOccupant
         {
             foreach (var occupant in _occupants.Values)
@@ -160,7 +142,6 @@ namespace Core.Board
             }
         }
 
-        /// Finds the primary player occupant on the board.
         public PlayerOccupant FindPlayer()
         {
             foreach (var occupant in _occupants.Values)
@@ -177,8 +158,6 @@ namespace Core.Board
 
         #region Board Mutation (Place, Remove, Move)
 
-        /// Places an occupant onto the board at a target position.
-        /// Fails if position is invalid or already occupied.
         public bool Place(TileOccupant occupant, Vector2Int pos)
         {
             if (occupant == null)
@@ -191,7 +170,6 @@ namespace Core.Board
                 return false;
             }
 
-            // If already on board elsewhere, remove from old position first
             if (_occupantsById.ContainsKey(occupant.Id))
             {
                 Remove(occupant);
@@ -205,8 +183,6 @@ namespace Core.Board
             return true;
         }
 
-        /// Force places an occupant, overwriting any existing occupant at that position if necessary.
-        /// Primarily used by initial room spawners and test fixtures.
         public void ForcePlace(TileOccupant occupant, Vector2Int pos)
         {
             if (occupant == null) throw new ArgumentNullException(nameof(occupant));
@@ -228,7 +204,6 @@ namespace Core.Board
             OnOccupantPlaced?.Invoke(occupant, pos);
         }
 
-        /// Removes an occupant from the board.
         public bool Remove(TileOccupant occupant)
         {
             if (occupant == null) return false;
@@ -247,7 +222,6 @@ namespace Core.Board
             return removed;
         }
 
-        /// Removes whatever occupant is currently at the target coordinate.
         public bool RemoveAt(Vector2Int pos)
         {
             if (_occupants.TryGetValue(pos, out var occupant))
@@ -257,8 +231,6 @@ namespace Core.Board
             return false;
         }
 
-        /// Moves an occupant to a new coordinate instantly in the simulation.
-        /// Strictly validates destination bounds, walls, and occupancy.
         public bool Move(TileOccupant occupant, Vector2Int newPos)
         {
             if (occupant == null) return false;
@@ -284,7 +256,6 @@ namespace Core.Board
             return true;
         }
 
-        /// Clears all dynamic occupants from the board.
         public void ClearOccupants()
         {
             var all = new List<TileOccupant>(_occupants.Values);
@@ -298,8 +269,6 @@ namespace Core.Board
 
         #region Spatial Line Queries (Raycasting)
 
-        /// Casts a ray along a directional step vector up to maxSteps.
-        /// Returns all visited coordinates until hitting a wall, out of bounds, or an occupant (if stopAtOccupant is true).
         public List<Vector2Int> Raycast(Vector2Int start, Vector2Int direction, int maxSteps, bool stopAtOccupant = true)
         {
             var result = new List<Vector2Int>();
@@ -326,7 +295,6 @@ namespace Core.Board
             return result;
         }
 
-        /// Checks whether there is a clear, unblocked straight line (cardinal or diagonal) between two points.
         public bool HasClearLineOfSight(Vector2Int from, Vector2Int to)
         {
             Vector2Int delta = to - from;

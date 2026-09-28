@@ -28,6 +28,7 @@ public class EnemyData : ScriptableObject
 
     [Header("Turn Priority")]
     [SerializeField] private int movePriority = 0;
+    [SerializeField] private int movesInterval = 1;
 
     [Header("Spawning")]
     [Range(0f, 1f)]
@@ -50,6 +51,7 @@ public class EnemyData : ScriptableObject
     public EnemySmartness IntelligenceLevel => smartness;
     public int MaxLineSteps => maxLineSteps;
     public int MovePriority => movePriority;
+    public int MovesInterval => movesInterval;
     public float PopulationPercentage => populationPercentage;
     public EventReference AttackSound => attackSound;
     public EventReference DamageSound => damageSound;

@@ -5,12 +5,6 @@ using UnityEngine;
 
 namespace Core.Occupants
 {
-    /// Pure C# authoritative data model for the Player unit on the GameBoard.
-    /// Single source of truth for runtime stats (Attack Damage, Defence, Attack Pattern/Range, Current & Max Health).
-    /// 
-    /// Key Property:
-    /// Player is the ONLY TileOccupant in the entire game with IsPushable = true.
-    /// All other occupants (enemies, chests, props, obstacles) have IsPushable = false.
     public class PlayerOccupant : TileOccupant
     {
         public Vector2Int FacingDirection { get; set; } = BoardCoordinate.North;
@@ -43,11 +37,10 @@ namespace Core.Occupants
         {
             AttackDamage = attackDamage;
             Defence = 0;
-            // CRITICAL: Player is the sole pushable occupant on the board!
+
             IsPushable = true;
         }
 
-        /// Updates the player's facing direction based on movement or manual turning.
         public void SetFacingDirection(Vector2Int direction)
         {
             if (direction != Vector2Int.zero)
@@ -179,7 +172,7 @@ namespace Core.Occupants
                     if (newTier < _healthValues.Length)
                     {
                         int diff = _healthValues[newTier] - _healthValues[currentTier];
-                        IncreaseMaxHealth(Mathf.Max(2, diff));
+                        IncreaseMaxHealth(Mathf.Max(1, diff));
                     }
                     break;
             }
@@ -216,7 +209,7 @@ namespace Core.Occupants
             var effects = new List<BoardEffect>();
             if (IsDead || damage <= 0) return effects;
 
-            int actualDamage = System.Math.Max(0, damage - Defence);
+            int actualDamage = System.Math.Max(1, damage - Defence);
             effects = base.TakeDamage(actualDamage, source);
 
             EventBus<PlayerHealthChangedEvent>.Raise(new PlayerHealthChangedEvent(CurrentHealth, MaxHealth));

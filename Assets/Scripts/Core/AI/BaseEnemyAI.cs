@@ -20,8 +20,18 @@ namespace Core.AI
                 enemy.SkipNextTurn = false;
                 return EnemyIntent.CreateWait(enemy);
             }
+            else if (enemy.IsStunned)
+            {
+                enemy.IsStunned = false;
+            }
 
             if (enemy.IsImmobile)
+            {
+                return EnemyIntent.CreateWait(enemy);
+            }
+
+            enemy.MoveTurnCounter++;
+            if (enemy.MovesInterval > 1 && (enemy.MoveTurnCounter % enemy.MovesInterval) != 0)
             {
                 return EnemyIntent.CreateWait(enemy);
             }

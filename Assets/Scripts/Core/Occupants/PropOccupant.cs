@@ -3,10 +3,6 @@ using UnityEngine;
 
 namespace Core.Occupants
 {
-    /// <summary>
-    /// Pure C# authoritative data model for generic destructible props on the GameBoard.
-    /// Extends DestructiblePropOccupant.
-    /// </summary>
     public class PropOccupant : DestructiblePropOccupant
     {
         public PropOccupant(

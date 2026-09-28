@@ -164,6 +164,10 @@ public class EnemyBase : MonoBehaviour
         if (evt.Source != null && evt.Source.GetComponent<PlayerMovement>() != null)
         {
             skipNextTurn = true;
+            if (TryGetComponent<Presentation.Entities.EnemyTileObject>(out var tileObj))
+            {
+                tileObj.SetStunned(true);
+            }
         }
 
         if (animator != null)

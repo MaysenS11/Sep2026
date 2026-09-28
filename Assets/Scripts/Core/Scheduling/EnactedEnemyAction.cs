@@ -8,36 +8,15 @@ using UnityEngine;
 
 namespace Core.Scheduling
 {
-    /// Encapsulates an enemy's action that was enacted on the simulation board during a turn.
-    /// Tracks the acting enemy, intent, emitted visual effects, spatial path traversal,
-    /// and any blocker dependencies required for collision-free animation scheduling.
     public class EnactedEnemyAction
     {
-        /// The acting enemy occupant.
         public EnemyOccupant Enemy { get; }
-
-        /// The intent that was executed on the board.
         public EnemyIntent Intent { get; }
-
-        /// Chronological visual effects emitted during execution of this action.
         public List<BoardEffect> EmittedEffects { get; }
-
-        /// All tiles traversed or affected by this action.
-        /// - For Knights: start and end tiles only (jump trajectory does not block intermediate tiles).
-        /// - For ray/line pieces: all intermediate tiles + destination.
-        /// - For attack/push: attacker path + player tile + push destination or blocked tile.
         public HashSet<Vector2Int> TraversedTiles { get; }
-
-        /// Initial position before this action was executed.
         public Vector2Int StartTile { get; }
-
-        /// Final position after move, jump, or attack recoil.
         public Vector2Int EndTile { get; }
-
-        /// If this was a blocked push attack, the position of the blocking tile/obstacle.
         public Vector2Int? BlockedTile { get; }
-
-        /// If a specific occupant was residing on the blocking tile, their unique ID.
         public int? BlockerOccupantId { get; }
 
         public EnactedEnemyAction(

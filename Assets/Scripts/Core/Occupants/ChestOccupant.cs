@@ -6,7 +6,6 @@ using UnityEngine;
 
 namespace Core.Occupants
 {
-    /// Pure C# authoritative data model for a Chest on the GameBoard.
     public class ChestOccupant : TileOccupant
     {
         public bool IsOpen { get; private set; }
@@ -28,8 +27,6 @@ namespace Core.Occupants
 
         public override bool IsDead => false;
 
-        /// Attacking a chest opens it.
-        /// Once opened, it remains on the board indefinitely as a permanent solid blocking obstacle.
         public override List<BoardEffect> TakeDamage(int damage, TileOccupant source = null)
         {
             var effects = new List<BoardEffect>();

@@ -7,16 +7,6 @@ using UnityEngine;
 
 namespace Core.Actions
 {
-    /// Handles an enemy attacking the player when the push destination behind the player is blocked.
-    /// 
-    /// Resolution rules:
-    /// 1. Player does NOT move.
-    /// 2. Attacking enemy CANNOT enter player's tile.
-    /// 3. Attacking enemy takes 1 recoil damage (emits DamageTakenEffect; if dead emits OccupantDestroyedEffect and removes enemy from board).
-    /// 4. Repositioning:
-    ///    - Standard enemies (Pawn, Rook, Bishop, Queen): stops 1 tile short of player along approach path (stays at origin if already adjacent).
-    ///    - Knight: bounces back to its original starting tile.
-    /// 5. Emits BlockedPushRecoilEffect with complete clash/blocker telemetry.
     public class BlockedPushAction : IBoardAction
     {
         public TileOccupant Attacker { get; }

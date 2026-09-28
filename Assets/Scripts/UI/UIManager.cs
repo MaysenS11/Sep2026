@@ -32,6 +32,8 @@ public class UIManager : MonoBehaviour
     private Transform healthContainerTransform;
     private bool isInitialized = false;
 
+    [SerializeField] private UI.OptionsMenuUI optionsMenu;
+
     private void Awake()
     {
         if (Instance == null)
@@ -39,6 +41,28 @@ public class UIManager : MonoBehaviour
             Instance = this;
         }
         InitializeHearts();
+        EnsureOptionsMenu();
+    }
+
+    private void EnsureOptionsMenu()
+    {
+        if (optionsMenu == null)
+        {
+            var audioMenuTransform = transform.Find("AudioMenu");
+            if (audioMenuTransform != null)
+            {
+                optionsMenu = audioMenuTransform.GetComponent<UI.OptionsMenuUI>();
+                if (optionsMenu == null)
+                {
+                    optionsMenu = audioMenuTransform.gameObject.AddComponent<UI.OptionsMenuUI>();
+                }
+                audioMenuTransform.gameObject.SetActive(false);
+            }
+        }
+        else
+        {
+            optionsMenu.gameObject.SetActive(false);
+        }
     }
 
     private void InitializeHearts()
@@ -100,11 +124,26 @@ public class UIManager : MonoBehaviour
     private void OnEnable()
     {
         EventBus<PlayerHealthChangedEvent>.Subscribe(OnPlayerHealthChanged);
+        EventBus<ToggleMenuEvent>.Subscribe(OnToggleMenu);
     }
 
     private void OnDisable()
     {
         EventBus<PlayerHealthChangedEvent>.Unsubscribe(OnPlayerHealthChanged);
+        EventBus<ToggleMenuEvent>.Unsubscribe(OnToggleMenu);
+    }
+
+    private void OnToggleMenu(ToggleMenuEvent evt)
+    {
+        if (optionsMenu == null)
+        {
+            EnsureOptionsMenu();
+        }
+
+        if (optionsMenu != null)
+        {
+            optionsMenu.HandleEscape();
+        }
     }
 
     private void OnPlayerHealthChanged(PlayerHealthChangedEvent evt)
@@ -213,7 +252,9 @@ public class UIManager : MonoBehaviour
     private int currentKeys = 0;
     public int CurrentKeys => currentKeys;
 
-    [Header("Win Screen")]
+    [Header("End Screens")]
+    [SerializeField] private GameObject gameOverPanel;
+    [SerializeField] private GameObject dungeonClearedPanel;
     [SerializeField] private GameObject winScreenPanel;
 
     public void AddKey(int amount = 1)
@@ -249,22 +290,131 @@ public class UIManager : MonoBehaviour
         }
     }
 
-    public void ShowWinScreen()
+    public void ShowGameOverScreen()
     {
-        if (winScreenPanel == null)
+        if (gameOverPanel == null)
         {
-            winScreenPanel = transform.Find("WinPanel")?.gameObject
-                          ?? transform.Find("WinScreen")?.gameObject
-                          ?? transform.Find("VictoryPanel")?.gameObject;
+            gameOverPanel = transform.Find("GameOver")?.gameObject
+                         ?? transform.Find("GameOverPanel")?.gameObject
+                         ?? transform.Find("DeathPanel")?.gameObject
+                         ?? GameObject.Find("GameOver");
         }
 
-        if (winScreenPanel != null)
+        if (gameOverPanel != null)
         {
-            winScreenPanel.SetActive(true);
+            WireEndScreenButtons(gameOverPanel);
+            gameOverPanel.SetActive(true);
         }
         else
         {
-            Debug.Log("[UIManager] Win Screen activated! The King has fallen.");
+            MenuManager.ShowGameOverOnStart = true;
+            UnityEngine.SceneManagement.SceneManager.LoadScene("StartMenu");
         }
+    }
+
+    public void ShowWinScreen()
+    {
+        if (dungeonClearedPanel == null)
+        {
+            dungeonClearedPanel = transform.Find("DungeonCleared")?.gameObject
+                               ?? transform.Find("DungeonClearedPanel")?.gameObject
+                               ?? transform.Find("WinPanel")?.gameObject
+                               ?? transform.Find("WinScreen")?.gameObject
+                               ?? GameObject.Find("DungeonCleared")
+                               ?? winScreenPanel;
+        }
+
+        if (dungeonClearedPanel != null)
+        {
+            WireEndScreenButtons(dungeonClearedPanel);
+            dungeonClearedPanel.SetActive(true);
+        }
+        else
+        {
+            MenuManager.ShowWinOnStart = true;
+            UnityEngine.SceneManagement.SceneManager.LoadScene("StartMenu");
+        }
+    }
+
+    private void WireEndScreenButtons(GameObject panel)
+    {
+        if (panel == null) return;
+        var buttons = panel.GetComponentsInChildren<Button>(true);
+        if (buttons == null || buttons.Length == 0) return;
+
+        Button menuButton = null;
+        Button quitButton = null;
+        Button retryButton = null;
+
+        for (int i = 0; i < buttons.Length; i++)
+        {
+            var btn = buttons[i];
+            if (btn == null) continue;
+            string bName = btn.name.ToLower();
+            string txt = "";
+            var tmp = btn.GetComponentInChildren<TMP_Text>(true);
+            if (tmp != null) txt = tmp.text.ToLower();
+
+            if (bName.Contains("quit") || bName.Contains("exit") || txt.Contains("quit") || txt.Contains("exit"))
+            {
+                quitButton = btn;
+            }
+            else if (bName.Contains("retry") || bName.Contains("restart") || bName.Contains("again") ||
+                     txt.Contains("retry") || txt.Contains("restart") || txt.Contains("again") || txt.Contains("play again"))
+            {
+                retryButton = btn;
+            }
+            else if (bName.Contains("menu") || bName.Contains("start") || txt.Contains("menu") || txt.Contains("start") || txt.Contains("main"))
+            {
+                menuButton = btn;
+            }
+        }
+
+        if (menuButton == null && retryButton == null && buttons.Length > 0)
+        {
+            menuButton = buttons[0];
+        }
+        if (quitButton == null && buttons.Length > 1)
+        {
+            quitButton = buttons[1];
+        }
+
+        if (retryButton != null)
+        {
+            retryButton.onClick.RemoveAllListeners();
+            retryButton.onClick.AddListener(RestartGame);
+        }
+
+        if (menuButton != null)
+        {
+            menuButton.onClick.RemoveAllListeners();
+            menuButton.onClick.AddListener(OnMenuButtonClicked);
+        }
+
+        if (quitButton != null)
+        {
+            quitButton.onClick.RemoveAllListeners();
+            quitButton.onClick.AddListener(OnQuitButtonClicked);
+        }
+    }
+
+    private void RestartGame()
+    {
+        UnityEngine.SceneManagement.SceneManager.LoadScene(
+            UnityEngine.SceneManagement.SceneManager.GetActiveScene().name);
+    }
+
+    private void OnMenuButtonClicked()
+    {
+        UnityEngine.SceneManagement.SceneManager.LoadScene("StartMenu");
+    }
+
+    private void OnQuitButtonClicked()
+    {
+#if UNITY_EDITOR
+        UnityEditor.EditorApplication.isPlaying = false;
+#else
+        Application.Quit();
+#endif
     }
 }

@@ -28,15 +28,22 @@ public class MenuManager : MonoBehaviour
     [SerializeField] private GameObject startMenuPanel;
     [SerializeField] private GameObject audioMenuPanel;
     [SerializeField] private GameObject gameOverPanel;
+    [SerializeField] private GameObject dungeonClearedPanel;
     [SerializeField] private UnityEngine.UI.Button optionsButton;
     [SerializeField] private UnityEngine.UI.Button quitButton;
 
     public static bool ShowGameOverOnStart { get; set; } = false;
+    public static bool ShowWinOnStart { get; set; } = false;
 
     private void Awake()
     {
         AutoWireElements();
-        if (ShowGameOverOnStart)
+        if (ShowWinOnStart)
+        {
+            ShowWinOnStart = false;
+            ShowDungeonCleared();
+        }
+        else if (ShowGameOverOnStart)
         {
             ShowGameOverOnStart = false;
             ShowGameOver();
@@ -69,6 +76,12 @@ public class MenuManager : MonoBehaviour
             if (t != null) gameOverPanel = t.gameObject;
         }
 
+        if (dungeonClearedPanel == null)
+        {
+            var t = canvasT.Find("DungeonCleared") ?? canvasT.Find("WinPanel") ?? canvasT.Find("VictoryPanel");
+            if (t != null) dungeonClearedPanel = t.gameObject;
+        }
+
         if (optionsMenu == null && audioMenuPanel != null)
         {
             optionsMenu = audioMenuPanel.GetComponent<UI.OptionsMenuUI>();
@@ -83,7 +96,6 @@ public class MenuManager : MonoBehaviour
             optionsMenu = FindAnyObjectByType<UI.OptionsMenuUI>(FindObjectsInactive.Include);
         }
 
-        // Wire buttons under StartMenu
         if (startMenuPanel != null)
         {
             if (optionsButton == null)
@@ -95,7 +107,6 @@ public class MenuManager : MonoBehaviour
                 quitButton = startMenuPanel.transform.Find("Buttons/QuitButton")?.GetComponent<UnityEngine.UI.Button>();
             }
 
-            // Arrow buttons: arrow goes right, arrow (1) goes left
             var wheel = startMenuPanel.GetComponentInChildren<CharacterWheelController>(true);
             var arrowRight = startMenuPanel.transform.Find("WheelPanel/Arrows/arrow");
             var arrowLeft = startMenuPanel.transform.Find("WheelPanel/Arrows/arrow (1)");
@@ -127,15 +138,64 @@ public class MenuManager : MonoBehaviour
             quitButton.onClick.AddListener(QuitGame);
         }
 
-        // Wire GameOver buttons to return to StartMenu
         if (gameOverPanel != null)
         {
-            var gameOverButtons = gameOverPanel.GetComponentsInChildren<UnityEngine.UI.Button>(true);
-            foreach (var btn in gameOverButtons)
+            WireEndPanelButtons(gameOverPanel);
+        }
+
+        if (dungeonClearedPanel != null)
+        {
+            WireEndPanelButtons(dungeonClearedPanel);
+        }
+    }
+
+    private void WireEndPanelButtons(GameObject panel)
+    {
+        if (panel == null) return;
+        var buttons = panel.GetComponentsInChildren<UnityEngine.UI.Button>(true);
+        if (buttons == null || buttons.Length == 0) return;
+
+        UnityEngine.UI.Button menuButton = null;
+        UnityEngine.UI.Button quitBtn = null;
+
+        for (int i = 0; i < buttons.Length; i++)
+        {
+            var btn = buttons[i];
+            if (btn == null) continue;
+            string bName = btn.name.ToLower();
+            string txt = "";
+            var tmp = btn.GetComponentInChildren<TMPro.TMP_Text>(true);
+            if (tmp != null) txt = tmp.text.ToLower();
+
+            if (bName.Contains("quit") || bName.Contains("exit") || txt.Contains("quit") || txt.Contains("exit"))
             {
-                btn.onClick.RemoveAllListeners();
-                btn.onClick.AddListener(ShowStartMenu);
+                quitBtn = btn;
             }
+            else if (bName.Contains("menu") || bName.Contains("start") || txt.Contains("menu") || txt.Contains("start") || txt.Contains("main"))
+            {
+                menuButton = btn;
+            }
+        }
+
+        if (menuButton == null && buttons.Length > 0)
+        {
+            menuButton = buttons[0];
+        }
+        if (quitBtn == null && buttons.Length > 1)
+        {
+            quitBtn = buttons[1];
+        }
+
+        if (menuButton != null)
+        {
+            menuButton.onClick.RemoveAllListeners();
+            menuButton.onClick.AddListener(ShowStartMenu);
+        }
+
+        if (quitBtn != null)
+        {
+            quitBtn.onClick.RemoveAllListeners();
+            quitBtn.onClick.AddListener(QuitGame);
         }
     }
 
@@ -144,6 +204,7 @@ public class MenuManager : MonoBehaviour
         if (startMenuPanel != null) startMenuPanel.SetActive(true);
         if (audioMenuPanel != null) audioMenuPanel.SetActive(false);
         if (gameOverPanel != null) gameOverPanel.SetActive(false);
+        if (dungeonClearedPanel != null) dungeonClearedPanel.SetActive(false);
     }
 
     public void ShowGameOver()
@@ -151,6 +212,15 @@ public class MenuManager : MonoBehaviour
         if (startMenuPanel != null) startMenuPanel.SetActive(false);
         if (audioMenuPanel != null) audioMenuPanel.SetActive(false);
         if (gameOverPanel != null) gameOverPanel.SetActive(true);
+        if (dungeonClearedPanel != null) dungeonClearedPanel.SetActive(false);
+    }
+
+    public void ShowDungeonCleared()
+    {
+        if (startMenuPanel != null) startMenuPanel.SetActive(false);
+        if (audioMenuPanel != null) audioMenuPanel.SetActive(false);
+        if (gameOverPanel != null) gameOverPanel.SetActive(false);
+        if (dungeonClearedPanel != null) dungeonClearedPanel.SetActive(true);
     }
 
     public void PlayGame()

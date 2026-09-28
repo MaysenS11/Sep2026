@@ -35,7 +35,7 @@ namespace Presentation.Entities
 
         [Tooltip("How many tiles directly north behind the pillar are checked for occlusion")]
         [Range(1, 4)]
-        [SerializeField] private int behindTileDepth = 2;
+        [SerializeField] private int behindTileDepth = 1;
 
         private readonly List<int> _occupantIds = new List<int>();
         private readonly HashSet<Vector2Int> _occupiedTiles = new HashSet<Vector2Int>();
@@ -241,9 +241,9 @@ namespace Presentation.Entities
                 foreach (Vector2Int behindTile in _behindTiles)
                 {
                     TileOccupant occ = board.GetOccupant(behindTile);
-                    if (occ != null)
+                    if (occ == null || occ.IsDead) continue;
+                    if (occ is PlayerOccupant || occ is EnemyOccupant)
                     {
-                        // Any occupant on the behind tile (Player, Enemy, etc.) occludes
                         return true;
                     }
                 }

@@ -2,8 +2,6 @@ using UnityEngine;
 
 namespace Core.Effects
 {
-    /// Visual effect commanding a fast strike lunge into/toward a target tile along an attack direction.
-    /// Used by attacking units to present physical attack impact.
     public class AttackLungeEffect : BoardEffect
     {
         public int AttackerId => OccupantId;

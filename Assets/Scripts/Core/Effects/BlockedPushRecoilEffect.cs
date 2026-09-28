@@ -2,8 +2,6 @@ using UnityEngine;
 
 namespace Core.Effects
 {
-    /// Visual effect representing a failed push attack: clash impact, spark/recoil animation,
-    /// recoil damage taken, and rebound bounce back to the recoil end tile.
     public class BlockedPushRecoilEffect : BoardEffect
     {
         public int AttackerId => OccupantId;

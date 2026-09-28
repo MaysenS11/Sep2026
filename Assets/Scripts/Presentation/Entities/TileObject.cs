@@ -366,14 +366,25 @@ namespace Presentation.Entities
 
             if (this != null && gameObject != null)
             {
-                gameObject.SetActive(false);
-                if (Application.isPlaying)
+                bool isPlayer = this is PlayerTileObject || GetComponent<PlayerMovement>() != null || CompareTag("Player");
+                if (isPlayer)
                 {
-                    Destroy(gameObject);
+                    if (spriteRenderer != null)
+                    {
+                        spriteRenderer.enabled = false;
+                    }
                 }
                 else
                 {
-                    DestroyImmediate(gameObject);
+                    gameObject.SetActive(false);
+                    if (Application.isPlaying)
+                    {
+                        Destroy(gameObject);
+                    }
+                    else
+                    {
+                        DestroyImmediate(gameObject);
+                    }
                 }
             }
         }

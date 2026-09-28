@@ -5,10 +5,6 @@ using Core.Effects;
 
 namespace Core.Scheduling
 {
-    /// Pure C# Turn Batching & Dependency Scheduler.
-    /// Analyzes sequential enacted enemy actions, determines spatial path conflicts,
-    /// vacated tile ordering, blocker arrival and departure dependencies, and groups actions into
-    /// path-disjoint concurrent animation batches with evenly divided time slices.
     public class TurnBatchScheduler
     {
         /// Schedules enacted enemy actions into concurrent animation batches.
@@ -67,12 +63,6 @@ namespace Core.Scheduling
             return batches;
         }
 
-        /// Checks whether two actions conflict spatially and CANNOT run concurrently in the same batch.
-        /// Conflict occurs if:
-        /// 1. Their traversed tile paths overlap.
-        /// 2. Action B enters/affects a tile Action A vacates or starts on.
-        /// 3. Action A enters/affects a tile Action B vacates or starts on.
-        /// 4. Both actions share destination or starting tiles.
         public static bool HasSpatialConflict(EnactedEnemyAction a, EnactedEnemyAction b)
         {
             if (a == null || b == null) return false;
@@ -114,14 +104,6 @@ namespace Core.Scheduling
             return false;
         }
 
-        /// Determines whether action A MUST be scheduled in a strictly earlier batch than action B.
-        /// Precedence is required when:
-        /// 1. Blocker Arrival: Action B was blocked by an obstacle/unit, and Action A was the unit that moved
-        ///    into that blocking tile (b.BlockedTile) during this turn.
-        /// 2. Blocker Departure: Action B pushes into a tile where the blocker (Action A) was residing and moving away.
-        ///    Action A must move away before Action B's push into that tile occurs.
-        /// 3. Vacated Tile Chaining: Action A moved out of a tile (a.StartTile != a.EndTile) and Action B
-        ///    enters or traverses that tile.
         public static bool MustPrecede(EnactedEnemyAction a, EnactedEnemyAction b)
         {
             if (a == null || b == null) return false;

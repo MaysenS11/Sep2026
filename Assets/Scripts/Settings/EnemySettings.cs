@@ -10,7 +10,11 @@ public class EnemySettings : ScriptableObject
     [Header("Turn & Movement Timing")]
     [SerializeField] private float enemyMoveDuration = 0.3f;
 
+    [Header("Stun Visual")]
+    [SerializeField] private Sprite stunSprite;
+
     public Sprite HeartFullSprite => heartFullSprite;
     public Sprite HeartEmptySprite => heartEmptySprite;
+    public Sprite StunSprite => stunSprite;
     public float EnemyMoveDuration => enemyMoveDuration;
 }

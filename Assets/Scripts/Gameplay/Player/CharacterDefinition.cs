@@ -8,6 +8,7 @@ public class CharacterDefinition : ScriptableObject
     [SerializeField] private Sprite maskSprite;
     [SerializeField] private Sprite maskWhiteSprite;
     [SerializeField] private Sprite fullBodySprite;
+    [SerializeField] private RuntimeAnimatorController animatorController;
     [SerializeField] private bool lockedByDefault = true;
 
     [Header("Audio")]
@@ -31,6 +32,7 @@ public class CharacterDefinition : ScriptableObject
     public Sprite MaskSprite => maskSprite;
     public Sprite MaskWhiteSprite => maskWhiteSprite;
     public Sprite FullBodySprite => fullBodySprite;
+    public RuntimeAnimatorController AnimatorController => animatorController;
     public bool LockedByDefault => lockedByDefault;
     public EventReference AttackSound => attackSound;
     public Core.Effects.WeaponType Weapon

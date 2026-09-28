@@ -63,28 +63,59 @@ namespace Core.AI
             List<Vector2Int> bestPath = null;
             float bestScore = float.MaxValue;
 
+            int chebyshevDist = System.Math.Max(System.Math.Abs(enemyPos.x - playerPos.x), System.Math.Abs(enemyPos.y - playerPos.y));
+            int walkLimit = System.Math.Min(3, maxSteps);
+
             foreach (var dir in AllowedDirections)
             {
                 var currentPath = new List<Vector2Int> { enemyPos };
                 Vector2Int current = enemyPos + dir;
 
-                for (int step = 1; step <= maxSteps; step++)
+                if (chebyshevDist > 3)
                 {
-                    if (!board.CanEnter(current))
+                    for (int step = 1; step <= walkLimit; step++)
                     {
-                        break;
+                        if (!board.CanEnter(current))
+                        {
+                            break;
+                        }
+
+                        currentPath.Add(current);
+                        current += dir;
                     }
 
-                    currentPath.Add(current);
-                    float score = ScoreCandidateTile(current, playerPos, enemy);
-                    if (score < bestScore)
+                    if (currentPath.Count > 1)
                     {
-                        bestScore = score;
-                        bestDestination = current;
-                        bestPath = new List<Vector2Int>(currentPath);
+                        Vector2Int endpoint = currentPath[currentPath.Count - 1];
+                        float score = ScoreCandidateTile(endpoint, playerPos, enemy);
+                        if (score < bestScore)
+                        {
+                            bestScore = score;
+                            bestDestination = endpoint;
+                            bestPath = new List<Vector2Int>(currentPath);
+                        }
                     }
+                }
+                else
+                {
+                    for (int step = 1; step <= walkLimit; step++)
+                    {
+                        if (!board.CanEnter(current))
+                        {
+                            break;
+                        }
 
-                    current += dir;
+                        currentPath.Add(current);
+                        float score = ScoreCandidateTile(current, playerPos, enemy);
+                        if (score < bestScore)
+                        {
+                            bestScore = score;
+                            bestDestination = current;
+                            bestPath = new List<Vector2Int>(currentPath);
+                        }
+
+                        current += dir;
+                    }
                 }
             }
 

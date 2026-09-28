@@ -7,9 +7,6 @@ using UnityEngine;
 
 namespace Core.AI
 {
-    /// AI strategy for Pawn archetype.
-    /// Moves 1 step toward the player along primary axis if clear.
-    /// Attacks the player if adjacent (cardinal or diagonal, matching enemy.UsesDiagonalAttack).
     public class PawnAI : BaseEnemyAI
     {
         protected override EnemyIntent DecideIntent(GameBoard board, EnemyOccupant enemy, PlayerOccupant player)
@@ -61,10 +58,8 @@ namespace Core.AI
                 }
             }
 
-            // Dumb Intelligence: Inefficient, erratic path selection when multiple axes are open
             if (enemy.IntelligenceLevel == EnemySmartness.Dumb && dx != 0 && dy != 0)
             {
-                // Erratic preference: alternates secondary axis based on position hash
                 bool erratic = ((enemyPos.x * 3 + enemyPos.y * 7 + enemy.Id) % 2) == 0;
                 if (erratic && secondaryStep != Vector2Int.zero && board.CanEnter(enemyPos + secondaryStep))
                 {

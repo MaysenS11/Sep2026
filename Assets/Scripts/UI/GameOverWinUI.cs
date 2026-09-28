@@ -94,19 +94,6 @@ namespace UI
             if (winMainMenuButton != null) winMainMenuButton.onClick.AddListener(LoadMainMenu);
             if (gameOverRetryButton != null) gameOverRetryButton.onClick.AddListener(RestartGame);
             if (gameOverMainMenuButton != null) gameOverMainMenuButton.onClick.AddListener(LoadMainMenu);
-
-            // If in StartMenu scene or standalone GameOver object, hook up all Back buttons directly to return to start menu
-            if (gameOverPanel != null)
-            {
-                var buttons = gameOverPanel.GetComponentsInChildren<Button>(true);
-                foreach (var btn in buttons)
-                {
-                    if (btn != null && btn != gameOverRetryButton && btn != gameOverMainMenuButton)
-                    {
-                        btn.onClick.AddListener(LoadMainMenu);
-                    }
-                }
-            }
         }
 
         private void HideAll()

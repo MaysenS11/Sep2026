@@ -7,8 +7,6 @@ using UnityEngine;
 
 namespace Core.Actions
 {
-    /// Moves an occupant along a validated linear path of empty tiles to a target destination.
-    /// Updates GameBoard state immediately and emits a MoveEffect.
     public class MoveAction : IBoardAction
     {
         public TileOccupant Occupant { get; }

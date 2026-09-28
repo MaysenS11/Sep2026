@@ -122,8 +122,107 @@ namespace Presentation.Entities
             yield return base.AnimateDamageRoutine(damage);
         }
 
+        [Header("Stun Visual")]
+        [SerializeField] private Sprite stunSprite;
+        private GameObject stunIndicatorObj;
+        private Core.Occupants.EnemyOccupant boundOccupant;
+
+        public void BindOccupant(Core.Occupants.EnemyOccupant occupant)
+        {
+            if (boundOccupant != null)
+            {
+                boundOccupant.OnStunChanged -= OnStunChanged;
+            }
+            boundOccupant = occupant;
+            if (boundOccupant != null)
+            {
+                boundOccupant.OnStunChanged += OnStunChanged;
+                SetStunned(boundOccupant.IsStunned);
+            }
+        }
+
+        private void OnDestroy()
+        {
+            if (boundOccupant != null)
+            {
+                boundOccupant.OnStunChanged -= OnStunChanged;
+            }
+        }
+
+        private void OnStunChanged(bool isStunned)
+        {
+            SetStunned(isStunned);
+        }
+
+        public void SetStunned(bool stunned)
+        {
+            if (stunned)
+            {
+                EnsureComponents();
+                if (stunIndicatorObj == null)
+                {
+                    Transform existing = transform.Find("StunIndicator");
+                    if (existing != null)
+                    {
+                        stunIndicatorObj = existing.gameObject;
+                    }
+                    else
+                    {
+                        stunIndicatorObj = new GameObject("StunIndicator");
+                        stunIndicatorObj.transform.SetParent(transform, false);
+                    }
+
+                    if (!stunIndicatorObj.TryGetComponent<SpriteRenderer>(out var sr))
+                    {
+                        sr = stunIndicatorObj.AddComponent<SpriteRenderer>();
+                    }
+
+                    if (stunSprite == null)
+                    {
+                        var eb = GetComponent<EnemyBase>();
+                        if (eb != null && eb.Settings != null)
+                        {
+                            stunSprite = eb.Settings.StunSprite;
+                        }
+                    }
+
+#if UNITY_EDITOR
+                    if (stunSprite == null)
+                    {
+                        stunSprite = UnityEditor.AssetDatabase.LoadAssetAtPath<Sprite>("Assets/Sprites/Indicators/Stun.png");
+                    }
+#endif
+
+                    sr.sprite = stunSprite;
+
+                    if (spriteRenderer != null)
+                    {
+                        sr.sortingLayerID = spriteRenderer.sortingLayerID;
+                        sr.sortingOrder = spriteRenderer.sortingOrder + 10;
+                    }
+
+                    Vector3 pos = new Vector3(0f, 0.75f, 0f);
+                    if (spriteRenderer != null && spriteRenderer.sprite != null)
+                    {
+                        pos = new Vector3(0f, spriteRenderer.bounds.size.y * 0.6f + 0.1f, 0f);
+                    }
+                    stunIndicatorObj.transform.localPosition = pos;
+                }
+
+                stunIndicatorObj.SetActive(true);
+            }
+            else
+            {
+                if (stunIndicatorObj != null)
+                {
+                    stunIndicatorObj.SetActive(false);
+                }
+            }
+        }
+
         public override IEnumerator AnimateDeathRoutine()
         {
+            SetStunned(false);
             SetAnimatorTrigger(DieHash);
             yield return base.AnimateDeathRoutine();
         }

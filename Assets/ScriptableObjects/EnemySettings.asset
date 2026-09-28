@@ -14,4 +14,5 @@ MonoBehaviour:
   m_EditorClassIdentifier: Assembly-CSharp::EnemySettings
   heartFullSprite: {fileID: 21300000, guid: 5c341d93a0822b84491c18f7cc14453d, type: 3}
   heartEmptySprite: {fileID: 21300000, guid: 82b5b6f996979204fa5a1017b5e1ce60, type: 3}
-  enemyMoveDuration: 0.24
+  enemyMoveDuration: 0.35
+  stunSprite: {fileID: 21300000, guid: 349694d0218096d4c853856dbcee389a, type: 3}

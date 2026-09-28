@@ -64,14 +64,13 @@ namespace Infrastructure
             moveEffect = null;
             if (direction == Vector2Int.zero) return false;
 
-            // Auto-discovery recovery: If board is empty or only has player, discover scene entities
-            if (Board.GetAllOccupants().Count <= 1)
+            if (Board.GetAllOccupants().Count <= 1 && GameManager.Instance != null && GameManager.Instance.Board == Board)
             {
                 BoardEntityFactory.RegisterSceneEntities(Board, EffectsRunner);
             }
 
             PlayerOccupant player = Board.FindPlayer();
-            if (player == null)
+            if (player == null && GameManager.Instance != null && GameManager.Instance.Board == Board)
             {
                 var pMove = UnityEngine.Object.FindAnyObjectByType<PlayerMovement>();
                 if (pMove != null)
@@ -85,14 +84,16 @@ namespace Infrastructure
                 return false;
             }
 
-            // Ensure grid position matches actual player transform position if desynced
-            var activePMove = UnityEngine.Object.FindAnyObjectByType<PlayerMovement>();
-            if (activePMove != null)
+            if (GameManager.Instance != null && GameManager.Instance.Board == Board)
             {
-                Vector2Int actualGrid = BoardCoordinate.WorldToGrid(activePMove.transform.position);
-                if (player.GridPosition != actualGrid && Board.IsInBounds(actualGrid))
+                var activePMove = UnityEngine.Object.FindAnyObjectByType<PlayerMovement>();
+                if (activePMove != null)
                 {
-                    Board.Move(player, actualGrid);
+                    Vector2Int actualGrid = BoardCoordinate.WorldToGrid(activePMove.transform.position);
+                    if (player.GridPosition != actualGrid && Board.IsInBounds(actualGrid))
+                    {
+                        Board.Move(player, actualGrid);
+                    }
                 }
             }
 
@@ -123,7 +124,7 @@ namespace Infrastructure
             emittedEffects = new List<BoardEffect>();
 
             PlayerOccupant player = Board.FindPlayer();
-            if (player == null)
+            if (player == null && GameManager.Instance != null && GameManager.Instance.Board == Board)
             {
                 var pMove = UnityEngine.Object.FindAnyObjectByType<PlayerMovement>();
                 if (pMove != null)
@@ -348,13 +349,30 @@ namespace Infrastructure
 
             // Collect active alive enemies
             var activeEnemies = new List<EnemyOccupant>(Board.GetOccupantsOfType<EnemyOccupant>());
-            if (activeEnemies.Count == 0)
+            if (activeEnemies.Count == 0 && GameManager.Instance != null && GameManager.Instance.Board == Board)
             {
                 BoardEntityFactory.RegisterSceneEntities(Board, EffectsRunner);
                 activeEnemies = new List<EnemyOccupant>(Board.GetOccupantsOfType<EnemyOccupant>());
             }
 
             activeEnemies.RemoveAll(e => e.IsDead);
+
+            if (GameManager.Instance != null)
+            {
+                int currentRoom = GameManager.Instance.CurrentRoomIndex;
+                if (currentRoom >= 0)
+                {
+                    activeEnemies.RemoveAll(e =>
+                    {
+                        var presenter = EffectsRunner != null ? EffectsRunner.GetTileObject(e.Id) : null;
+                        if (presenter != null && presenter.TryGetComponent<EnemyBase>(out var eb))
+                        {
+                            return eb.CurrentRoomIndex != currentRoom && eb.CurrentRoomIndex >= 0;
+                        }
+                        return false;
+                    });
+                }
+            }
 
             // Sort enemies by MovePriority ascending, then by Manhattan distance to player ascending
             activeEnemies.Sort((a, b) =>
@@ -365,6 +383,12 @@ namespace Infrastructure
                 int db = BoardCoordinate.ManhattanDistance(b.GridPosition, playerPos);
                 return da.CompareTo(db);
             });
+
+            const int maxEnemiesPerTurn = 2;
+            if (activeEnemies.Count > maxEnemiesPerTurn)
+            {
+                activeEnemies.RemoveRange(maxEnemiesPerTurn, activeEnemies.Count - maxEnemiesPerTurn);
+            }
 
             // Sequential AI evaluation and board mutation
             for (int i = 0; i < activeEnemies.Count; i++)

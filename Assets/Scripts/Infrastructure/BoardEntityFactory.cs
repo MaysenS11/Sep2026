@@ -152,6 +152,7 @@ namespace Infrastructure
             int movePriority = data != null ? data.MovePriority : 0;
             int maxLineSteps = data != null ? data.MaxLineSteps : (archetype == EnemyArchetype.Pawn ? 1 : 3);
             EnemySmartness smartness = data != null ? data.Smartness : EnemySmartness.Mid;
+            int movesInterval = data != null ? data.MovesInterval : (archetype == EnemyArchetype.Knight ? 2 : 1);
 
             var occupant = new EnemyOccupant(
                 archetype: archetype,
@@ -163,11 +164,13 @@ namespace Infrastructure
                 id: id,
                 name: archetype.ToString(),
                 intelligenceLevel: smartness,
-                isBoss: isBoss
+                isBoss: isBoss,
+                movesInterval: movesInterval
             );
 
             presenter.OccupantId = id;
             presenter.SnapToGrid(gridPos);
+            presenter.BindOccupant(occupant);
 
             board.ForcePlace(occupant, gridPos);
 
@@ -433,6 +436,11 @@ namespace Infrastructure
                 // Multi-Tile Pillars
                 if (lower.Contains("pillar") || t.GetComponent<PillarTileObject>() != null)
                 {
+                    if (t.GetComponentInParent<Dungeon.BossRoom>() != null)
+                    {
+                        continue;
+                    }
+
                     if (t.childCount > 0 && t.GetComponent<SpriteRenderer>() == null)
                     {
                         continue;
@@ -462,7 +470,7 @@ namespace Infrastructure
                     lower.Contains("rook") || lower.Contains("queen") ||
                     lower.Contains("enemy") || t.GetComponent<EnemyBase>() != null || t.GetComponent<EnemyTileObject>() != null)
                 {
-                    if (lower.Contains("king"))
+                    if (lower.Contains("king") || t.GetComponentInParent<Dungeon.BossRoom>() != null)
                     {
                         continue;
                     }
@@ -470,7 +478,14 @@ namespace Infrastructure
                     bool isAlreadyRegistered = t.TryGetComponent<EnemyTileObject>(out var presenter) &&
                                                presenter.OccupantId != 0 &&
                                                board.GetOccupantById(presenter.OccupantId) != null;
-                    if (!isAlreadyRegistered)
+                    if (isAlreadyRegistered)
+                    {
+                        if (board.GetOccupantById(presenter.OccupantId) is EnemyOccupant existingOcc)
+                        {
+                            presenter.BindOccupant(existingOcc);
+                        }
+                    }
+                    else
                     {
                         EnemyData data = t.TryGetComponent<EnemyBase>(out var eb) ? eb.Data : null;
                         EnemyArchetype archetype = data != null ? data.Archetype : EnemyArchetype.Pawn;

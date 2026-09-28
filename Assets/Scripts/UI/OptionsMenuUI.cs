@@ -36,6 +36,7 @@ namespace UI
         [Header("Credits")]
         [SerializeField] private GameObject creditsPanel;
         [SerializeField] private Button creditsButton;
+        [SerializeField] private Button menuButton;
         [SerializeField] private Button closeCreditsButton;
 
         [Header("Navigation")]
@@ -76,6 +77,11 @@ namespace UI
                 closeCreditsButton.onClick.AddListener(ShowOptionsHub);
             }
 
+            if (menuButton != null)
+            {
+                menuButton.onClick.AddListener(LoadMainMenu);
+            }
+
             BindActionButtons();
         }
 
@@ -108,6 +114,11 @@ namespace UI
                     });
                 }
             }
+        }
+
+        private void LoadMainMenu()
+        {
+            UnityEngine.SceneManagement.SceneManager.LoadScene("StartMenu");
         }
 
         public void SetCreditsVisible(bool visible)
@@ -308,20 +319,45 @@ namespace UI
             if (creditsPanel != null) creditsPanel.SetActive(true);
         }
 
+        public bool IsOpen => panelRoot != null ? panelRoot.activeSelf : gameObject.activeSelf;
+
+        public void HandleEscape()
+        {
+            if (!string.IsNullOrEmpty(awaitingRebindAction))
+            {
+                awaitingRebindAction = null;
+                ClearMessages();
+                return;
+            }
+
+            if (IsOpen)
+            {
+                OnBackClicked();
+            }
+            else
+            {
+                OpenOptions();
+            }
+        }
+
         public void OpenOptions()
         {
-            if (panelRoot != null) panelRoot.SetActive(true);
+            if (panelRoot == null) panelRoot = gameObject;
+            panelRoot.SetActive(true);
             ShowOptionsHub();
             RefreshActionLabels();
             ClearMessages();
+            EventBus<MenuVisibilityChangedEvent>.Raise(new MenuVisibilityChangedEvent(true));
         }
 
         public void CloseOptions()
         {
             awaitingRebindAction = null;
             ClearMessages();
-            if (panelRoot != null && panelRoot != gameObject) panelRoot.SetActive(false);
-            else gameObject.SetActive(false);
+            if (panelRoot == null) panelRoot = gameObject;
+            panelRoot.SetActive(false);
+
+            EventBus<MenuVisibilityChangedEvent>.Raise(new MenuVisibilityChangedEvent(false));
 
             var mm = Object.FindAnyObjectByType<MenuManager>(FindObjectsInactive.Include);
             if (mm != null)

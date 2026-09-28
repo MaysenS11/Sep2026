@@ -43,6 +43,7 @@ public class PlayerMovement : MonoBehaviour
     private InputAction attackAction;
     private InputAction menuAction;
 
+    private bool isMenuOpen = false;
     private bool canTakeTurn = true;
     private float nextAllowedInputTime = 0f;
     private Vector2 lastDirection = Vector2.down;
@@ -110,6 +111,7 @@ public class PlayerMovement : MonoBehaviour
         EventBus<EntityDamagedEvent>.Subscribe(OnEntityDamaged);
         EventBus<EntityDiedEvent>.Subscribe(OnEntityDied);
         EventBus<SharedAudioConfiguredEvent>.Subscribe(OnSharedAudioConfigured);
+        EventBus<MenuVisibilityChangedEvent>.Subscribe(OnMenuVisibilityChanged);
 
         if (attackAction != null) attackAction.performed += OnAttackPerformed;
         if (menuAction != null) menuAction.performed += OnMenuPerformed;
@@ -124,6 +126,7 @@ public class PlayerMovement : MonoBehaviour
         EventBus<EntityDamagedEvent>.Unsubscribe(OnEntityDamaged);
         EventBus<EntityDiedEvent>.Unsubscribe(OnEntityDied);
         EventBus<SharedAudioConfiguredEvent>.Unsubscribe(OnSharedAudioConfigured);
+        EventBus<MenuVisibilityChangedEvent>.Unsubscribe(OnMenuVisibilityChanged);
 
         currentAttackTiles.Clear();
         inputActions?.Disable();
@@ -138,6 +141,16 @@ public class PlayerMovement : MonoBehaviour
 
         if (characterDefinition != null)
         {
+            if (animator != null && characterDefinition.AnimatorController != null)
+            {
+                animator.runtimeAnimatorController = characterDefinition.AnimatorController;
+            }
+
+            if (TryGetComponent<SpriteRenderer>(out var sr) && characterDefinition.FullBodySprite != null)
+            {
+                sr.sprite = characterDefinition.FullBodySprite;
+            }
+
             UIManager uiManager = Object.FindAnyObjectByType<UIManager>();
             if (uiManager != null && characterDefinition.MaskSprite != null)
             {
@@ -172,6 +185,7 @@ public class PlayerMovement : MonoBehaviour
 
     private void HandleMovementInput()
     {
+        if (isMenuOpen) return;
         if (!canTakeTurn || Time.time < nextAllowedInputTime) return;
         if (ScreenFadeTransition.Instance != null && ScreenFadeTransition.Instance.IsTransitioning) return;
         if (GameManager.Instance != null && GameManager.Instance.TurnCoordinator != null && GameManager.Instance.TurnCoordinator.IsTurnInProgress) return;
@@ -299,6 +313,7 @@ public class PlayerMovement : MonoBehaviour
 
     private void OnAttackPerformed(InputAction.CallbackContext context)
     {
+        if (isMenuOpen) return;
         if (!canTakeTurn || (ScreenFadeTransition.Instance != null && ScreenFadeTransition.Instance.IsTransitioning)) return;
         if (GameManager.Instance != null && GameManager.Instance.TurnCoordinator != null && GameManager.Instance.TurnCoordinator.IsTurnInProgress) return;
 
@@ -528,9 +543,14 @@ public class PlayerMovement : MonoBehaviour
         NotifyTargetingChanged();
     }
 
+    private void OnMenuVisibilityChanged(MenuVisibilityChangedEvent evt)
+    {
+        isMenuOpen = evt.IsVisible;
+    }
+
     private void OnMenuPerformed(InputAction.CallbackContext context)
     {
-        UnityEngine.SceneManagement.SceneManager.LoadScene("StartMenu");
+        EventBus<ToggleMenuEvent>.Raise(new ToggleMenuEvent());
     }
 
     private void TryTriggerDoorAtCurrentPosition()
@@ -541,6 +561,8 @@ public class PlayerMovement : MonoBehaviour
         if (manager == null) return;
 
         Vector2Int gridPos = CurrentGridPosition;
+        if (manager.IsDoorTriggerBlocked(gridPos)) return;
+
         if (manager.TryResolveDoorAtTile(gridPos, out DoorType doorType))
         {
             GameManager.TriggerDoor(doorType, gridPos);

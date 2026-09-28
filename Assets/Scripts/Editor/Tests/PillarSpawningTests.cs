@@ -6,6 +6,7 @@ using Core.Occupants;
 using Dungeon;
 using Dungeon.Spawning;
 using Infrastructure;
+using Presentation.Entities;
 
 namespace Dungeon.EditorTests
 {
@@ -291,6 +292,102 @@ namespace Dungeon.EditorTests
             Object.DestroyImmediate(floorGo);
             Object.DestroyImmediate(gridGo);
             Object.DestroyImmediate(parent.gameObject);
+        }
+
+        [Test]
+        public void Test_PillarTileObject_Transparency_LivingPlayerAndEnemyTrigger()
+        {
+            var board = new GameBoard(10, 10, Vector2Int.zero);
+            for (int x = 0; x < 10; x++)
+                for (int y = 0; y < 10; y++)
+                    board.SetCell(new Vector2Int(x, y), TerrainType.Floor);
+
+            var go = new GameObject("PillarPresenter");
+            var pillar = go.AddComponent<Presentation.Entities.PillarTileObject>();
+            pillar.Initialize(new Vector2Int(3, 3), Vector2Int.one, board);
+
+            Vector2Int behindTile = new Vector2Int(3, 4);
+
+            var player = new PlayerOccupant(maxHealth: 6, initialPosition: behindTile, id: 1);
+            board.Place(player, behindTile);
+            bool result = pillar.EvaluateBehindState(board);
+            Assert.IsTrue(result, "Living player behind pillar should trigger translucency.");
+            board.Remove(player);
+
+            var enemy = new EnemyOccupant(EnemyArchetype.Pawn, maxHealth: 4, initialPosition: behindTile, id: 2);
+            board.Place(enemy, behindTile);
+            result = pillar.EvaluateBehindState(board);
+            Assert.IsTrue(result, "Living enemy behind pillar should trigger translucency.");
+            board.Remove(enemy);
+
+            Object.DestroyImmediate(go);
+        }
+
+        [Test]
+        public void Test_PillarTileObject_Transparency_IgnoredOccupantsDoNotTrigger()
+        {
+            var board = new GameBoard(10, 10, Vector2Int.zero);
+            for (int x = 0; x < 10; x++)
+                for (int y = 0; y < 10; y++)
+                    board.SetCell(new Vector2Int(x, y), TerrainType.Floor);
+
+            var go = new GameObject("PillarPresenter");
+            var pillar = go.AddComponent<Presentation.Entities.PillarTileObject>();
+            pillar.Initialize(new Vector2Int(3, 3), Vector2Int.one, board);
+
+            Vector2Int behindTile = new Vector2Int(3, 4);
+
+            var barrel = new DestructiblePropOccupant(DestructiblePropType.Barrel, initialPosition: behindTile, id: 10);
+            board.Place(barrel, behindTile);
+            Assert.IsFalse(pillar.EvaluateBehindState(board), "Barrel behind pillar should NOT trigger translucency.");
+            board.Remove(barrel);
+
+            var chest = new ChestOccupant(initialPosition: behindTile, id: 11);
+            board.Place(chest, behindTile);
+            Assert.IsFalse(pillar.EvaluateBehindState(board), "Chest behind pillar should NOT trigger translucency.");
+            board.Remove(chest);
+
+            var otherPillarOcc = new PillarOccupant(
+                gridPosition: behindTile,
+                footprintOrigin: behindTile,
+                footprintSize: Vector2Int.one,
+                id: 12);
+            board.ForcePlace(otherPillarOcc, behindTile);
+            Assert.IsFalse(pillar.EvaluateBehindState(board), "Another pillar behind should NOT trigger translucency.");
+            board.Remove(otherPillarOcc);
+
+            Object.DestroyImmediate(go);
+        }
+
+        [Test]
+        public void Test_PillarTileObject_Transparency_DeadEntitiesDoNotTrigger()
+        {
+            var board = new GameBoard(10, 10, Vector2Int.zero);
+            for (int x = 0; x < 10; x++)
+                for (int y = 0; y < 10; y++)
+                    board.SetCell(new Vector2Int(x, y), TerrainType.Floor);
+
+            var go = new GameObject("PillarPresenter");
+            var pillar = go.AddComponent<Presentation.Entities.PillarTileObject>();
+            pillar.Initialize(new Vector2Int(3, 3), Vector2Int.one, board);
+
+            Vector2Int behindTile = new Vector2Int(3, 4);
+
+            var deadPlayer = new PlayerOccupant(maxHealth: 1, initialPosition: behindTile, id: 20);
+            deadPlayer.TakeDamage(99);
+            Assert.IsTrue(deadPlayer.IsDead);
+            board.Place(deadPlayer, behindTile);
+            Assert.IsFalse(pillar.EvaluateBehindState(board), "Dead player behind pillar should NOT trigger translucency.");
+            board.Remove(deadPlayer);
+
+            var deadEnemy = new EnemyOccupant(EnemyArchetype.Pawn, maxHealth: 1, initialPosition: behindTile, id: 21);
+            deadEnemy.TakeDamage(99);
+            Assert.IsTrue(deadEnemy.IsDead);
+            board.Place(deadEnemy, behindTile);
+            Assert.IsFalse(pillar.EvaluateBehindState(board), "Dead enemy behind pillar should NOT trigger translucency.");
+            board.Remove(deadEnemy);
+
+            Object.DestroyImmediate(go);
         }
     }
 }

@@ -7,9 +7,6 @@ using UnityEngine;
 
 namespace Core.Actions
 {
-    /// Moves an occupant (such as a Knight) over intervening tiles to an empty target destination.
-    /// Intervening tiles may contain walls, obstacles, or units without blocking the jump.
-    /// Updates GameBoard state immediately and emits a JumpEffect.
     public class JumpAction : IBoardAction
     {
         public TileOccupant Occupant { get; }
@@ -30,8 +27,7 @@ namespace Core.Actions
 
             Vector2Int startPos = Occupant.GridPosition;
             if (startPos == Destination) return effects;
-
-            // Knight jumps ignore intervening tiles, but destination must be completely enterable
+            
             if (!board.CanEnter(Destination))
             {
                 return effects;

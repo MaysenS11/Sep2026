@@ -32,8 +32,12 @@ namespace Core.Tests
             TestDetectionRange();
             TestBlockedLineOfSightDoesNotAttackThroughObstacle();
             TestMaxLineStepsLimitsAttackRange();
+            TestKnightMovesEveryTwoTurns();
+            TestLineMoverDistanceGreater3_AlwaysWalks3Tiles();
+            TestLineMoverDistanceGreater3_StopsAtWall();
+            TestLineMoverDistanceLessEqual3_OptimalSteps();
 
-            Debug.Log("[EnemyAITests] All 14 Phase 3 test cases passed successfully!");
+            Debug.Log("[EnemyAITests] All 18 Phase 3 test cases passed successfully!");
         }
 
         private static void Assert(bool condition, string testName)
@@ -42,6 +46,32 @@ namespace Core.Tests
             {
                 throw new Exception($"[EnemyAITests] Assertion failed in {testName}!");
             }
+        }
+
+        private static void TestKnightMovesEveryTwoTurns()
+        {
+            var board = new GameBoard(8, 8);
+            var player = new PlayerOccupant(maxHealth: 6, initialPosition: new Vector2Int(4, 4));
+            board.Place(player, new Vector2Int(4, 4));
+
+            var knight = new EnemyOccupant(EnemyArchetype.Knight, initialPosition: new Vector2Int(0, 0));
+            board.Place(knight, new Vector2Int(0, 0));
+
+            // Turn 1 (MoveTurnCounter 1 % 2 != 0): Should wait
+            var intent1 = EnemyAIFactory.EvaluateEnemy(board, knight);
+            Assert(intent1.IntentType == IntentType.Wait, "Knight waits on turn 1");
+
+            // Turn 2 (MoveTurnCounter 2 % 2 == 0): Should act
+            var intent2 = EnemyAIFactory.EvaluateEnemy(board, knight);
+            Assert(intent2.IntentType == IntentType.Jump, "Knight moves on turn 2");
+
+            // Turn 3 (MoveTurnCounter 3 % 2 != 0): Should wait
+            var intent3 = EnemyAIFactory.EvaluateEnemy(board, knight);
+            Assert(intent3.IntentType == IntentType.Wait, "Knight waits on turn 3");
+
+            // Turn 4 (MoveTurnCounter 4 % 2 == 0): Should act
+            var intent4 = EnemyAIFactory.EvaluateEnemy(board, knight);
+            Assert(intent4.IntentType == IntentType.Jump, "Knight moves on turn 4");
         }
 
         private static void TestPawnMovementAndAttackSelection()
@@ -134,7 +164,7 @@ namespace Core.Tests
             board.Place(player, new Vector2Int(4, 4));
 
             // 1. Knight distant at (0, 0): cannot attack, jumps to valid L-jump closest to (4, 4)
-            var knight = new EnemyOccupant(EnemyArchetype.Knight, initialPosition: new Vector2Int(0, 0));
+            var knight = new EnemyOccupant(EnemyArchetype.Knight, initialPosition: new Vector2Int(0, 0), movesInterval: 1);
             board.Place(knight, new Vector2Int(0, 0));
 
             var moveIntent = EnemyAIFactory.EvaluateEnemy(board, knight);
@@ -148,7 +178,7 @@ namespace Core.Tests
             board.Remove(knight);
 
             // 2. Knight at (2, 3), player at (4, 4): offset (2, 1) lands on player!
-            var attackingKnight = new EnemyOccupant(EnemyArchetype.Knight, initialPosition: new Vector2Int(2, 3));
+            var attackingKnight = new EnemyOccupant(EnemyArchetype.Knight, initialPosition: new Vector2Int(2, 3), movesInterval: 1);
             board.Place(attackingKnight, new Vector2Int(2, 3));
 
             var attackIntent = EnemyAIFactory.EvaluateEnemy(board, attackingKnight);
@@ -171,7 +201,7 @@ namespace Core.Tests
             board.SetWall(new Vector2Int(3, 2), true);
 
             // Knight at (0, 1): jump offset (+2, +1) lands on player at (2, 2), push East is blocked by wall!
-            var knight = new EnemyOccupant(EnemyArchetype.Knight, maxHealth: 4, initialPosition: new Vector2Int(0, 1));
+            var knight = new EnemyOccupant(EnemyArchetype.Knight, maxHealth: 4, initialPosition: new Vector2Int(0, 1), movesInterval: 1);
             board.Place(knight, new Vector2Int(0, 1));
 
             var intent = EnemyAIFactory.EvaluateEnemy(board, knight);
@@ -379,6 +409,55 @@ namespace Core.Tests
             var intent = EnemyAIFactory.EvaluateEnemy(board, rook);
             Assert(intent.IntentType == IntentType.Move, "Rook cannot attack player beyond MaxLineSteps; chooses Move");
             Assert(intent.TargetPosition == new Vector2Int(1, 3), "Rook advances max 2 steps towards player to (1, 3)");
+        }
+
+        private static void TestLineMoverDistanceGreater3_AlwaysWalks3Tiles()
+        {
+            var board = new GameBoard(20, 20);
+            var player = new PlayerOccupant(initialPosition: new Vector2Int(10, 10));
+            board.Place(player, new Vector2Int(10, 10));
+
+            var rook = new EnemyOccupant(EnemyArchetype.Rook, initialPosition: new Vector2Int(0, 0));
+            board.Place(rook, new Vector2Int(0, 0));
+
+            var intent = EnemyAIFactory.EvaluateEnemy(board, rook);
+            Assert(intent.IntentType == IntentType.Move, "Rook intends Move when player is distant");
+            Assert(intent.Path.Count == 4, "Rook path has 4 waypoints representing exactly 3 steps");
+            Assert(intent.TargetPosition == new Vector2Int(3, 0) || intent.TargetPosition == new Vector2Int(0, 3), "Rook walks full 3 tiles towards player");
+        }
+
+        private static void TestLineMoverDistanceGreater3_StopsAtWall()
+        {
+            var board = new GameBoard(20, 20);
+            var player = new PlayerOccupant(initialPosition: new Vector2Int(10, 10));
+            board.Place(player, new Vector2Int(10, 10));
+
+            var rook = new EnemyOccupant(EnemyArchetype.Rook, initialPosition: new Vector2Int(5, 5));
+            board.Place(rook, new Vector2Int(5, 5));
+
+            board.SetWall(new Vector2Int(5, 7), true);
+            board.SetWall(new Vector2Int(7, 5), true);
+            board.SetWall(new Vector2Int(4, 5), true);
+            board.SetWall(new Vector2Int(5, 4), true);
+
+            var intent = EnemyAIFactory.EvaluateEnemy(board, rook);
+            Assert(intent.IntentType == IntentType.Move, "Rook intends Move");
+            Assert(intent.Path.Count == 2, "Rook takes 1 available step before wall when 3 steps are blocked");
+            Assert(intent.TargetPosition == new Vector2Int(5, 6) || intent.TargetPosition == new Vector2Int(6, 5), "Rook stops at available step before wall");
+        }
+
+        private static void TestLineMoverDistanceLessEqual3_OptimalSteps()
+        {
+            var board = new GameBoard(10, 10);
+            var player = new PlayerOccupant(initialPosition: new Vector2Int(3, 3));
+            board.Place(player, new Vector2Int(3, 3));
+
+            var rook = new EnemyOccupant(EnemyArchetype.Rook, intelligenceLevel: EnemySmartness.Smart, initialPosition: new Vector2Int(1, 2));
+            board.Place(rook, new Vector2Int(1, 2));
+
+            var intent = EnemyAIFactory.EvaluateEnemy(board, rook);
+            Assert(intent.IntentType == IntentType.Move, "Rook intends Move");
+            Assert(intent.TargetPosition == new Vector2Int(3, 2), "Smart Rook takes optimal 2 steps to establish LOS without overshooting");
         }
 
 #if UNITY_EDITOR

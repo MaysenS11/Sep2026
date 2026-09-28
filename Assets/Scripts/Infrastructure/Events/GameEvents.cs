@@ -366,3 +366,17 @@ public readonly struct GameOverEvent : IEvent
         MaskId = maskId;
     }
 }
+
+public readonly struct ToggleMenuEvent : IEvent
+{
+}
+
+public readonly struct MenuVisibilityChangedEvent : IEvent
+{
+    public readonly bool IsVisible;
+
+    public MenuVisibilityChangedEvent(bool isVisible)
+    {
+        IsVisible = isVisible;
+    }
+}
